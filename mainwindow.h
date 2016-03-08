@@ -18,11 +18,7 @@ public:
 private slots:
     void on_pushButton_clicked();
 
-    void on_lineEdit_R_editingFinished();
-
     void on_spinBox_R_editingFinished();
-
-    void on_spinBox_U_editingFinished();
 
     void on_spinBox_U_valueChanged(int arg1);
 

@@ -14,6 +14,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
                                    0,0,1/Rpersp,1);
     //TODO: store object on the scene in the QList<CADObject> objects;
     t1 = Torus();
+    e1 = Elipse();
 }
 
 //clipping lines going behind observer position and drawing new lines on the scene
@@ -78,6 +79,23 @@ void Widget::paintEvent(QPaintEvent *)
             q1 = q1/q1.w();
             q2 = q2/q2.w();
             painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
+        }
+    }
+
+    //DRAWING IMPLICIT ELIPSE WITH RAY CAST
+    //widget dimentions
+    QPoint topLeft = QPoint(-width()/2,-height()/2);
+    QPoint botRight = QPoint(1.5f*width(),1.5f*height());//painter.viewport().bottomRight();
+    for (int y = topLeft.y(); y < botRight.y(); y++) {
+        for (int x = topLeft.x(); x < botRight.x(); x++) {
+            //float woot = e1.f(x, y, matrix);
+            //woot = +1;
+            if (e1.f(x, y, matrix) != -1) {
+               float z1 = sqrt(e1.f(x, y, matrix));
+               float z2 = z1*(-1);
+               painter.setPen(Qt::yellow);
+               painter.drawEllipse(QPoint(x, y), 1, 1);
+            }
         }
     }
 }

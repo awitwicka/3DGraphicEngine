@@ -6,6 +6,7 @@
 #include <QVector4D>
 #include <QVector>
 #include "torus.h"
+#include "elipse.h"
 
 class Widget : public QWidget
 {
@@ -22,6 +23,7 @@ class Widget : public QWidget
 
 public:
     Torus t1;
+    Elipse e1;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
     void wheelEvent(QWheelEvent*event);
