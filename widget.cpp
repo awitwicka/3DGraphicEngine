@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QWheelEvent>
+#include <qthread.h>
 
 Widget::Widget(QWidget *parent) : QWidget(parent)
 {
@@ -14,7 +15,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
                                    0,0,1/Rpersp,1);
     //TODO: store object on the scene in the QList<CADObject> objects;
     t1 = Torus();
-    e1 = Elipse();
+    //e1 = new Elipse();
 }
 
 //clipping lines going behind observer position and drawing new lines on the scene
@@ -83,31 +84,22 @@ void Widget::paintEvent(QPaintEvent *)
     }
 
     //DRAWING IMPLICIT ELIPSE WITH RAY CAST
-    //light params
-    QVector4D n;
-    QVector4D v = QVector4D(0,0,1,1);
-    float I;
-    float m = 50.0;
-    QColor color;
-    //widget dimentions
-    QPoint topLeft = QPoint(-width()/2,-height()/2);
-    QPoint botRight = QPoint(1.5f*width(),1.5f*height());//painter.viewport().bottomRight();
-    for (int y = topLeft.y(); y < botRight.y(); y++) {
-        for (int x = topLeft.x(); x < botRight.x(); x++) {
-            float z = e1.f(x, y, matrix);
-            if (z != -1) {
-               //Intensity of the light
-               n = e1.fd(x, y, z, matrix);
-               n.normalize();
-               I = pow(QVector4D::dotProduct(v, n),m); //TODO: add m
-               //qWarning() << "intensity:" << I;
-               color.setHsl(60, 100, I);
-               painter.setPen(color);
-               painter.setPen(Qt::yellow);
-               painter.drawEllipse(QPoint(x, y), 1, 1);
-            }
-        }
-    }
+    //Viewer *view = new Viewer();
+    QThread *thread = new QThread();
+    e1 = new Elipse();
+    e1->setM(matrix);
+    e1->setWidgetHeight(height());
+    e1->setWidgetWidth(width());
+    e1->moveToThread(thread);
+    connect( thread, SIGNAL(started()), e1, SLOT(doWork(/*width(), height(), matrix*/)) );
+    connect( e1, SIGNAL(workFinished(const QImage &)), this, SLOT(setImage(const QImage &)) );
+    //automatically delete thread and task object when work is done:
+    //connect( thread, SIGNAL(workFinished()), e1, SLOT(deleteLater()) );
+    //connect( thread, SIGNAL(workFinished()), thread, SLOT(deleteLater()) );
+    //painter.drawImage(rect(), image, image.rect());
+    thread->start();
+
+    painter.drawImage(rect(), image, image.rect());
 }
 
 void Widget::wheelEvent(QWheelEvent * event)
@@ -173,5 +165,10 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
         savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
     }
     update();
+}
+
+void Widget::setImage(const QImage &img)
+{
+    image = img;
 }
 

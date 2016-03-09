@@ -16,6 +16,8 @@ class Widget : public QWidget
     //Torus t1;
     float Rpersp;
     QPoint savedMouse;
+    //QPainter painter;
+    QImage image;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);
@@ -23,7 +25,7 @@ class Widget : public QWidget
 
 public:
     Torus t1;
-    Elipse e1;
+    Elipse *e1;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
     void wheelEvent(QWheelEvent*event);
@@ -33,6 +35,7 @@ public:
 signals:
 
 public slots:
+    void setImage(const QImage &);
 };
 
 #endif // WIDGET_H
