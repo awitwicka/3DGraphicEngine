@@ -13,6 +13,7 @@ class Elipse
 public:
     Elipse();
     float  f(float x, float y, QMatrix4x4 m);
+    QVector4D fd(float x, float y, float z, QMatrix4x4 m);
 };
 
 #endif // ELIPSE_H

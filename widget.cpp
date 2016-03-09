@@ -83,16 +83,26 @@ void Widget::paintEvent(QPaintEvent *)
     }
 
     //DRAWING IMPLICIT ELIPSE WITH RAY CAST
+    //light params
+    QVector4D n;
+    QVector4D v = QVector4D(0,0,1,1);
+    float I;
+    float m = 50.0;
+    QColor color;
     //widget dimentions
     QPoint topLeft = QPoint(-width()/2,-height()/2);
     QPoint botRight = QPoint(1.5f*width(),1.5f*height());//painter.viewport().bottomRight();
     for (int y = topLeft.y(); y < botRight.y(); y++) {
         for (int x = topLeft.x(); x < botRight.x(); x++) {
-            //float woot = e1.f(x, y, matrix);
-            //woot = +1;
-            if (e1.f(x, y, matrix) != -1) {
-               float z1 = sqrt(e1.f(x, y, matrix));
-               float z2 = z1*(-1);
+            float z = e1.f(x, y, matrix);
+            if (z != -1) {
+               //Intensity of the light
+               n = e1.fd(x, y, z, matrix);
+               n.normalize();
+               I = pow(QVector4D::dotProduct(v, n),m); //TODO: add m
+               //qWarning() << "intensity:" << I;
+               color.setHsl(60, 100, I);
+               painter.setPen(color);
                painter.setPen(Qt::yellow);
                painter.drawEllipse(QPoint(x, y), 1, 1);
             }
