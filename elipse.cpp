@@ -1,15 +1,15 @@
 #include "elipse.h"
 
-Elipse::Elipse(): a(5), b(10), c(5)
+Elipse::Elipse(): a(50), b(100), c(50)
 {
     InitializeElipse();
 }
 
 void Elipse::InitializeElipse()
 {
-    D = QMatrix4x4(a,0,0,0,
-                   0,b,0,0,
-                   0,0,c,0,
+    D = QMatrix4x4(1/(a*a),0,0,0,
+                   0,1/(b*b),0,0,
+                   0,0,1/(c*c),0,
                    0,0,0,-1); //odwrotnosci kwadratow a = a/50^2;
 }
 
@@ -17,24 +17,22 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
 {
     qWarning() << "Hello I'm a new Thread!";
 
-    QImage image(800,600,QImage::Format_RGB32);
-    QPainter painter;
-    painter.begin(&image);
-    painter.drawRect(10,10,50,50);
+    QImage image(widgetWidth,widgetHeight,QImage::Format_RGB32);
+    QPainter painter(&image);
+    //painter.begin(&image);
+    painter.setViewport(image.width()/2,image.height()/2,image.width(),image.height());
+    painter.setPen(Qt::white);
+    painter.drawRect(-10,-10,50,50);
     //painter.end();
-
-
-    //QImage image = QImage();
     //QPainter painter(&image);
     //painter.fillRect(image.rect(),Qt::black);
-    //painter.setViewport(image.width()/2,image.height()/2,image.width(),image.height());
-    //ui.imageLabel->setPixmap(5QPixmap::fromImage(qImage));
+
 
     //light params
     QVector4D n;
-    QVector4D v = QVector4D(0,0,-1,1);
+    QVector4D v = QVector4D(0,0,1,1);
     float I;
-    float m = 1; //TODO: set as global
+    float m = 50.0; //TODO: set as global
     QColor color;
     //widget dimentions
     QPoint topLeft = QPoint(-widgetWidth/2,-widgetHeight/2);
@@ -47,7 +45,7 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
                //Intensity of the light
                n = fd(x, y, z, matrix);
                n.normalize();
-               float dot = fabsf(QVector4D::dotProduct(v, n));
+               float dot = QVector4D::dotProduct(v, n);
                I = pow(dot,m); //TODO: add m
                qWarning() << "intensity:" << dot;
                //color.setRgb(I*100,I*100,0);
@@ -81,7 +79,7 @@ float Elipse::f(float x, float y, QMatrix4x4 m)
         return -1;
     float z1 = (-bx + sqrt(delta)) / (2*ax);
     float z2 = (-bx - sqrt(delta)) / (2*ax);
-    if (z1 <= z2)
+    if (z1 >= z2)
         return z1;
     else
         return z2;

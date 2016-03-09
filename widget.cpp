@@ -15,6 +15,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
                                    0,0,1/Rpersp,1);
     //TODO: store object on the scene in the QList<CADObject> objects;
     t1 = Torus();
+    thread = new QThread();
     //e1 = new Elipse();
 }
 
@@ -48,7 +49,7 @@ void Widget::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.fillRect(this->rect(),Qt::black);
     //QRect r = painter.viewport();
-    painter.setViewport(width()/2,height()/2,width(),height());
+    //painter.setViewport(width()/2,height()/2,width(),height()); //ACTIVATE TO DROW TORUS!
     painter.setPen(Qt::white);
 
 
@@ -84,8 +85,8 @@ void Widget::paintEvent(QPaintEvent *)
     }
 
     //DRAWING IMPLICIT ELIPSE WITH RAY CAST
-    //Viewer *view = new Viewer();
-    QThread *thread = new QThread();
+    thread->quit();
+    thread = new QThread();
     e1 = new Elipse();
     e1->setM(matrix);
     e1->setWidgetHeight(height());
@@ -94,8 +95,8 @@ void Widget::paintEvent(QPaintEvent *)
     connect( thread, SIGNAL(started()), e1, SLOT(doWork(/*width(), height(), matrix*/)) );
     connect( e1, SIGNAL(workFinished(const QImage &)), this, SLOT(setImage(const QImage &)) );
     //automatically delete thread and task object when work is done:
-    //connect( thread, SIGNAL(workFinished()), e1, SLOT(deleteLater()) );
-    //connect( thread, SIGNAL(workFinished()), thread, SLOT(deleteLater()) );
+    connect( thread, SIGNAL(finished()), e1, SLOT(deleteLater()) );
+    connect( thread, SIGNAL(finished()), thread, SLOT(deleteLater()) );
     //painter.drawImage(rect(), image, image.rect());
     thread->start();
 

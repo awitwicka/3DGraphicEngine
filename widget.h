@@ -25,6 +25,7 @@ class Widget : public QWidget
 
 public:
     Torus t1;
+    QThread *thread;
     Elipse *e1;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);

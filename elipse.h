@@ -32,6 +32,7 @@ public slots:
     void doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/);
 signals:
     void workFinished(const QImage &output);
+    void newApproxReady(const QImage &output);
 };
 
 #endif // ELIPSE_H
