@@ -3,7 +3,13 @@
 Elipse::Elipse(): a(50), b(100), c(50)
 {
     InitializeElipse();
+    run = true;
 }
+
+/*Elipse::~Elipse()
+{
+    run = false;
+}*/
 
 void Elipse::InitializeElipse()
 {
@@ -21,8 +27,9 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
     QPainter painter(&image);
     //painter.begin(&image);
     painter.setViewport(image.width()/2,image.height()/2,image.width(),image.height());
-    painter.setPen(Qt::white);
-    painter.drawRect(-10,-10,50,50);
+    //painter.setPen(Qt::white);
+    //painter.drawRect(-10,-10,50,50);
+    painter.setBrush(Qt::SolidPattern);
     //painter.end();
     //QPainter painter(&image);
     //painter.fillRect(image.rect(),Qt::black);
@@ -38,27 +45,42 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
     QPoint topLeft = QPoint(-widgetWidth/2,-widgetHeight/2);
     QPoint botRight = QPoint(1.5f*widgetWidth,1.5f*widgetHeight);//painter.viewport().bottomRight();
 
-    for (int y = topLeft.y(); y < botRight.y(); y++) {
-        for (int x = topLeft.x(); x < botRight.x(); x++) {
-            float z = f(x, y, matrix);
-            if (z != -1) {
-               //Intensity of the light
-               n = fd(x, y, z, matrix);
-               n.normalize();
-               float dot = QVector4D::dotProduct(v, n);
-               I = pow(dot,m); //TODO: add m
-               qWarning() << "intensity:" << dot;
-               //color.setRgb(I*100,I*100,0);
-               color.setHsl(60, 100, I*100);
-               painter.setPen(color);
-               //painter.setPen(Qt::yellow);
-               painter.drawEllipse(QPoint(x, y), 1, 1);
+    int no = 4;
+    while(run && no <= image.height() && no <= image.width()) {
+        int stepH = image.height()/no;
+        int stepW = image.width()/no;
+        for (int y = topLeft.y()+stepH/2; y < botRight.y(); y+=stepH) {
+            for (int x = topLeft.x()+stepW/2; x < botRight.x(); x+=stepW) {
+                float z = f(x, y, matrix);
+                if (!run) return;
+                if (z != -1) {
+                   //Intensity of the light
+                   n = fd(x, y, z, matrix);
+                   n.normalize();
+                   float dot = QVector4D::dotProduct(v, n);
+                   I = pow(dot,m); //TODO: add m
+                   qWarning() << "intensity:" << dot;
+                   //color.setRgb(I*100,I*100,0);
+                   color.setHsl(60, 100, I*100);
+                   painter.setPen(color);
+                   //painter.setPen(Qt::yellow);
+                   //painter.fillRect();
+                   painter.drawRect(x-stepW/2, y-stepH/2, stepW, stepH);
+                }
             }
         }
+        no *= 2;
+        emit workFinished(image);
+        //TODO: clean image here
     }
     //image = d->input.scaled( d->size, d->aspectMode, Qt::SmoothTransformation );
     painter.end();
     emit workFinished(image);
+}
+
+void Elipse::stop()
+{
+    run = false;
 }
 
 float Elipse::f(float x, float y, QMatrix4x4 m)

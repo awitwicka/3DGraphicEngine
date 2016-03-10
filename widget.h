@@ -27,6 +27,7 @@ public:
     Torus t1;
     QThread *thread;
     Elipse *e1;
+    void UpdateGui();
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
     void wheelEvent(QWheelEvent*event);
@@ -34,7 +35,7 @@ public:
     void mouseMoveEvent(QMouseEvent*event);
 
 signals:
-
+    void stop1();
 public slots:
     void setImage(const QImage &);
 };

@@ -16,6 +16,7 @@ class Elipse : public QObject
     float widgetHeight;
     float widgetWidth;
     void InitializeElipse();
+    bool run;
 public:
     Elipse();
     //~Elipse();
@@ -29,7 +30,8 @@ public:
     void setM(const QMatrix4x4 &value);
 
 public slots:
-    void doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/);
+    void doWork();
+    void stop();
 signals:
     void workFinished(const QImage &output);
     void newApproxReady(const QImage &output);

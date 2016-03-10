@@ -85,21 +85,6 @@ void Widget::paintEvent(QPaintEvent *)
     }
 
     //DRAWING IMPLICIT ELIPSE WITH RAY CAST
-    thread->quit();
-    thread = new QThread();
-    e1 = new Elipse();
-    e1->setM(matrix);
-    e1->setWidgetHeight(height());
-    e1->setWidgetWidth(width());
-    e1->moveToThread(thread);
-    connect( thread, SIGNAL(started()), e1, SLOT(doWork(/*width(), height(), matrix*/)) );
-    connect( e1, SIGNAL(workFinished(const QImage &)), this, SLOT(setImage(const QImage &)) );
-    //automatically delete thread and task object when work is done:
-    connect( thread, SIGNAL(finished()), e1, SLOT(deleteLater()) );
-    connect( thread, SIGNAL(finished()), thread, SLOT(deleteLater()) );
-    //painter.drawImage(rect(), image, image.rect());
-    thread->start();
-
     painter.drawImage(rect(), image, image.rect());
 }
 
@@ -107,7 +92,7 @@ void Widget::wheelEvent(QWheelEvent * event)
 {
     worldMatrix.scale(exp(event->delta()/1200.0));
     //qWarning() << "scale:" << 1.0+event->delta()/1200.0;
-    update();
+    UpdateGui();
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
@@ -165,11 +150,35 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             worldMatrix = rotX * rotY * worldMatrix;
         savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
     }
-    update();
+    //update();
+    UpdateGui();
 }
 
 void Widget::setImage(const QImage &img)
 {
     image = img;
+    update();
+}
+
+void Widget::UpdateGui()
+{
+    emit stop1();
+    //thread->terminate();
+    thread->exit(0);
+    thread = new QThread();
+    e1 = new Elipse();
+    e1->setM(worldMatrix);
+    e1->setWidgetHeight(height());
+    e1->setWidgetWidth(width());
+    e1->moveToThread(thread);
+    connect( thread, SIGNAL(started()), e1, SLOT(doWork()) );
+    connect( e1, SIGNAL(workFinished(const QImage &)), this, SLOT(setImage(const QImage &)) );
+    //automatically delete thread and task object when work is done:
+    //connect( thread, SIGNAL(finished()), e1, SLOT(stop()) );
+    connect( thread, SIGNAL(finished()), e1, SLOT(deleteLater()) );
+    connect( thread, SIGNAL(finished()), thread, SLOT(deleteLater()) );
+    connect( this, SIGNAL(stop1()), e1, SLOT(stop()), Qt::DirectConnection);
+    thread->start();
+    update();
 }
 
