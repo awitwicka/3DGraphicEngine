@@ -11,6 +11,7 @@ class Elipse : public QObject
     float a;
     float b;
     float c;
+    float m;
     QMatrix4x4 D;
     QMatrix4x4 matrix;
     float widgetHeight;
@@ -18,7 +19,7 @@ class Elipse : public QObject
     void InitializeElipse();
     bool run;
 public:
-    Elipse();
+    Elipse(float a, float b, float c, float m);
     //~Elipse();
     float  f(float x, float y, QMatrix4x4 m);
     QVector4D fd(float x, float y, float z, QMatrix4x4 m);
@@ -27,7 +28,9 @@ public:
     void setA(float value);
     void setB(float value);
     void setC(float value);
-    void setM(const QMatrix4x4 &value);
+    void setMatrix(const QMatrix4x4 &value);
+
+    void setM(float value);
 
 public slots:
     void doWork();

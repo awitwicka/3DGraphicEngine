@@ -16,6 +16,10 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     //TODO: store object on the scene in the QList<CADObject> objects;
     t1 = Torus();
     thread = new QThread();
+    A = 50;
+    B = 50;
+    C = 50;
+    M = 50;
     //e1 = new Elipse();
 }
 
@@ -160,14 +164,34 @@ void Widget::setImage(const QImage &img)
     update();
 }
 
+void Widget::setA(float value)
+{
+    A = value;
+}
+
+void Widget::setB(float value)
+{
+    B = value;
+}
+
+void Widget::setC(float value)
+{
+    C = value;
+}
+
+void Widget::setM(float value)
+{
+    M = value;
+}
+
 void Widget::UpdateGui()
 {
     emit stop1();
     //thread->terminate();
     thread->exit(0);
     thread = new QThread();
-    e1 = new Elipse();
-    e1->setM(worldMatrix);
+    e1 = new Elipse(A,B,C,M);
+    e1->setMatrix(worldMatrix);
     e1->setWidgetHeight(height());
     e1->setWidgetWidth(width());
     e1->moveToThread(thread);

@@ -1,7 +1,11 @@
 #include "elipse.h"
 
-Elipse::Elipse(): a(50), b(100), c(50)
+Elipse::Elipse(float a, float b, float c, float m)//: a(50), b(100), c(50)
 {
+    this->a = a;
+    this->b = b;
+    this->c = c;
+    this->m = m;
     InitializeElipse();
     run = true;
 }
@@ -10,6 +14,11 @@ Elipse::Elipse(): a(50), b(100), c(50)
 {
     run = false;
 }*/
+
+void Elipse::setM(float value)
+{
+    m = value;
+}
 
 void Elipse::InitializeElipse()
 {
@@ -37,9 +46,9 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
 
     //light params
     QVector4D n;
-    QVector4D v = QVector4D(0,0,1,1);
+    QVector4D v = QVector4D(0,0,1,-1);
     float I;
-    float m = 50.0; //TODO: set as global
+    //float m = 50.0; //TODO: set as global
     QColor color;
     //widget dimentions
     QPoint topLeft = QPoint(-widgetWidth/2,-widgetHeight/2);
@@ -59,13 +68,12 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
                    n = fd(x, y, z, matrix);
                    n.normalize();
                    float dot = QVector4D::dotProduct(v, n);
-                   I = pow(dot,m); //TODO: add m
+                   I = pow(dot,m);
                    qWarning() << "intensity:" << dot;
                    //color.setRgb(I*100,I*100,0);
                    color.setHsl(60, 100, I*100);
                    painter.setPen(color);
                    //painter.setPen(Qt::yellow);
-                   //painter.drawRect(x-stepW/2, y-stepH/2, stepW, stepH);
                    painter.fillRect(x-stepW/2, y-stepH/2, stepW, stepH, color);
                 }
             }
@@ -74,7 +82,6 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
         emit workFinished(image);
     }
     painter.end();
-    //emit workFinished(image);
 }
 
 void Elipse::stop()
@@ -153,7 +160,7 @@ void Elipse::setC(float value)
     c = value;
 }
 
-void Elipse::setM(const QMatrix4x4 &value)
+void Elipse::setMatrix(const QMatrix4x4 &value)
 {
     matrix = value;
 }

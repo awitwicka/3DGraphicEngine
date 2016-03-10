@@ -18,6 +18,12 @@ class Widget : public QWidget
     QPoint savedMouse;
     //QPainter painter;
     QImage image;
+    //Elipse
+    //TODO: to delete all ABCM
+    float A;
+    float B;
+    float C;
+    float M;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);
@@ -33,6 +39,14 @@ public:
     void wheelEvent(QWheelEvent*event);
     void mousePressEvent(QMouseEvent*event);
     void mouseMoveEvent(QMouseEvent*event);
+
+    void setA(float value);
+
+    void setB(float value);
+
+    void setC(float value);
+
+    void setM(float value);
 
 signals:
     void stop1();
