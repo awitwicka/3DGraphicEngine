@@ -30,7 +30,7 @@ void Elipse::InitializeElipse()
 
 void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
 {
-    qWarning() << "Hello I'm a new Thread!";
+    //qWarning() << "Hello I'm a new Thread!";
 
     QImage image(widgetWidth,widgetHeight,QImage::Format_RGB32);
     QPainter painter(&image);
@@ -46,7 +46,7 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
 
     //light params
     QVector4D n;
-    QVector4D v = QVector4D(0,0,1,-1);
+    QVector4D v = QVector4D(0,0,-1,1);
     float I;
     //float m = 50.0; //TODO: set as global
     QColor color;
@@ -56,7 +56,7 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
 
     int no = 8;
     while(run && no <= image.height() && no <= image.width()) {
-        painter.fillRect(-image.width()/2, -image.height()/2, image.width(), image.height(), Qt::black);
+        painter.fillRect(-image.width()/2, -image.height()/2, image.width(), image.height(), Qt::gray);
         int stepH = image.height()/no;
         int stepW = image.width()/no;
         for (int y = topLeft.y()+stepH/2; y < botRight.y(); y+=stepH) {
@@ -69,9 +69,9 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
                    n.normalize();
                    float dot = QVector4D::dotProduct(v, n);
                    I = pow(dot,m);
-                   qWarning() << "intensity:" << dot;
-                   //color.setRgb(I*100,I*100,0);
-                   color.setHsl(60, 100, I*100);
+                   //qWarning() << "intensity:" << dot;
+                   color.setRgb(255*I,255*I,0);
+                   //color.setHsl(59, 255, I*255);
                    painter.setPen(color);
                    //painter.setPen(Qt::yellow);
                    painter.fillRect(x-stepW/2, y-stepH/2, stepW, stepH, color);
@@ -91,8 +91,10 @@ void Elipse::stop()
 
 float Elipse::f(float x, float y, QMatrix4x4 m)
 {
-    QMatrix4x4 Dm = m.inverted().transposed()*D*m.inverted();
-
+    //QMatrix4x4 Dm = m.inverted().transposed()*D*m.inverted();
+    QMatrix4x4 Dm = m.inverted();
+    Dm = Dm.transposed();
+    Dm = Dm*D*m.inverted();
     //(a11x^2 + a22y^2 + 2a12xy + 2a14x + 2a24y + a44)+
     //+2(a13x + a23y + a34)z + a33z^2 = 0
     QVector4D row1 = Dm.row(0);
@@ -100,39 +102,34 @@ float Elipse::f(float x, float y, QMatrix4x4 m)
     QVector4D row3 = Dm.row(2);
     QVector4D row4 = Dm.row(3);
     float ax = row3.z();
-    float bx = 2*(row1.z()*x + row2.z()*y + row3.w());
-    float cx = row1.x()*x*x + row2.y()*y*y + 2*row1.y()*x*y + 2*row1.w()*x + 2*row2.w()*y + row4.w();
-    float delta = bx*bx - (4*ax*cx);
+    float bx = 2*((row1.z()*x) + (row2.z()*y) + (row3.w()));
+    float cx = (row1.x()*x*x) + (row2.y()*y*y) + (2*row1.y()*x*y) + (2*row1.w()*x) + (2*row2.w()*y) + (row4.w());
+    float delta = (bx*bx) - (4*ax*cx);
     if (delta<0)
         return -1;
     float z1 = (-bx + sqrt(delta)) / (2*ax);
     float z2 = (-bx - sqrt(delta)) / (2*ax);
-    if (z1 >= z2)
+    if (z1 <= z2)
         return z1;
     else
         return z2;
-
-    /*
-    float zz = -((x*x)/(a*a) + (y*y)/(b*b) -1)*(c*c);
-    if (zz < 0)
-        return -1;
-    else
-        return zz;//return sqrt(zz);
-    */
 }
 
 QVector4D Elipse::fd(float x, float y, float z, QMatrix4x4 m)
 {
-    QMatrix4x4 Dm = m.inverted().transposed()*D*m.inverted();
+    QMatrix4x4 Dm = m.inverted();
+    Dm = Dm.transposed();
+    Dm = Dm*D*m.inverted();
     QVector4D row1 = Dm.row(0);
     QVector4D row2 = Dm.row(1);
     QVector4D row3 = Dm.row(2);
     QVector4D row4 = Dm.row(3);
 
-   return 2*QVector4D(x*row1.x()+y*row1.y()+z*row1.z()+row1.w(),
-                    x*row2.x()+y*row2.y()+z*row2.z()+row2.w(),
-                    x*row3.x()+y*row3.y()+z*row3.z()+row3.w(),
-                    x*row4.x()+y*row4.y()+z*row4.z()+row4.w());
+   return 2*QVector4D((x*row1.x())+(y*row1.y())+(z*row1.z())+(row1.w()),
+                    (x*row2.x())+(y*row2.y())+(z*row2.z())+(row2.w()),
+                    (x*row3.x())+(y*row3.y())+(z*row3.z())+(row3.w()),
+                      0
+                    /*(x*row4.x())+(y*row4.y())+(z*row4.z())+(row4.w())*/);
 }
 
 void Elipse::setWidgetHeight(float value)

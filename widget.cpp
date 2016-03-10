@@ -19,7 +19,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     A = 50;
     B = 50;
     C = 50;
-    M = 50;
+    M = 2.5;
     //e1 = new Elipse();
 }
 
@@ -61,7 +61,7 @@ void Widget::paintEvent(QPaintEvent *)
     QMatrix4x4 matrix = worldMatrix;
     //TODO: loop through all existing objects on the scene: for()
     //TODO: draw axis in the middle of the scene
-    for (int i = 0; i < t1.indices.length(); i++) {
+    /*for (int i = 0; i < t1.indices.length(); i++) {
         QVector4D q1 = t1.points[t1.indices[i].x()]; //TODO: refactoring -> to function
         QVector4D q2 = t1.points[t1.indices[i].y()];  
         q1 = matrix*q1;
@@ -86,8 +86,7 @@ void Widget::paintEvent(QPaintEvent *)
             q2 = q2/q2.w();
             painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
         }
-    }
-
+    }*/
     //DRAWING IMPLICIT ELIPSE WITH RAY CAST
     painter.drawImage(rect(), image, image.rect());
 }

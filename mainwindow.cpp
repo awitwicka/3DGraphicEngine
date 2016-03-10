@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    //findChild<Widget*>()->UpdateGui();
     //Widget* w = findChild<Widget*>();
 
     //findChild<QSpinBox*>("spinBox_U")->setValue(w.t1.Usegments);
@@ -67,7 +67,7 @@ void MainWindow::on_horizontalSlider_c_sliderMoved(int position)
 
 void MainWindow::on_horizontalSlider_m_sliderMoved(int position)
 {
-    findChild<Widget*>()->e1->setM(position);
-    findChild<Widget*>()->setM(position);
+    findChild<Widget*>()->e1->setM(position*0.1f);
+    findChild<Widget*>()->setM(position*0.1f);
     findChild<Widget*>()->UpdateGui();
 }
