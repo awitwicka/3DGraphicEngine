@@ -135,6 +135,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QLabel" name="label_show_m">
+         <property name="text">
+          <string>2.5</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>

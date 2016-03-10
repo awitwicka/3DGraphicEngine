@@ -56,7 +56,7 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
 
     int no = 8;
     while(run && no <= image.height() && no <= image.width()) {
-        painter.fillRect(-image.width()/2, -image.height()/2, image.width(), image.height(), Qt::gray);
+        painter.fillRect(-image.width()/2, -image.height()/2, image.width(), image.height(), Qt::black);
         int stepH = image.height()/no;
         int stepW = image.width()/no;
         for (int y = topLeft.y()+stepH/2; y < botRight.y(); y+=stepH) {

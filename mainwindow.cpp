@@ -69,5 +69,7 @@ void MainWindow::on_horizontalSlider_m_sliderMoved(int position)
 {
     findChild<Widget*>()->e1->setM(position*0.1f);
     findChild<Widget*>()->setM(position*0.1f);
+    QString str = QString::number(position*0.1f);
+    findChild<QLabel*>("label_show_m")->setText(str);
     findChild<Widget*>()->UpdateGui();
 }
