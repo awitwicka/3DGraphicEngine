@@ -45,8 +45,9 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
     QPoint topLeft = QPoint(-widgetWidth/2,-widgetHeight/2);
     QPoint botRight = QPoint(1.5f*widgetWidth,1.5f*widgetHeight);//painter.viewport().bottomRight();
 
-    int no = 4;
+    int no = 8;
     while(run && no <= image.height() && no <= image.width()) {
+        painter.fillRect(-image.width()/2, -image.height()/2, image.width(), image.height(), Qt::black);
         int stepH = image.height()/no;
         int stepW = image.width()/no;
         for (int y = topLeft.y()+stepH/2; y < botRight.y(); y+=stepH) {
@@ -64,18 +65,16 @@ void Elipse::doWork(/*float widgetWidth, float widgetHeight, QMatrix matrix*/)
                    color.setHsl(60, 100, I*100);
                    painter.setPen(color);
                    //painter.setPen(Qt::yellow);
-                   //painter.fillRect();
-                   painter.drawRect(x-stepW/2, y-stepH/2, stepW, stepH);
+                   //painter.drawRect(x-stepW/2, y-stepH/2, stepW, stepH);
+                   painter.fillRect(x-stepW/2, y-stepH/2, stepW, stepH, color);
                 }
             }
         }
         no *= 2;
         emit workFinished(image);
-        //TODO: clean image here
     }
-    //image = d->input.scaled( d->size, d->aspectMode, Qt::SmoothTransformation );
     painter.end();
-    emit workFinished(image);
+    //emit workFinished(image);
 }
 
 void Elipse::stop()
