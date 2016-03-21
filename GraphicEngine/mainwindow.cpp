@@ -43,3 +43,9 @@ void MainWindow::on_spinBox_V_valueChanged(int arg1)
     findChild<Widget*>()->t1.setV(arg1);
     findChild<Widget*>()->update();
 }
+
+void MainWindow::on_checkBox_stereo_toggled(bool checked)
+{
+    findChild<Widget*>()->isStereo = checked;
+    findChild<Widget*>()->update();
+}

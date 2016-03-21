@@ -24,6 +24,8 @@ private slots:
 
     void on_spinBox_V_valueChanged(int arg1);
 
+    void on_checkBox_stereo_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
 };

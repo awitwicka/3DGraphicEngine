@@ -22,6 +22,7 @@ class Widget : public QWidget
     //void DrawClippedLines(QVector4D q1, QPainter painter, QVector4D q2);
 
 public:
+    bool isStereo;
     Torus t1;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
