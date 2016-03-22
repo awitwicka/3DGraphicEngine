@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //Widget* w = findChild<Widget*>();
+    Widget* w = findChild<Widget*>();
 
     //findChild<QSpinBox*>("spinBox_U")->setValue(w.t1.Usegments);
 }
@@ -47,5 +47,11 @@ void MainWindow::on_spinBox_V_valueChanged(int arg1)
 void MainWindow::on_checkBox_stereo_toggled(bool checked)
 {
     findChild<Widget*>()->isStereo = checked;
+    findChild<Widget*>()->update();
+}
+
+void MainWindow::on_pushButton_addMarker_clicked()
+{
+    findChild<Widget*>()->markers.append(Marker(0, 0, 0));
     findChild<Widget*>()->update();
 }

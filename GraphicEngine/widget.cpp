@@ -23,7 +23,6 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
                                    0,0,1/Rpersp,1);
     //TODO: store object on the scene in the QList<CADObject> objects;
     isStereo = false;
-    //markers = new Qvector<Marker>();
     t1 = Torus();
 }
 
@@ -113,49 +112,28 @@ void Widget::paintEvent(QPaintEvent *)
         }
     }
     //draw points
-    for (int i = 0; i < t1.indices.length(); i++) {
-        QVector4D q1 = t1.points[t1.indices[i].x()]; //TODO: refactoring -> to function
-        QVector4D q2 = t1.points[t1.indices[i].y()];
-        q1 = matrix*q1;
-        q2 = matrix*q2;
-        //DrawClippedLines(painter, q1, q2); //TODO: refactor
-        if (q1.z() <= -Rpersp && q2.z() <= -Rpersp) {
+    for (int i = 0; i < markers.length() ; i++) {
+        QVector4D q = markers[i].point;
+        q = matrix * q;
+        float offset = markers[i].getSize()/2;
+        if (q.z() <= -Rpersp) {
            continue;
-        }
-        if (q1.z() <= -Rpersp && q2.z() > -Rpersp) {
-            QVector4D dir = q1-q2;
-            QVector4D newq = dir * (-Rpersp+1-q2.z())/dir.z();
-            q1 = q2 + newq; //watch not to change w parameter while adding newq
-        } else if (q1.z() > -Rpersp && q2.z() <= -Rpersp) {
-            QVector4D dir = q2-q1;
-            QVector4D newq = dir * (-Rpersp+1-q1.z())/dir.z();
-            q2 = q1 + newq;
-        }
-        if (q1.z() > -Rpersp && q2.z() > -Rpersp) {
+        } else {
             if (isStereo) {
-                QVector4D L1  = stereoLMatrix*q1;
-                QVector4D L2  = stereoLMatrix*q2;
-                QVector4D R1  = stereoRMatrix*q1;
-                QVector4D R2  = stereoRMatrix*q2;
-                L1 = L1/L1.w();
-                L2 = L2/L2.w();
-                R1 = R1/R1.w();
-                R2 = R2/R2.w();
+                QVector4D L  = stereoLMatrix*q;
+                QVector4D R  = stereoRMatrix*q;
+                L = L/L.w();
+                R = R/R.w();
                 painter.setCompositionMode(QPainter::CompositionMode_Plus);
                 color.setRgb(150,0,0,255);
-                //color.setRgb(255,10,10,255);
-                painter.setPen(color);
-                painter.drawLine(L1.x(),L1.y(),L2.x(),L2.y());
+                painter.fillRect(L.x()-offset, L.y()-offset, offset*2, offset*2, color);
                 color.setRgb(0,0,255,255);
-                painter.setPen(color);
-                painter.drawLine(R1.x(),R1.y(),R2.x(),R2.y());
+                painter.fillRect(R.x()-offset, R.y()-offset, offset*2, offset*2, color);
             }
             else {
-                q1 = perspectiveMatrix*q1;
-                q2 = perspectiveMatrix*q2;
-                q1 = q1/q1.w();
-                q2 = q2/q2.w();
-                painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
+                q = perspectiveMatrix*q;
+                q = q/q.w();
+                painter.fillRect(q.x()-offset, q.y()-offset, offset*2, offset*2, Qt::white);
             }
         }
     }

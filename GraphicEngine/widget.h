@@ -17,7 +17,6 @@ class Widget : public QWidget
     float Rpersp;
     float eDistance;
     QPoint savedMouse;
-    QVector<Marker> markers;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);
@@ -25,6 +24,7 @@ class Widget : public QWidget
 
 public:
     bool isStereo;
+    QVector<Marker> markers;
     Torus t1;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
