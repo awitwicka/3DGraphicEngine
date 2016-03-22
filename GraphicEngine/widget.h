@@ -7,6 +7,7 @@
 #include <QVector>
 #include "torus.h"
 #include "marker.h"
+#include "cursor.h"
 
 class Widget : public QWidget
 {
@@ -18,6 +19,7 @@ class Widget : public QWidget
     float eDistance;
     QPoint savedMouse;
     bool isEditable;
+    Cursor cursor;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);

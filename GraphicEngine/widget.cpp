@@ -25,6 +25,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     isStereo = false;
     isEditable = false;
     t1 = Torus();
+    cursor = Cursor();
 }
 
 //clipping lines going behind observer position and drawing new lines on the scene
@@ -171,8 +172,8 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
     }
     if(event->buttons() & Qt::RightButton)
     {
-        float dx = event->screenPos().x() - savedMouse.x();
-        float dy = event->screenPos().y() - savedMouse.y();
+        float dx = -event->screenPos().x() + savedMouse.x();
+        float dy = +event->screenPos().y() - savedMouse.y();
         dx /= 100;
         dy /= 100;
         //TODO: correct rotation around z axis
