@@ -23,14 +23,16 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
                                    0,0,1/Rpersp,1);
     //TODO: store object on the scene in the QList<CADObject> objects;
     isStereo = false;
+    isEditable = false;
     t1 = Torus();
 }
 
 //clipping lines going behind observer position and drawing new lines on the scene
-/*void Widget::DrawClippedLines(QPainter painter, QVector4D q1, QVector4D q2)
+void Widget::DrawClippedLines(QPainter &painter, QVector4D q1, QVector4D q2)
 {
+    QColor color;
     if (q1.z() <= -Rpersp && q2.z() <= -Rpersp) {
-       continue;
+       return;//continue;
     }
     if (q1.z() <= -Rpersp && q2.z() > -Rpersp) {
         QVector4D dir = q1-q2;
@@ -42,13 +44,32 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
         q2 = q1 + newq;
     }
     if (q1.z() > -Rpersp && q2.z() > -Rpersp) {
-        q1 = perspectiveMatrix*q1;
-        q2 = perspectiveMatrix*q2;
-        q1 = q1/q1.w();
-        q2 = q2/q2.w();
-        painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
+        if (isStereo) {
+            QVector4D L1  = stereoLMatrix*q1;
+            QVector4D L2  = stereoLMatrix*q2;
+            QVector4D R1  = stereoRMatrix*q1;
+            QVector4D R2  = stereoRMatrix*q2;
+            L1 = L1/L1.w();
+            L2 = L2/L2.w();
+            R1 = R1/R1.w();
+            R2 = R2/R2.w();
+            painter.setCompositionMode(QPainter::CompositionMode_Plus);
+            color.setRgb(150,0,0,255);
+            painter.setPen(color);
+            painter.drawLine(L1.x(),L1.y(),L2.x(),L2.y());
+            color.setRgb(0,0,255,255);
+            painter.setPen(color);
+            painter.drawLine(R1.x(),R1.y(),R2.x(),R2.y());
+        }
+        else {
+            q1 = perspectiveMatrix*q1;
+            q2 = perspectiveMatrix*q2;
+            q1 = q1/q1.w();
+            q2 = q2/q2.w();
+            painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
+        }
     }
-}*/
+}
 
 void Widget::paintEvent(QPaintEvent *)
 {
@@ -70,46 +91,7 @@ void Widget::paintEvent(QPaintEvent *)
         QVector4D q2 = t1.points[t1.indices[i].y()];  
         q1 = matrix*q1;
         q2 = matrix*q2;
-        //DrawClippedLines(painter, q1, q2); //TODO: refactor
-        if (q1.z() <= -Rpersp && q2.z() <= -Rpersp) {
-           continue;
-        }
-        if (q1.z() <= -Rpersp && q2.z() > -Rpersp) {
-            QVector4D dir = q1-q2;
-            QVector4D newq = dir * (-Rpersp+1-q2.z())/dir.z();
-            q1 = q2 + newq; //watch not to change w parameter while adding newq
-        } else if (q1.z() > -Rpersp && q2.z() <= -Rpersp) {
-            QVector4D dir = q2-q1;
-            QVector4D newq = dir * (-Rpersp+1-q1.z())/dir.z();
-            q2 = q1 + newq;
-        }
-        if (q1.z() > -Rpersp && q2.z() > -Rpersp) {          
-            if (isStereo) {
-                QVector4D L1  = stereoLMatrix*q1;
-                QVector4D L2  = stereoLMatrix*q2;
-                QVector4D R1  = stereoRMatrix*q1;
-                QVector4D R2  = stereoRMatrix*q2;
-                L1 = L1/L1.w();
-                L2 = L2/L2.w();
-                R1 = R1/R1.w();
-                R2 = R2/R2.w();
-                painter.setCompositionMode(QPainter::CompositionMode_Plus);
-                color.setRgb(150,0,0,255);
-                //color.setRgb(255,10,10,255);
-                painter.setPen(color);
-                painter.drawLine(L1.x(),L1.y(),L2.x(),L2.y());
-                color.setRgb(0,0,255,255);
-                painter.setPen(color);
-                painter.drawLine(R1.x(),R1.y(),R2.x(),R2.y());
-            }
-            else {
-                q1 = perspectiveMatrix*q1;
-                q2 = perspectiveMatrix*q2;
-                q1 = q1/q1.w();
-                q2 = q2/q2.w();
-                painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
-            }
-        }
+        DrawClippedLines(painter, q1, q2); //TODO: refactor
     }
     //draw points
     for (int i = 0; i < markers.length() ; i++) {
@@ -139,6 +121,8 @@ void Widget::paintEvent(QPaintEvent *)
     }
 }
 
+
+
 void Widget::wheelEvent(QWheelEvent * event)
 {
     worldMatrix.scale(exp(event->delta()/1200.0));
@@ -149,6 +133,18 @@ void Widget::wheelEvent(QWheelEvent * event)
 void Widget::mousePressEvent(QMouseEvent *event)
 {
     savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+    switch(isEditable) {
+        case true:
+            if(event->buttons() & Qt::LeftButton) {
+
+
+            }
+            break;
+        case false:
+            break;
+        default:
+            break;
+    }
 }
 
 void Widget::mouseMoveEvent(QMouseEvent *event)
@@ -202,5 +198,20 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
         savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
     }
     update();
+}
+
+void Widget::switchSceneMode(int index) {
+    switch(index) {
+
+    case 0:
+        isEditable = false;
+        break;
+    case 1:
+        isEditable = true;
+        break;
+    default:
+        break;
+
+    }
 }
 

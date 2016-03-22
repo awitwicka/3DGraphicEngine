@@ -1,7 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "widget.h"
+#include <QListWidget>
 #include <QMainWindow>
+#include <QTreeWidget>
 
 namespace Ui {
 class MainWindow;
@@ -27,8 +30,15 @@ private slots:
     void on_checkBox_stereo_toggled(bool checked);    
     void on_pushButton_addMarker_clicked();
 
+    void on_pushButton_DelMarker_clicked();
+
+    void on_comboBox_activated(int index);
+
 private:
     Ui::MainWindow *ui;
+    Widget* w;
+    QListWidget* l;
+    QTreeWidget* t;
 };
 
 #endif // MAINWINDOW_H

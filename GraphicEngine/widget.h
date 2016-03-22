@@ -17,10 +17,12 @@ class Widget : public QWidget
     float Rpersp;
     float eDistance;
     QPoint savedMouse;
+    bool isEditable;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);
-    //void DrawClippedLines(QVector4D q1, QPainter painter, QVector4D q2);
+    void DrawClippedLines(QPainter &painter, QVector4D q1, QVector4D q2);
+    //void DrawCursor
 
 public:
     bool isStereo;
@@ -31,6 +33,7 @@ public:
     void wheelEvent(QWheelEvent*event);
     void mousePressEvent(QMouseEvent*event);
     void mouseMoveEvent(QMouseEvent*event);
+    void switchSceneMode(int index);
 
 signals:
 

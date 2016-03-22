@@ -19,12 +19,14 @@ SOURCES += main.cpp\
     widget.cpp \
     cadobject.cpp \
     torus.cpp \
-    marker.cpp
+    marker.cpp \
+    cursor.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
     cadobject.h \
     torus.h \
-    marker.h
+    marker.h \
+    cursor.h
 
 FORMS    += mainwindow.ui

@@ -7,14 +7,16 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    Widget* w = findChild<Widget*>();
-
+    w = findChild<Widget*>();
+    l = findChild<QListWidget*>();
+    t = findChild<QTreeWidget*>();
     //findChild<QSpinBox*>("spinBox_U")->setValue(w.t1.Usegments);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    //qdeleteall
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -34,24 +36,42 @@ void MainWindow::on_spinBox_R_editingFinished()
 void MainWindow::on_spinBox_U_valueChanged(int arg1)
 {
     //if (arg >= 1)
-    findChild<Widget*>()->t1.setU(arg1);
-    findChild<Widget*>()->update();
+    w->t1.setU(arg1);
+    w->update();
 }
 
 void MainWindow::on_spinBox_V_valueChanged(int arg1)
 {
-    findChild<Widget*>()->t1.setV(arg1);
-    findChild<Widget*>()->update();
+    w->t1.setV(arg1);
+    w->update();
 }
 
 void MainWindow::on_checkBox_stereo_toggled(bool checked)
 {
-    findChild<Widget*>()->isStereo = checked;
-    findChild<Widget*>()->update();
+    w->isStereo = checked;
+    w->update();
 }
 
 void MainWindow::on_pushButton_addMarker_clicked()
 {
-    findChild<Widget*>()->markers.append(Marker(0, 0, 0));
-    findChild<Widget*>()->update();
+    Marker m = Marker(0, 0, 0);
+    w->markers.append(m);
+    //l->addItem(QListWidgetItem());
+    //QList<QTreeWid8getItem *> items;
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(m.name)); //parent, columns names...
+    t->addTopLevelItem(item);
+    w->update();
+}
+void MainWindow::on_pushButton_DelMarker_clicked()
+{
+    //TODO: Delete from list as well
+    QList<QTreeWidgetItem*> toDelete = t->selectedItems();
+    foreach (QTreeWidgetItem* it, toDelete) {
+        t->takeTopLevelItem(t->indexOfTopLevelItem(it));
+    }
+}
+
+void MainWindow::on_comboBox_activated(int index)
+{
+    w->switchSceneMode(index);
 }

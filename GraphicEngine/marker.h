@@ -9,9 +9,10 @@
 class Marker
 {
     float size;
-    QString name;
     QColor color;
+    static int id;
 public:
+    QString name;
     QVector4D point;
     Marker();
     Marker(float x, float y, float z);
