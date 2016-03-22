@@ -6,6 +6,7 @@
 #include <QVector4D>
 #include <QVector>
 #include "torus.h"
+#include "marker.h"
 
 class Widget : public QWidget
 {
@@ -16,6 +17,7 @@ class Widget : public QWidget
     float Rpersp;
     float eDistance;
     QPoint savedMouse;
+    QVector<Marker> markers;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);
