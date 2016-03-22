@@ -18,7 +18,7 @@ class Widget : public QWidget
     float Rpersp;
     float eDistance;
     QPoint savedMouse;
-    bool isEditable;
+    int sceneMode;
     Cursor cursor;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;

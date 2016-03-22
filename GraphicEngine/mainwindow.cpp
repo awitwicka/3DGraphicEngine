@@ -69,6 +69,7 @@ void MainWindow::on_pushButton_DelMarker_clicked()
     foreach (QTreeWidgetItem* it, toDelete) {
         t->takeTopLevelItem(t->indexOfTopLevelItem(it));
     }
+    w->update();
 }
 
 void MainWindow::on_comboBox_activated(int index)

@@ -1,5 +1,11 @@
 #include "marker.h"
 
+
+QColor Marker::getColor() const
+{
+    return color;
+}
+
 Marker::Marker()
 {
     size = 4;
@@ -8,7 +14,7 @@ Marker::Marker()
     id++;
 }
 
-Marker::Marker(float x, float y, float z) : color(Qt::white), size(10)
+Marker::Marker(float x, float y, float z) : color(Qt::white),  highlighColor(Qt::yellow), size(10)
 {
     name = QString("point %1").arg(id);// + "1");
     //point(x, y,  z);
@@ -24,6 +30,11 @@ float Marker::getSize() const
 void Marker::setSize(float value)
 {
     size = value;
+}
+
+void Marker::setColor(const QColor &value)
+{
+    color = value;
 }
 
 int Marker::id = 0;

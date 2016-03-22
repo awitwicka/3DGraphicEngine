@@ -6,7 +6,7 @@
 Widget::Widget(QWidget *parent) : QWidget(parent)
 {
     //distance between observer and the projection plane
-    Rpersp = 200;
+    Rpersp = 700;
     eDistance = 50;
     worldMatrix = QMatrix4x4(); //identity
     perspectiveMatrix = QMatrix4x4(1,0,0,0,
@@ -23,7 +23,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
                                    0,0,1/Rpersp,1);
     //TODO: store object on the scene in the QList<CADObject> objects;
     isStereo = false;
-    isEditable = false;
+    sceneMode = 0;
     t1 = Torus();
     cursor = Cursor();
 }
@@ -94,6 +94,14 @@ void Widget::paintEvent(QPaintEvent *)
         q2 = matrix*q2;
         DrawClippedLines(painter, q1, q2); //TODO: refactor
     }
+    //cursor
+    for (int i = 0; i < cursor.indices.length(); i++) {
+        QVector4D q1 = cursor.points[cursor.indices[i].x()]; //TODO: refactoring -> to function
+        QVector4D q2 = cursor.points[cursor.indices[i].y()];
+        q1 = matrix*q1;
+        q2 = matrix*q2;
+        DrawClippedLines(painter, q1, q2); //TODO: refactor
+    }
     //draw points
     for (int i = 0; i < markers.length() ; i++) {
         QVector4D q = markers[i].point;
@@ -116,32 +124,58 @@ void Widget::paintEvent(QPaintEvent *)
             else {
                 q = perspectiveMatrix*q;
                 q = q/q.w();
-                painter.fillRect(q.x()-offset, q.y()-offset, offset*2, offset*2, Qt::white);
+                markers[i].pointWorld = q;
+                painter.fillRect(q.x()-offset, q.y()-offset, offset*2, offset*2, markers[i].getColor());
             }
         }
     }
+    //draw cursor
+    /*float offset = cursor.getSize()/2;
+    painter.setPen(Qt::red);
+    painter.drawLine(cursor.center.x()-offset, cursor.center.y(), cursor.center.x()+offset, cursor.center.y());
+    painter.setPen(Qt::green);
+    painter.drawLine(cursor.center.x(), cursor.center.y()-offset, cursor.center.x(), cursor.center.y()+offset);
+    painter.setPen(Qt::blue);
+    painter.drawLine(cursor.center.x()-offset, cursor.center.y(), cursor.center.x()+offset, cursor.center.y());*/
 }
 
 
 
 void Widget::wheelEvent(QWheelEvent * event)
 {
-    worldMatrix.scale(exp(event->delta()/1200.0));
     //qWarning() << "scale:" << 1.0+event->delta()/1200.0;
+    switch(sceneMode) {
+        case 0: //Move Scene
+            worldMatrix.scale(exp(event->delta()/1200.0));
+            break;
+        case 1: //Edit Points
+            break;
+        default:
+            break;
+    }
+    cursor.updateCursor(worldMatrix);
     update();
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
 {
     savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
-    switch(isEditable) {
-        case true:
-            if(event->buttons() & Qt::LeftButton) {
-
-
-            }
+    switch(sceneMode) {
+        case 0: //Move Scene
             break;
-        case false:
+        case 1: //Edit Points
+            if(event->buttons() & Qt::LeftButton) {
+                foreach (Marker m, markers) {
+                    float offset = m.getSize()/2;
+                    if (savedMouse.x() >= m.pointWorld.x()-offset && savedMouse.x() <= m.pointWorld.x()+offset &&
+                            savedMouse.y() >= m.pointWorld.y()-offset && savedMouse.y() >= m.pointWorld.y()-offset) {
+                        //m.set
+                        continue;
+                    }
+                }
+                //move cursor only if not moving
+                //if
+            }
             break;
         default:
             break;
@@ -149,70 +183,84 @@ void Widget::mousePressEvent(QMouseEvent *event)
 }
 
 void Widget::mouseMoveEvent(QMouseEvent *event)
-{
-    if(event->buttons() & Qt::LeftButton)
-    {
-        float dx = event->screenPos().x() - savedMouse.x();
-        float dy = event->screenPos().y() - savedMouse.y();
+{    
+    switch(sceneMode) {
+        case 0: //Move Scene
+            if(event->buttons() & Qt::LeftButton)
+            {
+                float dx = event->screenPos().x() - savedMouse.x();
+                float dy = event->screenPos().y() - savedMouse.y();
 
-        QMatrix4x4 translate = QMatrix4x4(1,0,0,dx,
-                                          0,1,0,dy,
-                                          0,0,1,0,
-                                          0,0,0,1);
-        QMatrix4x4 translateZ = QMatrix4x4(1,0,0,dx,
-                                          0,1,0,0,
-                                          0,0,1,dy,
-                                          0,0,0,1);
+                QMatrix4x4 translate = QMatrix4x4(1,0,0,dx,
+                                                  0,1,0,dy,
+                                                  0,0,1,0,
+                                                  0,0,0,1);
+                QMatrix4x4 translateZ = QMatrix4x4(1,0,0,dx,
+                                                  0,1,0,0,
+                                                  0,0,1,dy,
+                                                  0,0,0,1);
 
-        if (event->modifiers() & Qt::ShiftModifier )
-            worldMatrix = translateZ * worldMatrix;
-        else
-            worldMatrix = translate * worldMatrix;
-        savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+                if (event->modifiers() & Qt::ShiftModifier )
+                    worldMatrix = translateZ * worldMatrix;
+                else
+                    worldMatrix = translate * worldMatrix;
+                savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+            }
+            if(event->buttons() & Qt::RightButton)
+            {
+                float dx = -event->screenPos().x() + savedMouse.x();
+                float dy = +event->screenPos().y() - savedMouse.y();
+                dx /= 100;
+                dy /= 100;
+                //TODO: correct rotation around z axis
+                float dz = dx+dy/2;
+
+                QMatrix4x4 rotX = QMatrix4x4(1,0,0,0,
+                                             0,cos(dy),-sin(dy),0,
+                                             0,sin(dy),cos(dy),0,
+                                             0,0,0,1);
+                QMatrix4x4 rotY = QMatrix4x4(cos(dx),0,sin(dx),0,
+                                             0,1,0,0,
+                                             -sin(dx),0,cos(dx),0,
+                                             0,0,0,1);
+                QMatrix4x4 rotZ = QMatrix4x4(cos(dz),-sin(dz),0,0,
+                                             sin(dz),cos(dz),0,0,
+                                             0,0,1,0,
+                                             0,0,0,1);
+
+                if (event->modifiers() & Qt::ShiftModifier )
+                    worldMatrix = rotZ * worldMatrix;
+                else
+                    worldMatrix = rotX * rotY * worldMatrix;
+                savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+            }
+            break;
+        case 1: //Edit Points
+            if(event->buttons() & Qt::LeftButton) {
+                float dx = event->screenPos().x() - savedMouse.x();
+                float dy = event->screenPos().y() - savedMouse.y();
+
+                if (event->modifiers() & Qt::ShiftModifier )
+                    cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0); //worldMatrix = translateZ * worldMatrix;
+                else
+                    cursor.center += worldMatrix.inverted()*QVector4D(dx,dy,0,0);//worldMatrix = translate * worldMatrix;
+
+                savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+                //move cursor
+            }
+            if(event->buttons() & Qt::RightButton) {
+                //move point
+
+            }
+            break;
+        default:
+            break;
     }
-    if(event->buttons() & Qt::RightButton)
-    {
-        float dx = -event->screenPos().x() + savedMouse.x();
-        float dy = +event->screenPos().y() - savedMouse.y();
-        dx /= 100;
-        dy /= 100;
-        //TODO: correct rotation around z axis
-        float dz = dx+dy/2;
-
-        QMatrix4x4 rotX = QMatrix4x4(1,0,0,0,
-                                     0,cos(dy),-sin(dy),0,
-                                     0,sin(dy),cos(dy),0,
-                                     0,0,0,1);
-        QMatrix4x4 rotY = QMatrix4x4(cos(dx),0,sin(dx),0,
-                                     0,1,0,0,
-                                     -sin(dx),0,cos(dx),0,
-                                     0,0,0,1);
-        QMatrix4x4 rotZ = QMatrix4x4(cos(dz),-sin(dz),0,0,
-                                     sin(dz),cos(dz),0,0,
-                                     0,0,1,0,
-                                     0,0,0,1);
-
-        if (event->modifiers() & Qt::ShiftModifier )
-            worldMatrix = rotZ * worldMatrix;
-        else
-            worldMatrix = rotX * rotY * worldMatrix;
-        savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
-    }
+    cursor.updateCursor(worldMatrix);
     update();
 }
 
 void Widget::switchSceneMode(int index) {
-    switch(index) {
-
-    case 0:
-        isEditable = false;
-        break;
-    case 1:
-        isEditable = true;
-        break;
-    default:
-        break;
-
-    }
+    sceneMode = index;
 }
 
