@@ -14,7 +14,7 @@ Marker::Marker()
     id++;
 }
 
-Marker::Marker(float x, float y, float z) : color(Qt::white),  highlighColor(Qt::yellow), size(10)
+Marker::Marker(float x, float y, float z) : color(Qt::white), size(10)
 {
     name = QString("point %1").arg(id);// + "1");
     //point(x, y,  z);

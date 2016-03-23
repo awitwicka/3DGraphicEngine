@@ -9,9 +9,10 @@
 class Cursor
 {
     float size;
-    void InitializeCursor();
+
     void Clear();
 public:
+    void InitializeCursor();
     Cursor();
     QVector<QVector4D> points;
     QVector<QPoint> indices;

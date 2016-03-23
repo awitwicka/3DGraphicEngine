@@ -26,6 +26,10 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     sceneMode = 0;
     t1 = Torus();
     cursor = Cursor();
+    highlighColor = Qt::yellow;
+    normalColor = Qt::white;
+    selectedMarker = nullptr;
+    //setMouseTracking(true);
 }
 
 //clipping lines going behind observer position and drawing new lines on the scene
@@ -159,17 +163,26 @@ void Widget::wheelEvent(QWheelEvent * event)
 
 void Widget::mousePressEvent(QMouseEvent *event)
 {
-    savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+    savedMouse = QPoint(event->pos().x(), event->pos().y());
     switch(sceneMode) {
         case 0: //Move Scene
             break;
         case 1: //Edit Points
             if(event->buttons() & Qt::LeftButton) {
-                foreach (Marker m, markers) {
-                    float offset = m.getSize()/2;
-                    if (savedMouse.x() >= m.pointWorld.x()-offset && savedMouse.x() <= m.pointWorld.x()+offset &&
-                            savedMouse.y() >= m.pointWorld.y()-offset && savedMouse.y() >= m.pointWorld.y()-offset) {
-                        //m.set
+                for (int i = 0; i < markers.length(); i++) {
+                    float offset = markers[i].getSize()/2;
+                    float x = savedMouse.x()-width()/2;
+                    float y = savedMouse.y()-height()/2;
+                    if (x >= markers[i].pointWorld.x()-offset &&
+                            x <= markers[i].pointWorld.x()+offset &&
+                            y >= markers[i].pointWorld.y()-offset &&
+                            y <= markers[i].pointWorld.y()+offset) {
+                        if (selectedMarker != nullptr)
+                            selectedMarker->setColor(normalColor);
+                        selectedMarker = &markers[i];
+                        markers[i].setColor(highlighColor);
+                        //cursor.center = QVector4D(markers[i].point.x(),markers[i].point.y(),markers[i].point.z(),0);
+                        //cursor.InitializeCursor();
                         continue;
                     }
                 }
@@ -180,6 +193,8 @@ void Widget::mousePressEvent(QMouseEvent *event)
         default:
             break;
     }
+    //cursor.updateCursor(worldMatrix);
+    update();
 }
 
 void Widget::mouseMoveEvent(QMouseEvent *event)
@@ -188,8 +203,8 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
         case 0: //Move Scene
             if(event->buttons() & Qt::LeftButton)
             {
-                float dx = event->screenPos().x() - savedMouse.x();
-                float dy = event->screenPos().y() - savedMouse.y();
+                float dx = event->pos().x() - savedMouse.x();
+                float dy = event->pos().y() - savedMouse.y();
 
                 QMatrix4x4 translate = QMatrix4x4(1,0,0,dx,
                                                   0,1,0,dy,
@@ -204,12 +219,12 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
                     worldMatrix = translateZ * worldMatrix;
                 else
                     worldMatrix = translate * worldMatrix;
-                savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+                savedMouse = QPoint(event->pos().x(), event->pos().y());
             }
             if(event->buttons() & Qt::RightButton)
             {
-                float dx = -event->screenPos().x() + savedMouse.x();
-                float dy = +event->screenPos().y() - savedMouse.y();
+                float dx = -event->pos().x() + savedMouse.x();
+                float dy = +event->pos().y() - savedMouse.y();
                 dx /= 100;
                 dy /= 100;
                 //TODO: correct rotation around z axis
@@ -232,25 +247,38 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
                     worldMatrix = rotZ * worldMatrix;
                 else
                     worldMatrix = rotX * rotY * worldMatrix;
-                savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+                savedMouse = QPoint(event->pos().x(), event->pos().y());
             }
             break;
         case 1: //Edit Points
+
             if(event->buttons() & Qt::LeftButton) {
-                float dx = event->screenPos().x() - savedMouse.x();
-                float dy = event->screenPos().y() - savedMouse.y();
+                float dx = event->pos().x() - savedMouse.x();
+                float dy = event->pos().y() - savedMouse.y();
 
                 if (event->modifiers() & Qt::ShiftModifier )
                     cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0); //worldMatrix = translateZ * worldMatrix;
                 else
                     cursor.center += worldMatrix.inverted()*QVector4D(dx,dy,0,0);//worldMatrix = translate * worldMatrix;
 
-                savedMouse = QPoint(event->screenPos().x(), event->screenPos().y());
+                savedMouse = QPoint(event->pos().x(), event->pos().y());
                 //move cursor
             }
             if(event->buttons() & Qt::RightButton) {
                 //move point
-
+                if (selectedMarker != nullptr) {
+                    float dx = event->pos().x() - savedMouse.x();
+                    float dy = event->pos().y() - savedMouse.y();
+                    if (event->modifiers() & Qt::ShiftModifier ) {
+                        cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
+                        selectedMarker->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
+                    }
+                    else {
+                        cursor.center += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
+                        selectedMarker->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
+                    }
+                    savedMouse = QPoint(event->pos().x(), event->pos().y());
+                }
             }
             break;
         default:

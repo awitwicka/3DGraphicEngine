@@ -20,6 +20,9 @@ class Widget : public QWidget
     QPoint savedMouse;
     int sceneMode;
     Cursor cursor;
+    QColor normalColor;
+    QColor highlighColor;
+    Marker* selectedMarker;
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);

@@ -10,7 +10,6 @@ class Marker
 {
     float size;
     QColor color;
-    QColor highlighColor;
     static int id;
 public:
     QString name;
