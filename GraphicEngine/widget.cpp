@@ -189,6 +189,21 @@ void Widget::mousePressEvent(QMouseEvent *event)
                 //move cursor only if not moving
                 //if
             }
+            if(event->buttons() & Qt::Key_Space) {
+                float dist; //TODO get init dist
+                float index;
+                float distTmp;
+                if (markers.length() != 0) {
+                    dist = sqrt((cursor.center - markers[0].point).lengthSquared());
+                    for (int i = 1; i < markers.length(); i++) {
+                        distTmp = sqrt((cursor.center - markers[i].point).lengthSquared());
+                        if (distTmp < dist) {
+                            dist = distTmp;
+                            index = i;
+                        }
+                    }
+                }
+            }
             break;
         default:
             break;

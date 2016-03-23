@@ -9,7 +9,7 @@
 class Cursor
 {
     float size;
-
+    float range;
     void Clear();
 public:
     void InitializeCursor();

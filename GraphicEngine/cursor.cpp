@@ -5,6 +5,7 @@ Cursor::Cursor()
 {
     center = QVector4D(0, 0, 0, 1);
     size = 40;
+    range = 40;
     InitializeCursor();
 }
 
