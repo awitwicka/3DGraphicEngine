@@ -65,17 +65,34 @@ void MainWindow::on_pushButton_addMarker_clicked()
 void MainWindow::on_pushButton_DelMarker_clicked()
 {
     //TODO: Delete from list as well
+    QString name;
     QList<QTreeWidgetItem*> toDelete = t->selectedItems();
     foreach (QTreeWidgetItem* it, toDelete) {
+        name = it->text(0);
         t->takeTopLevelItem(t->indexOfTopLevelItem(it));
+        for (int i = 0; i < w->markers.length(); i++) {
+            if (w->markers[i].name == name)
+                w->markers.removeAt(i);
+        }
     }
 
-    //w->markers.
-    //w->markers.removeOne()
-    //w->update();
+    w->update();
 }
 
 void MainWindow::on_comboBox_activated(int index)
 {
     w->switchSceneMode(index);
+}
+
+void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
+{
+    QString name = item->text(0);
+    for (int i = 0; i < w->markers.length(); i++) {
+        if (w->markers[i].name == name) {
+           w->SelectPoint(i);
+        }
+            //w->markers.removeAt(i);
+            //function to select marker etc (refactor from switch)
+    }
+    w->update();
 }

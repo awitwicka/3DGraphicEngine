@@ -42,6 +42,8 @@ public:
     void switchSceneMode(int index);
     void keyPressEvent(QKeyEvent*event);
 
+    void SelectPoint(int i);
+
 signals:
 
 public slots:

@@ -167,6 +167,16 @@ void Widget::wheelEvent(QWheelEvent * event)
     update();
 }
 
+void Widget::SelectPoint(int i)
+{
+    if (selectedMarker != nullptr)
+        selectedMarker->setColor(normalColor);
+    selectedMarker = &markers[i];
+    markers[i].setColor(highlighColor);
+    cursor.center = QVector4D(markers[i].point.x(),markers[i].point.y(),markers[i].point.z(),1);
+    cursor.updateCursor(worldMatrix);
+}
+
 void Widget::mousePressEvent(QMouseEvent *event)
 {
     savedMouse = QPoint(event->pos().x(), event->pos().y());
@@ -183,11 +193,7 @@ void Widget::mousePressEvent(QMouseEvent *event)
                             x <= markers[i].pointWorld.x()+offset &&
                             y >= markers[i].pointWorld.y()-offset &&
                             y <= markers[i].pointWorld.y()+offset) {
-                        if (selectedMarker != nullptr)
-                            selectedMarker->setColor(normalColor);
-                        selectedMarker = &markers[i];
-                        markers[i].setColor(highlighColor);
-                        cursor.center = QVector4D(markers[i].point.x(),markers[i].point.y(),markers[i].point.z(),1);
+                        SelectPoint(i);
                         //cursor.InitializeCursor();
                         break;
                     }
@@ -199,7 +205,7 @@ void Widget::mousePressEvent(QMouseEvent *event)
         default:
             break;
     }
-    cursor.updateCursor(worldMatrix);
+    //cursor.updateCursor(worldMatrix);
     update();
 }
 

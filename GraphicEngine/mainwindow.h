@@ -34,6 +34,8 @@ private slots:
 
     void on_comboBox_activated(int index);
 
+    void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
+
 private:
     Ui::MainWindow *ui;
     Widget* w;
