@@ -13,6 +13,7 @@ class Marker
     static int id;
 public:
     QString name;
+    QString idname;
     QVector4D point;
     QVector4D pointWorld;
     Marker();

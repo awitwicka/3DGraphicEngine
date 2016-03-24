@@ -11,12 +11,14 @@ Marker::Marker()
     size = 4;
     point = QVector4D(0, 0, 0, 1);
     name = QString("point %1").arg(id);
+    idname = QString("%1").arg(id);
     id++;
 }
 
 Marker::Marker(float x, float y, float z) : color(Qt::white), size(10)
 {
     name = QString("point %1").arg(id);// + "1");
+    idname = QString("%1").arg(id);
     //point(x, y,  z);
     point = QVector4D(x, y, z, 1);
     id++;

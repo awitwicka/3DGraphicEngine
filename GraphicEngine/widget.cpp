@@ -177,6 +177,11 @@ void Widget::SelectPoint(int i)
     cursor.updateCursor(worldMatrix);
 }
 
+void Widget::DeselectPoint()
+{
+    selectedMarker = nullptr;
+}
+
 void Widget::mousePressEvent(QMouseEvent *event)
 {
     savedMouse = QPoint(event->pos().x(), event->pos().y());

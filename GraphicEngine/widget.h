@@ -22,7 +22,7 @@ class Widget : public QWidget
     Cursor cursor;
     QColor normalColor;
     QColor highlighColor;
-    Marker* selectedMarker;
+    Marker* selectedMarker;    
     //QList<CADObject> objects;
     //QVector<QVector4D> points;
     //objs[i]->f(u,v);
@@ -43,6 +43,7 @@ public:
     void keyPressEvent(QKeyEvent*event);
 
     void SelectPoint(int i);
+    void DeselectPoint();
 
 signals:
     void cursorPosChanged(QVector4D pos, QVector4D posScreen);

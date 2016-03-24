@@ -58,7 +58,8 @@ void MainWindow::on_pushButton_addMarker_clicked()
     w->markers.append(m);
     //l->addItem(QListWidgetItem());
     //QList<QTreeWid8getItem *> items;
-    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(m.name)); //parent, columns names...
+    QList<QString> columns = {m.name, m.idname};
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
     item->setFlags(item->flags() | Qt::ItemIsEditable);
     t->addTopLevelItem(item);
     w->update();
@@ -66,17 +67,19 @@ void MainWindow::on_pushButton_addMarker_clicked()
 void MainWindow::on_pushButton_DelMarker_clicked()
 {
     //TODO: Delete from list as well
-    QString name;
+    w->DeselectPoint();
+    QString idname;
     QList<QTreeWidgetItem*> toDelete = t->selectedItems();
     foreach (QTreeWidgetItem* it, toDelete) {
-        name = it->text(0);
+        idname = it->text(1);
         t->takeTopLevelItem(t->indexOfTopLevelItem(it));
-        delete it;
+
         for (int i = 0; i < w->markers.length(); i++) {
-            if (w->markers[i].name == name)
+            if (w->markers[i].idname == idname)
                 w->markers.removeAt(i);
         }
-        break;
+        delete it;
+        //break;
     }
 
     w->update();
@@ -89,9 +92,9 @@ void MainWindow::on_comboBox_activated(int index)
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
-    QString name = item->text(0);
+    QString idname = item->text(1);
     for (int i = 0; i < w->markers.length(); i++) {
-        if (w->markers[i].name == name) {
+        if (w->markers[i].idname == idname) {
            w->SelectPoint(i);
         }
             //w->markers.removeAt(i);
@@ -102,15 +105,14 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 
 void MainWindow::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
-    int index;
-    QString name = item->text(0);
+    //TODO: change name of point in model
+    /*int index;
+    QString idname = item->text(1);
     for (int i = 0; i < w->markers.length(); i++) {
-        if (w->markers[i].name == name)
+        if (w->markers[i].idname == idname)
             index = i;
-    }
-    ui->treeWidget->editItem(item, column);
-    w->markers[index].name = item->text(0);
-
+    }*/
+    ui->treeWidget->editItem(item, 0);
 }
 
 void MainWindow::on_widget_cursorPosChanged(const QVector4D &pos, const QVector4D &screen)
