@@ -112,6 +112,12 @@ void Widget::paintEvent(QPaintEvent *)
         QVector4D q = markers[i].point;
         q = matrix * q;
         float offset = markers[i].getSize()/2;
+
+        //calc to get position of point in camera coord
+        QVector4D qCamPos = perspectiveMatrix*q;
+        qCamPos = qCamPos/qCamPos.w();
+        markers[i].pointWorld = qCamPos;
+
         if (q.z() <= -Rpersp) {
            continue;
         } else {
@@ -129,7 +135,6 @@ void Widget::paintEvent(QPaintEvent *)
             else {
                 q = perspectiveMatrix*q;
                 q = q/q.w();
-                markers[i].pointWorld = q;
                 painter.fillRect(q.x()-offset, q.y()-offset, offset*2, offset*2, markers[i].getColor());
             }
         }
@@ -268,8 +273,13 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             if(event->buttons() & Qt::RightButton) {
                 //move point
                 if (selectedMarker != nullptr) {
+                    float dist = sqrt((cursor.center - selectedMarker->point).lengthSquared());
+                    if (dist > cursor.range)
+                        return;
+
                     float dx = event->pos().x() - savedMouse.x();
                     float dy = event->pos().y() - savedMouse.y();
+
                     if (event->modifiers() & Qt::ShiftModifier ) {
                         cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
                         selectedMarker->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
