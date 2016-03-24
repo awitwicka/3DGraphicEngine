@@ -29,6 +29,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     highlighColor = Qt::yellow;
     normalColor = Qt::white;
     selectedMarker = nullptr;
+    setFocusPolicy(Qt::StrongFocus);
     //setMouseTracking(true);
 }
 
@@ -181,34 +182,19 @@ void Widget::mousePressEvent(QMouseEvent *event)
                             selectedMarker->setColor(normalColor);
                         selectedMarker = &markers[i];
                         markers[i].setColor(highlighColor);
-                        //cursor.center = QVector4D(markers[i].point.x(),markers[i].point.y(),markers[i].point.z(),0);
+                        cursor.center = QVector4D(markers[i].point.x(),markers[i].point.y(),markers[i].point.z(),1);
                         //cursor.InitializeCursor();
-                        continue;
+                        break;
                     }
                 }
                 //move cursor only if not moving
                 //if
             }
-            if(event->buttons() & Qt::Key_Space) {
-                float dist; //TODO get init dist
-                float index;
-                float distTmp;
-                if (markers.length() != 0) {
-                    dist = sqrt((cursor.center - markers[0].point).lengthSquared());
-                    for (int i = 1; i < markers.length(); i++) {
-                        distTmp = sqrt((cursor.center - markers[i].point).lengthSquared());
-                        if (distTmp < dist) {
-                            dist = distTmp;
-                            index = i;
-                        }
-                    }
-                }
-            }
             break;
         default:
             break;
     }
-    //cursor.updateCursor(worldMatrix);
+    cursor.updateCursor(worldMatrix);
     update();
 }
 
@@ -300,6 +286,43 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             break;
     }
     cursor.updateCursor(worldMatrix);
+    update();
+}
+
+void Widget::keyPressEvent(QKeyEvent *event)
+{
+    switch(sceneMode) {
+        case 0: //Move Scene
+
+        break;
+    case 1: //Edit Points
+        if(event->key() == Qt::Key_Space) {
+            float dist; //TODO get init dist
+            float index;
+            float distTmp;
+            if (markers.length() == 0)
+                return;
+
+            dist = sqrt((cursor.center - markers[0].point).lengthSquared());
+            for (int i = 1; i < markers.length(); i++) {
+               distTmp = sqrt((cursor.center - markers[i].point).lengthSquared());
+               if (distTmp < dist) {
+                   dist = distTmp;
+                   index = i;
+               }
+            }
+
+            if (dist > cursor.range)
+                return;
+            if (selectedMarker != nullptr)
+                selectedMarker->setColor(normalColor);
+            selectedMarker = &markers[index];
+            markers[index].setColor(highlighColor);
+        }
+        break;
+    default:
+        break;
+    }
     update();
 }
 

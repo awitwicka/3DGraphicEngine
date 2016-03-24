@@ -30,6 +30,7 @@ class Widget : public QWidget
     //void DrawCursor
 
 public:
+    //KeyPress(QWidget *parent = 0);
     bool isStereo;
     QVector<Marker> markers;
     Torus t1;
@@ -39,6 +40,7 @@ public:
     void mousePressEvent(QMouseEvent*event);
     void mouseMoveEvent(QMouseEvent*event);
     void switchSceneMode(int index);
+    void keyPressEvent(QKeyEvent*event);
 
 signals:
 

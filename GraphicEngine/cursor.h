@@ -9,9 +9,9 @@
 class Cursor
 {
     float size;
-    float range;
     void Clear();
 public:
+    float range;
     void InitializeCursor();
     Cursor();
     QVector<QVector4D> points;
