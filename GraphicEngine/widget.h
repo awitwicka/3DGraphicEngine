@@ -32,7 +32,7 @@ class Widget : public QWidget
 public:
     //KeyPress(QWidget *parent = 0);
     bool isStereo;
-    QVector<Marker> markers;
+    QList<Marker> markers;
     Torus t1;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
@@ -45,6 +45,7 @@ public:
     void SelectPoint(int i);
 
 signals:
+    void cursorPosChanged(QVector4D pos, QVector4D posScreen);
 
 public slots:
 };

@@ -302,6 +302,7 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             break;
     }
     cursor.updateCursor(worldMatrix);
+    emit cursorPosChanged(cursor.center, perspectiveMatrix*worldMatrix*cursor.center);
     update();
 }
 

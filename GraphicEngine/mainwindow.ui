@@ -118,7 +118,7 @@
      <widget class="QFrame" name="frame">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-        <horstretch>0</horstretch>
+        <horstretch>10</horstretch>
         <verstretch>7</verstretch>
        </sizepolicy>
       </property>
@@ -223,24 +223,43 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QLabel" name="label_CursorPos">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Cursor Pos</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_CursorScreen">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Cursor Screen</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
     <item>
-     <widget class="QListWidget" name="listWidget">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
+     <widget class="QTreeWidget" name="treeWidget">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QTreeWidget" name="treeWidget">
       <column>
        <property name="text">
         <string notr="true">1</string>
@@ -277,6 +296,9 @@
    <extends>QWidget</extends>
    <header location="global">widget.h</header>
    <container>1</container>
+   <slots>
+    <signal>cursorPosChanged(QVector4D,QVector4D)</signal>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>

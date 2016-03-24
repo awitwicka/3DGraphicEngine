@@ -36,6 +36,10 @@ private slots:
 
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
 
+    void on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
+
+    void on_widget_cursorPosChanged(const QVector4D &, const QVector4D &);
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

@@ -59,6 +59,7 @@ void MainWindow::on_pushButton_addMarker_clicked()
     //l->addItem(QListWidgetItem());
     //QList<QTreeWid8getItem *> items;
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(m.name)); //parent, columns names...
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
     t->addTopLevelItem(item);
     w->update();
 }
@@ -70,10 +71,12 @@ void MainWindow::on_pushButton_DelMarker_clicked()
     foreach (QTreeWidgetItem* it, toDelete) {
         name = it->text(0);
         t->takeTopLevelItem(t->indexOfTopLevelItem(it));
+        delete it;
         for (int i = 0; i < w->markers.length(); i++) {
             if (w->markers[i].name == name)
                 w->markers.removeAt(i);
         }
+        break;
     }
 
     w->update();
@@ -95,4 +98,24 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
             //function to select marker etc (refactor from switch)
     }
     w->update();
+}
+
+void MainWindow::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+    int index;
+    QString name = item->text(0);
+    for (int i = 0; i < w->markers.length(); i++) {
+        if (w->markers[i].name == name)
+            index = i;
+    }
+    ui->treeWidget->editItem(item, column);
+    w->markers[index].name = item->text(0);
+
+}
+
+void MainWindow::on_widget_cursorPosChanged(const QVector4D &pos, const QVector4D &screen)
+{
+    //findChild<QLabel*>("label_CursorPos")->setText(QString("x: %1, y: %2, z: %3").arg(pos.x(), pos.y(), pos.z()));
+    findChild<QLabel*>("label_CursorPos")->setText(QString("x: %1, y: %2, z: %3").arg((int)pos.x()).arg((int)pos.y()).arg((int)pos.z()));
+    findChild<QLabel*>("label_CursorScreen")->setText(QString("x: %1, y: %2").arg((int)screen.x()).arg((int)screen.y()));
 }
