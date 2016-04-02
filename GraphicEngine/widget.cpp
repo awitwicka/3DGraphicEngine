@@ -5,22 +5,8 @@
 
 Widget::Widget(QWidget *parent) : QWidget(parent)
 {
-    //distance between observer and the projection plane
-    Rpersp = 700;
-    eDistance = 50;
     worldMatrix = QMatrix4x4(); //identity
-    perspectiveMatrix = QMatrix4x4(1,0,0,0,
-                                   0,1,0,0,
-                                   0,0,0,0,
-                                   0,0,1/Rpersp,1);
-    stereoLMatrix = QMatrix4x4(1,0,-eDistance/(2*Rpersp),0,
-                                   0,1,0,0,
-                                   0,0,0,0,
-                                   0,0,1/Rpersp,1);
-    stereoRMatrix = QMatrix4x4(1,0,eDistance/(2*Rpersp),0,
-                                   0,1,0,0,
-                                   0,0,0,0,
-                                   0,0,1/Rpersp,1);
+
     //TODO: store object on the scene in the QList<CADObject> objects;
     isStereo = false;
     sceneMode = 0;
@@ -33,50 +19,6 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     //setMouseTracking(true);
 }
 
-//clipping lines going behind observer position and drawing new lines on the scene
-void Widget::DrawClippedLines(QPainter &painter, QVector4D q1, QVector4D q2)
-{
-    QColor color;
-    if (q1.z() <= -Rpersp && q2.z() <= -Rpersp) {
-       return;//continue;
-    }
-    if (q1.z() <= -Rpersp && q2.z() > -Rpersp) {
-        QVector4D dir = q1-q2;
-        QVector4D newq = dir * (-Rpersp+1-q2.z())/dir.z();
-        q1 = q2 + newq; //watch not to change w parameter while adding newq
-    } else if (q1.z() > -Rpersp && q2.z() <= -Rpersp) {
-        QVector4D dir = q2-q1;
-        QVector4D newq = dir * (-Rpersp+1-q1.z())/dir.z();
-        q2 = q1 + newq;
-    }
-    if (q1.z() > -Rpersp && q2.z() > -Rpersp) {
-        if (isStereo) {
-            QVector4D L1  = stereoLMatrix*q1;
-            QVector4D L2  = stereoLMatrix*q2;
-            QVector4D R1  = stereoRMatrix*q1;
-            QVector4D R2  = stereoRMatrix*q2;
-            L1 = L1/L1.w();
-            L2 = L2/L2.w();
-            R1 = R1/R1.w();
-            R2 = R2/R2.w();
-            painter.setCompositionMode(QPainter::CompositionMode_Plus);
-            color.setRgb(150,0,0,255);
-            painter.setPen(color);
-            painter.drawLine(L1.x(),L1.y(),L2.x(),L2.y());
-            color.setRgb(0,0,255,255);
-            painter.setPen(color);
-            painter.drawLine(R1.x(),R1.y(),R2.x(),R2.y());
-        }
-        else {
-            q1 = perspectiveMatrix*q1;
-            q2 = perspectiveMatrix*q2;
-            q1 = q1/q1.w();
-            q2 = q2/q2.w();
-            painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
-        }
-    }
-}
-
 void Widget::paintEvent(QPaintEvent *)
 {
     //BRUSH AND VIEWPORT SETTINGS
@@ -86,67 +28,14 @@ void Widget::paintEvent(QPaintEvent *)
     painter.setViewport(width()/2,height()/2,width(),height());
     painter.setPen(Qt::white);
 
-
     //DRAWING OBJECTS ON THE SCENE
-    QMatrix4x4 matrix = worldMatrix;
-    QColor color;
     //TODO: loop through all existing objects on the scene: for()
     //TODO: draw axis in the middle of the scene
-    for (int i = 0; i < t1.indices.length(); i++) {
-        QVector4D q1 = t1.points[t1.indices[i].x()]; //TODO: refactoring -> to function
-        QVector4D q2 = t1.points[t1.indices[i].y()];  
-        q1 = matrix*q1;
-        q2 = matrix*q2;
-        DrawClippedLines(painter, q1, q2); //TODO: refactor
+    t1.Draw(painter, worldMatrix, isStereo);
+    //Cursor.Draw(painter, worldMatrix, isStereo);
+    foreach (Marker m, markers) {
+        m.Draw(painter, worldMatrix, isStereo);
     }
-    //cursor
-    for (int i = 0; i < cursor.indices.length(); i++) {
-        QVector4D q1 = cursor.points[cursor.indices[i].x()]; //TODO: refactoring -> to function
-        QVector4D q2 = cursor.points[cursor.indices[i].y()];
-        q1 = matrix*q1;
-        q2 = matrix*q2;
-        DrawClippedLines(painter, q1, q2); //TODO: refactor
-    }
-    //draw points
-    for (int i = 0; i < markers.length() ; i++) {
-        QVector4D q = markers[i].point;
-        q = matrix * q;
-        float offset = markers[i].getSize()/2;
-
-        //calc to get position of point in camera coord
-        QVector4D qCamPos = perspectiveMatrix*q;
-        qCamPos = qCamPos/qCamPos.w();
-        markers[i].pointWorld = qCamPos;
-
-        if (q.z() <= -Rpersp) {
-           continue;
-        } else {
-            if (isStereo) {
-                QVector4D L  = stereoLMatrix*q;
-                QVector4D R  = stereoRMatrix*q;
-                L = L/L.w();
-                R = R/R.w();
-                painter.setCompositionMode(QPainter::CompositionMode_Plus);
-                color.setRgb(150,0,0,255);
-                painter.fillRect(L.x()-offset, L.y()-offset, offset*2, offset*2, color);
-                color.setRgb(0,0,255,255);
-                painter.fillRect(R.x()-offset, R.y()-offset, offset*2, offset*2, color);
-            }
-            else {
-                q = perspectiveMatrix*q;
-                q = q/q.w();
-                painter.fillRect(q.x()-offset, q.y()-offset, offset*2, offset*2, markers[i].getColor());
-            }
-        }
-    }
-    //draw cursor
-    /*float offset = cursor.getSize()/2;
-    painter.setPen(Qt::red);
-    painter.drawLine(cursor.center.x()-offset, cursor.center.y(), cursor.center.x()+offset, cursor.center.y());
-    painter.setPen(Qt::green);
-    painter.drawLine(cursor.center.x(), cursor.center.y()-offset, cursor.center.x(), cursor.center.y()+offset);
-    painter.setPen(Qt::blue);
-    painter.drawLine(cursor.center.x()-offset, cursor.center.y(), cursor.center.x()+offset, cursor.center.y());*/
 }
 
 
@@ -307,7 +196,7 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             break;
     }
     cursor.updateCursor(worldMatrix);
-    emit cursorPosChanged(cursor.center, perspectiveMatrix*worldMatrix*cursor.center);
+    emit cursorPosChanged(cursor.center, Constants::perspectiveMatrix*worldMatrix*cursor.center);
     update();
 }
 

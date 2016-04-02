@@ -2,14 +2,14 @@
 #define MARKER_H
 
 #include <QColor>
+#include <QPainter>
 #include <QVector4D>
+#include "cadobject.h"
+#include "constants.h"
 
-
-
-class Marker
+class Marker : public CADObject
 {
     float size;
-    QColor color;
     static int id;
 public:
     QString name;
@@ -17,7 +17,9 @@ public:
     QVector4D point;
     QVector4D pointWorld;
     Marker();
+    //~Marker() {};
     Marker(float x, float y, float z);
+    void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 
     float getSize() const;
     void setSize(float value);

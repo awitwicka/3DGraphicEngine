@@ -55,20 +55,6 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QComboBox" name="comboBox">
-               <item>
-                <property name="text">
-                 <string>Move Scene</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Edit Points</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item>
               <widget class="QLabel" name="label_Marker">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -247,6 +233,20 @@
          <property name="text">
           <string>Cursor Screen</string>
          </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBox">
+         <item>
+          <property name="text">
+           <string>Move Scene</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Edit Points</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>

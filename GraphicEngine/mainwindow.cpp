@@ -10,6 +10,10 @@ MainWindow::MainWindow(QWidget *parent) :
     w = findChild<Widget*>();
     l = findChild<QListWidget*>();
     t = findChild<QTreeWidget*>();
+
+    QList<QString> columns = {"Torus", "0"};
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
+    t->addTopLevelItem(item);
     //findChild<QSpinBox*>("spinBox_U")->setValue(w.t1.Usegments);
 }
 
