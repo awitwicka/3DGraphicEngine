@@ -14,7 +14,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     cursor = Cursor();
     highlighColor = Qt::yellow;
     normalColor = Qt::white;
-    selectedMarker = nullptr;
+    IsMultipleSelect = false;
     setFocusPolicy(Qt::StrongFocus);
     //setMouseTracking(true);
 }
@@ -56,19 +56,48 @@ void Widget::wheelEvent(QWheelEvent * event)
     update();
 }
 
-void Widget::SelectPoint(int i)
-{
-    if (selectedMarker != nullptr)
-        selectedMarker->setColor(normalColor);
-    selectedMarker = &markers[i];
-    markers[i].setColor(highlighColor);
+void Widget::HandlePointSelection(int i, bool IsMultiSelect)
+{ 
+    //deselect all selected markers
+    //if (selectedMarker != nullptr)
+        //selectedMarker->setColor(normalColor);
+    //selectedMarker = &markers[i];
+
+    if (!IsMultiSelect) {
+        for (int i = 0; i < selectedMarkers.length(); i++){
+            selectedMarkers[i]->setColor(normalColor);
+            selectedMarkers[i]->IsSelected = false;
+        }
+        selectedMarkers.clear();
+        selectedMarkers.append(&markers[i]);
+        markers[i].setColor(highlighColor);
+        markers[i].IsSelected = true;
+    } else {
+        if (markers[i].IsSelected) {
+            selectedMarkers.removeAll(&markers[i]);
+            markers[i].setColor(normalColor);
+            markers[i].IsSelected = false;
+
+        } else {
+            selectedMarkers.append(&markers[i]);
+            markers[i].setColor(highlighColor);
+            markers[i].IsSelected = true;
+        }
+    }
+
     cursor.center = QVector4D(markers[i].point.x(),markers[i].point.y(),markers[i].point.z(),1);
     cursor.updateCursor(worldMatrix);
 }
 
+void Widget::RemovePoint(int i)
+{
+    selectedMarkers.removeAll(&markers[i]);
+    markers.removeAt(i);
+}
+
 void Widget::DeselectPoint()
 {
-    selectedMarker = nullptr;
+    //selectedMarker = nullptr;
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
@@ -87,19 +116,15 @@ void Widget::mousePressEvent(QMouseEvent *event)
                     float worldY = markers[i].pointWorld.y();
                     if (x >= worldX-offset && x <= worldX+offset &&
                         y >= worldY-offset && y <= worldY+offset) {
-                        SelectPoint(i);
-                        //cursor.InitializeCursor();
+                        HandlePointSelection(i, IsMultipleSelect);
                         break;
                     }
                 }
-                //move cursor only if not moving
-                //if
             }
             break;
         default:
             break;
     }
-    //cursor.updateCursor(worldMatrix);
     update();
 }
 
@@ -172,21 +197,24 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             }
             if(event->buttons() & Qt::RightButton) {
                 //move point
-                if (selectedMarker != nullptr) {
-                    float dist = sqrt((cursor.center - selectedMarker->point).lengthSquared());
+                if (selectedMarkers.length() > 0) {
+                    //only if cursor in range
+                    /*float dist = sqrt((cursor.center - selectedMarker->point).lengthSquared());
                     if (dist > cursor.range)
                         return;
-
+                    */
                     float dx = event->pos().x() - savedMouse.x();
                     float dy = event->pos().y() - savedMouse.y();
 
                     if (event->modifiers() & Qt::ShiftModifier ) {
                         cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
-                        selectedMarker->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
+                        for (int i = 0; i < selectedMarkers.length(); i++)
+                            selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
                     }
                     else {
                         cursor.center += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
-                        selectedMarker->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
+                        for (int i = 0; i < selectedMarkers.length(); i++)
+                            selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
                     }
                     savedMouse = QPoint(event->pos().x(), event->pos().y());
                 }
@@ -225,10 +253,7 @@ void Widget::keyPressEvent(QKeyEvent *event)
 
             if (dist > cursor.range)
                 return;
-            if (selectedMarker != nullptr)
-                selectedMarker->setColor(normalColor);
-            selectedMarker = &markers[index];
-            markers[index].setColor(highlighColor);
+            HandlePointSelection(index, IsMultipleSelect);
         }
         break;
     default:

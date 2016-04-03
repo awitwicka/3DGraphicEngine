@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     torus.cpp \
     marker.cpp \
     cursor.cpp \
-    constants.cpp
+    constants.cpp \
+    bezier.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -29,6 +30,7 @@ HEADERS  += mainwindow.h \
     torus.h \
     marker.h \
     cursor.h \
-    constants.h
+    constants.h \
+    bezier.h
 
 FORMS    += mainwindow.ui

@@ -3,8 +3,6 @@
 
 #include <QMatrix4x4>
 
-
-
 class Constants
 {
 public:

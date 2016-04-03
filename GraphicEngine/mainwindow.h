@@ -40,6 +40,8 @@ private slots:
 
     void on_widget_cursorPosChanged(const QVector4D &, const QVector4D &);
 
+    void on_checkBox_multiSelect_clicked(bool checked);
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

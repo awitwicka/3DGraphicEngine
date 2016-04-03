@@ -12,6 +12,7 @@ Marker::Marker()
     point = QVector4D(0, 0, 0, 1);
     name = QString("point %1").arg(id);
     idname = QString("%1").arg(id);
+    IsSelected= false;
     id++;
 }
 
@@ -21,6 +22,7 @@ Marker::Marker(float x, float y, float z) : size(10)
     idname = QString("%1").arg(id);
     //point(x, y,  z);
     point = QVector4D(x, y, z, 1);
+    IsSelected= false;
     id++;
 }
 

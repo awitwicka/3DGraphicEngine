@@ -14,6 +14,7 @@ class Marker : public CADObject
 public:
     QString name;
     QString idname;
+    bool IsSelected;
     QVector4D point;
     QVector4D pointWorld;
     Marker();

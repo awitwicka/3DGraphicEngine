@@ -20,7 +20,6 @@ class Widget : public QWidget
     Cursor cursor;
     QColor normalColor;
     QColor highlighColor;
-    Marker* selectedMarker;    
     //QList<CADObject> objects;
 
     //objs[i]->f(u,v);
@@ -29,7 +28,9 @@ class Widget : public QWidget
 public:
     //KeyPress(QWidget *parent = 0);
     bool isStereo;
+    bool IsMultipleSelect;
     QList<Marker> markers;
+    QList<Marker*> selectedMarkers;
     Torus t1;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
@@ -39,7 +40,8 @@ public:
     void switchSceneMode(int index);
     void keyPressEvent(QKeyEvent*event);
 
-    void SelectPoint(int i);
+    void HandlePointSelection(int i, bool IsMultiSelect);
+    void RemovePoint(int i);
     void DeselectPoint();
 
 signals:

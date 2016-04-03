@@ -116,6 +116,13 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
+        <widget class="QCheckBox" name="checkBox_multiSelect">
+         <property name="text">
+          <string>Multi Select</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="pushButton">
          <property name="enabled">
           <bool>false</bool>
@@ -275,7 +282,7 @@
      <x>0</x>
      <y>0</y>
      <width>916</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -30,13 +30,4 @@ private:
         QVector<QPoint> indices;
 };
 
-/*class Torus:public CADObject{
-    //...
-    QVector4D f(float u, float v);
-};
-class BezierPatch:public CADObject{9
-    //...
-    QVector4D f(float u, float v);
-};*/
-
 #endif // CADOBJECT_H

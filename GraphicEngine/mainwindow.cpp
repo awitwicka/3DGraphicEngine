@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     l = findChild<QListWidget*>();
     t = findChild<QTreeWidget*>();
 
-    QList<QString> columns = {"Torus", "0"};
+    QList<QString> columns = {"Torus", "tor"};
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
     t->addTopLevelItem(item);
     //findChild<QSpinBox*>("spinBox_U")->setValue(w.t1.Usegments);
@@ -71,7 +71,12 @@ void MainWindow::on_pushButton_addMarker_clicked()
 void MainWindow::on_pushButton_DelMarker_clicked()
 {
     //TODO: Delete from list as well
-    w->DeselectPoint();
+    /*if(QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+    {
+        // Do a few things
+    }*/
+
+    //w->DeselectPoint();
     QString idname;
     QList<QTreeWidgetItem*> toDelete = t->selectedItems();
     foreach (QTreeWidgetItem* it, toDelete) {
@@ -80,7 +85,7 @@ void MainWindow::on_pushButton_DelMarker_clicked()
 
         for (int i = 0; i < w->markers.length(); i++) {
             if (w->markers[i].idname == idname)
-                w->markers.removeAt(i);
+                w->RemovePoint(i);
         }
         delete it;
         //break;
@@ -99,7 +104,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     QString idname = item->text(1);
     for (int i = 0; i < w->markers.length(); i++) {
         if (w->markers[i].idname == idname) {
-           w->SelectPoint(i);
+           w->HandlePointSelection(i, w->IsMultipleSelect);
         }
             //w->markers.removeAt(i);
             //function to select marker etc (refactor from switch)
@@ -124,4 +129,16 @@ void MainWindow::on_widget_cursorPosChanged(const QVector4D &pos, const QVector4
     //findChild<QLabel*>("label_CursorPos")->setText(QString("x: %1, y: %2, z: %3").arg(pos.x(), pos.y(), pos.z()));
     findChild<QLabel*>("label_CursorPos")->setText(QString("x: %1, y: %2, z: %3").arg((int)pos.x()).arg((int)pos.y()).arg((int)pos.z()));
     findChild<QLabel*>("label_CursorScreen")->setText(QString("x: %1, y: %2").arg((int)screen.x()).arg((int)screen.y()));
+}
+
+void MainWindow::on_checkBox_multiSelect_clicked(bool checked)
+{
+    if(checked) {
+        t->setSelectionMode(QAbstractItemView::MultiSelection);
+        w->IsMultipleSelect = true;
+    }
+    if(!checked) {
+        t->setSelectionMode(QAbstractItemView::SingleSelection);
+        w->IsMultipleSelect = false;
+    }
 }
