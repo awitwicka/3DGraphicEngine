@@ -30,6 +30,11 @@ public:
     void setV(float l);
     void setR(float R);
     void setr(float r);
+
+    virtual QVector<QVector4D> getPoints() const;
+    virtual void setPoints(const QVector<QVector4D> &value);
+    virtual QVector<QPoint> getIndices() const;
+    virtual void setIndices(const QVector<QPoint> &value);
 };
 
 #endif // TORUS_H

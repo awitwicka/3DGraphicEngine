@@ -9,10 +9,7 @@
 class CADObject{
     public:
         CADObject();
-        virtual ~CADObject()=0;
-        QVector<QVector4D> points;
-        QVector<QPoint> indices;
-        QMatrix4x4 modelMatrix;
+        virtual ~CADObject()=0;       
         //float ulen,vlen;
         //virtual QVector4D f(float u, float v);
         virtual void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
@@ -20,13 +17,24 @@ class CADObject{
         QColor LRedColor;
         QColor RBlueColor;
         QColor Color;
+
+        //getters setters
+        virtual void setPoints(const QVector<QVector4D> &value);
+        virtual void setIndices(const QVector<QPoint> &value);
+        virtual QVector<QVector4D> getPoints() const;
+        virtual QVector<QPoint> getIndices() const;
+
+private:
+        QMatrix4x4 modelMatrix;
+        QVector<QVector4D> points;
+        QVector<QPoint> indices;
 };
 
 /*class Torus:public CADObject{
     //...
     QVector4D f(float u, float v);
 };
-class BezierPatch:public CADObject{
+class BezierPatch:public CADObject{9
     //...
     QVector4D f(float u, float v);
 };*/

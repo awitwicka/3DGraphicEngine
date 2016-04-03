@@ -5,6 +5,26 @@ Torus::Torus() : Usegments(3), Vsegments(3), R(100), r(30)
     InitializeTorus();
 }
 
+QVector<QPoint> Torus::getIndices() const
+{
+    return indices;
+}
+
+void Torus::setIndices(const QVector<QPoint> &value)
+{
+    indices = value;
+}
+
+QVector<QVector4D> Torus::getPoints() const
+{
+    return points;
+}
+
+void Torus::setPoints(const QVector<QVector4D> &value)
+{
+    points = value;
+}
+
 void Torus::InitializeTorus()
 {
     Clear();

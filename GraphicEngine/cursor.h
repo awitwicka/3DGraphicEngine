@@ -9,11 +9,11 @@
 
 class Cursor : public CADObject
 {
+    void InitializeCursor();
     float size;
     void Clear();
 public:
     float range;
-    void InitializeCursor();
     Cursor();
     //~Cursor() {};
     QVector<QVector4D> points;
@@ -30,6 +30,11 @@ public:
     painter.drawLine(cursor.center.x(), cursor.center.y()-offset, cursor.center.x(), cursor.center.y()+offset);
     painter.setPen(Qt::blue);
     painter.drawLine(cursor.center.x()-offset, cursor.center.y(), cursor.center.x()+offset, cursor.center.y());*/
+
+    virtual QVector<QVector4D> getPoints() const;
+    virtual void setPoints(const QVector<QVector4D> &value);
+    virtual QVector<QPoint> getIndices() const;
+    virtual void setIndices(const QVector<QPoint> &value);
 };
 
 #endif // CURSOR_H

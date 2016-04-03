@@ -32,13 +32,13 @@ void Widget::paintEvent(QPaintEvent *)
     //TODO: loop through all existing objects on the scene: for()
     //TODO: draw axis in the middle of the scene
     t1.Draw(painter, worldMatrix, isStereo);
-    //Cursor.Draw(painter, worldMatrix, isStereo);
-    foreach (Marker m, markers) {
-        m.Draw(painter, worldMatrix, isStereo);
-    }
+    cursor.Draw(painter, worldMatrix, isStereo);
+    for (int i = 0; i< markers.length(); i++)
+        markers[i].Draw(painter, worldMatrix, isStereo);
+    //foreach (Marker m, markers) { //czy operuje na kopach???
+    //    m.Draw(painter, worldMatrix, isStereo);
+    //}
 }
-
-
 
 void Widget::wheelEvent(QWheelEvent * event)
 {
@@ -83,10 +83,10 @@ void Widget::mousePressEvent(QMouseEvent *event)
                     float offset = markers[i].getSize()/2;
                     float x = savedMouse.x()-width()/2;
                     float y = savedMouse.y()-height()/2;
-                    if (x >= markers[i].pointWorld.x()-offset &&
-                            x <= markers[i].pointWorld.x()+offset &&
-                            y >= markers[i].pointWorld.y()-offset &&
-                            y <= markers[i].pointWorld.y()+offset) {
+                    float worldX = markers[i].pointWorld.x();
+                    float worldY = markers[i].pointWorld.y();
+                    if (x >= worldX-offset && x <= worldX+offset &&
+                        y >= worldY-offset && y <= worldY+offset) {
                         SelectPoint(i);
                         //cursor.InitializeCursor();
                         break;

@@ -14,13 +14,15 @@ CADObject::~CADObject()
 
 void CADObject::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
 {
+    QVector<QPoint> indices = getIndices();
+    QVector<QVector4D> points = getPoints();
     for (int i = 0; i < indices.length(); i++) {
         QVector4D q1 = points[indices[i].x()]; //TODO: refactoring -> to function
         QVector4D q2 = points[indices[i].y()];
         q1 = matrix*q1;
         q2 = matrix*q2;
         if (q1.z() <= -Constants::Rpersp && q2.z() <= -Constants::Rpersp) {
-           return;//continue;
+           continue;
         }
         if (q1.z() <= -Constants::Rpersp && q2.z() > -Constants::Rpersp) {
             QVector4D dir = q1-q2;
@@ -57,6 +59,26 @@ void CADObject::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
             }
         }
     }
+}
+
+QVector<QVector4D> CADObject::getPoints() const
+{
+    return points;
+}
+
+void CADObject::setPoints(const QVector<QVector4D> &value)
+{
+    points = value;
+}
+
+void CADObject::setIndices(const QVector<QPoint> &value)
+{
+    indices = value;
+}
+
+QVector<QPoint> CADObject::getIndices() const
+{
+    return indices;
 }
 
 

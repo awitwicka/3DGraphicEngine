@@ -9,6 +9,26 @@ Cursor::Cursor()
     InitializeCursor();
 }
 
+QVector<QPoint> Cursor::getIndices() const
+{
+    return indices;
+}
+
+void Cursor::setIndices(const QVector<QPoint> &value)
+{
+    indices = value;
+}
+
+QVector<QVector4D> Cursor::getPoints() const
+{
+    return points;
+}
+
+void Cursor::setPoints(const QVector<QVector4D> &value)
+{
+    points = value;
+}
+
 void Cursor::InitializeCursor()
 {
     Clear();
