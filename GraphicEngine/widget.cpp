@@ -35,6 +35,8 @@ void Widget::paintEvent(QPaintEvent *)
     cursor.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
+    for (int i = 0; i< bezier_objects.length(); i++)
+        bezier_objects[i].Draw(painter, worldMatrix, isStereo);
     //foreach (Marker m, markers) { //czy operuje na kopach???
     //    m.Draw(painter, worldMatrix, isStereo);
     //}

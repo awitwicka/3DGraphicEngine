@@ -42,6 +42,8 @@ private slots:
 
     void on_checkBox_multiSelect_clicked(bool checked);
 
+    void on_pushButton_addBezier_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

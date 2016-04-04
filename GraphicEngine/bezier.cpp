@@ -5,24 +5,22 @@ Bezier::Bezier()
 
 }
 
-Bezier::Bezier(QList<Marker*> markers)
+Bezier::Bezier(const QList<Marker *> &markers)
 {
     //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
+    //TODO: why deg = 1 why alwa 2 points, why 13178416941 in markers???????
     int n = markers.length();
     if (n>0) {
         QList<Marker*> m;
-        int count = 0;
         for (int i = 1; i < n; i) {
             m.append(markers[i-1]);
-            if (count<3) {
+            for (int c = 0; c<3; c++) {
                 if (i<n)
                     m.append(markers[i]);
                 i++;
-                count++;
             }
             Segments.append(Segment(m));
             m.clear();
-            count = 0;
         }
     }
     InitializeBezier();
@@ -35,7 +33,7 @@ void Bezier::InitializeBezier()
     int j=0;
     for (int s = 0; s<Segments.length(); s++) {
         for (int i = 0; i <= linesNo; i++) {
-            points.append(getBezierPoint(Segments[i], i/linesNo));
+            points.append(getBezierPoint(Segments[s], (float)i/(float)linesNo));
         }
         for (j; j < (linesNo*(s+1))-1; j++) {
             indices.append(QPoint(j, j+1));

@@ -8,6 +8,7 @@
 #include "torus.h"
 #include "marker.h"
 #include "cursor.h"
+#include "bezier.h"
 
 class Widget : public QWidget
 {
@@ -30,6 +31,7 @@ public:
     bool isStereo;
     bool IsMultipleSelect;
     QList<Marker> markers;
+    QList<Bezier> bezier_objects;
     QList<Marker*> selectedMarkers;
     Torus t1;
     explicit Widget(QWidget *parent = 0);

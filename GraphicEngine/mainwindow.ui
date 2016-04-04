@@ -55,6 +55,13 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
+              <widget class="QPushButton" name="pushButton_addBezier">
+               <property name="text">
+                <string>Add Bezier</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QLabel" name="label_Marker">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">

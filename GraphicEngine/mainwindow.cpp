@@ -142,3 +142,9 @@ void MainWindow::on_checkBox_multiSelect_clicked(bool checked)
         w->IsMultipleSelect = false;
     }
 }
+
+void MainWindow::on_pushButton_addBezier_clicked()
+{
+    w->bezier_objects.append(Bezier(w->selectedMarkers));
+    w->update();
+}

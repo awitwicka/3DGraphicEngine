@@ -16,12 +16,20 @@ class Bezier : public CADObject
 public:
     Bezier();
     QList<Segment> Segments;
-    Bezier(QList<Marker*> markers);
+    Bezier(QList<Marker*> const & markers);
 
     virtual QVector<QVector4D> getPoints() const;
     virtual void setPoints(const QVector<QVector4D> &value);
     virtual QVector<QPoint> getIndices() const;
     virtual void setIndices(const QVector<QPoint> &value);
 };
+
+/*
+ *
+ * void func(QList<int> list) // func will use a copy of list
+void func(QList<int>& list) // func will use the same instance of list
+void func(QList<int> const & list) // func will use the same instance of list and will not* modify it
+void func(QList<int>* list) // func will take a pointer to a QList<int> (that may be valid or not...)
+ * */
 
 #endif // BEZIER_H
