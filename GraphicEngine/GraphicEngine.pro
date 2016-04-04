@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     marker.cpp \
     cursor.cpp \
     constants.cpp \
-    bezier.cpp
+    bezier.cpp \
+    segment.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -31,6 +32,7 @@ HEADERS  += mainwindow.h \
     marker.h \
     cursor.h \
     constants.h \
-    bezier.h
+    bezier.h \
+    segment.h
 
 FORMS    += mainwindow.ui

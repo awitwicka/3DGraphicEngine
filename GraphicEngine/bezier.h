@@ -3,19 +3,25 @@
 
 #include "cadobject.h"
 #include "marker.h"
-
+#include "segment.h"
 
 class Bezier : public CADObject
 {
     void InitializeBezier();
-    QVector4D getBezierPoint(Marker m1, Marker m2, Marker m3, Marker m4, float t);
+    QVector4D getBezierPoint(Segment seg, float t);
     void getCurveGeometry();
-public:
-    Bezier();
-    Bezier(Marker*m1, Marker*m2, Marker*m3, Marker*m4);
-    QList<Marker*> markers;
+
     QVector<QVector4D> points;
     QVector<QPoint> indices;
+public:
+    Bezier();
+    QList<Segment> Segments;
+    Bezier(QList<Marker*> markers);
+
+    virtual QVector<QVector4D> getPoints() const;
+    virtual void setPoints(const QVector<QVector4D> &value);
+    virtual QVector<QPoint> getIndices() const;
+    virtual void setIndices(const QVector<QPoint> &value);
 };
 
 #endif // BEZIER_H
