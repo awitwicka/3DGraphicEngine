@@ -2,6 +2,18 @@
 
 int Bezier::id = 0;
 
+
+//TODO clear pointers
+/*
+ *
+ * int iNum = qList.count();
+for (int i=0; i<iNumElements; i++)
+  delete (qList.takeAt(0));
+ *
+ * or qdelete all
+ *
+ * */
+
 Bezier::Bezier()
 {
     name = QString("bezier %1").arg(id);
@@ -20,6 +32,7 @@ Bezier::Bezier(const QList<Marker *> &mark)
 
 void Bezier::InitializeBezier()
 {
+    Clear();
     //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
     int n = markers.length();
     if (n>0) {
@@ -43,7 +56,7 @@ void Bezier::InitializeBezier()
         for (int i = 0; i <= linesNo; i++) {
             points.append(getBezierPoint(Segments[s], (float)i/(float)linesNo));
         }
-        for (j; j < (linesNo*(s+1))-1; j++) {
+        for (j; j < (linesNo*(s+1)); j++) {
             indices.append(QPoint(j, j+1));
         }
     }
@@ -65,6 +78,13 @@ QVector4D Bezier::getBezierPoint(Segment seg, float t)
     QVector4D p = tmp[0];
     delete[] tmp;
     return p;
+}
+
+void Bezier::Clear()
+{
+    indices.clear();
+    points.clear();
+    Segments.clear(); //todo:are they disposed?
 }
 
 QVector<QPoint> Bezier::getIndices() const

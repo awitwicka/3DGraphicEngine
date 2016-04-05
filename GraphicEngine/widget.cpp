@@ -219,6 +219,9 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
                             selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
                     }
                     savedMouse = QPoint(event->pos().x(), event->pos().y());
+                    //TODO update only if point a part of any bezier curve //event on pointschange?
+                    for(int i = 0; i<bezier_objects.length(); i++)
+                        bezier_objects[i].InitializeBezier();
                 }
             }
             break;

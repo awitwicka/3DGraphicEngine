@@ -14,6 +14,7 @@ class CADObject{
         //virtual QVector4D f(float u, float v);
         virtual void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 
+
         QColor LRedColor;
         QColor RBlueColor;
         QColor Color;
@@ -24,10 +25,11 @@ class CADObject{
         virtual QVector<QVector4D> getPoints() const;
         virtual QVector<QPoint> getIndices() const;
 
-private:
+    private:
         QMatrix4x4 modelMatrix;
         QVector<QVector4D> points;
         QVector<QPoint> indices;
+    protected:
 };
 
 #endif // CADOBJECT_H

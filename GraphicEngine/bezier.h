@@ -8,13 +8,15 @@
 class Bezier : public CADObject
 {
     static int id;
-    void InitializeBezier();
     QVector4D getBezierPoint(Segment seg, float t);
     void getCurveGeometry();
 
     QVector<QVector4D> points;
     QVector<QPoint> indices;
+
+    void Clear();
 public:
+    void InitializeBezier();
     QString name;
     QString idname;
     Bezier();
