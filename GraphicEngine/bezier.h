@@ -18,13 +18,13 @@ class Bezier : public CADObject
 
     void Clear();
 public:
-    void InitializeBezier();
+    void InitializeBezier(QMatrix4x4 matrix);
     QString name;
     QString idname;
     Bezier();
     QList<Segment> Segments;
     QList<Marker*> markers;
-    Bezier(QList<Marker*> const & m);
+    Bezier(QList<Marker*> const & m, QMatrix4x4 matrix);
     void DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 
     virtual QVector<QVector4D> getPoints() const;

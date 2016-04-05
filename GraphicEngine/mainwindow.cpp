@@ -223,7 +223,7 @@ void MainWindow::on_checkBox_multiSelect_clicked(bool checked)
 void MainWindow::on_pushButton_addBezier_clicked()
 {
     //crete bezier curve
-    Bezier b = Bezier(w->selectedMarkers);
+    Bezier b = Bezier(w->selectedMarkers, w->worldMatrix);
     w->bezier_objects.append(b);
 
     //create and add item to list

@@ -37,6 +37,8 @@ void Widget::paintEvent(QPaintEvent *)
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< bezier_objects.length(); i++) {
+        //TODO: only if zoom points/grabbing/points no change
+        bezier_objects[i].InitializeBezier(worldMatrix);
         bezier_objects[i].Draw(painter, worldMatrix, isStereo);
         if (showCurve)
             bezier_objects[i].DrawCurve(painter, worldMatrix, isStereo);
@@ -224,8 +226,8 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
                     }
                     savedMouse = QPoint(event->pos().x(), event->pos().y());
                     //TODO update only if point a part of any bezier curve //event on pointschange?
-                    for(int i = 0; i<bezier_objects.length(); i++)
-                        bezier_objects[i].InitializeBezier();
+                    //for(int i = 0; i<bezier_objects.length(); i++)
+                        //bezier_objects[i].InitializeBezier(worldMatrix);
                 }
             }
             break;

@@ -21,13 +21,13 @@ Bezier::Bezier()
     id++;
 }
 
-Bezier::Bezier(const QList<Marker *> &mark)
+Bezier::Bezier(const QList<Marker *> &mark, QMatrix4x4 matrix)
 {
     name = QString("bezier %1").arg(id);
     idname = QString("b%1").arg(id);
     id++;
     markers = mark;
-    InitializeBezier();
+    InitializeBezier(matrix);
 }
 
 void Bezier::DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
@@ -37,11 +37,26 @@ void Bezier::DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
     Color = Qt::white;
 }
 
-void Bezier::InitializeBezier()
+void Bezier::InitializeBezier(QMatrix4x4 matrix)
 {
     Clear();
-    //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
+
     int n = markers.length();
+    float length = 0;
+    //initialize Curve
+    for (int i = 0; i < n-1; i++) {
+        pointsCurve.append(markers[i]->point);
+        indicesCurve.append(QPoint(i, i+1));
+        QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[i]->point;
+        QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[i+1]->point;
+        q1 = q1/q1.w();
+        q2 = q2/q2.w();
+        length += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
+    }
+
+    pointsCurve.append(markers.last()->point);
+    //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
+
     if (n>0) {
         QList<Marker*> m;
         for (int i = 1; i < n; i) {
@@ -57,7 +72,7 @@ void Bezier::InitializeBezier()
     }
 
     //Clear(); todo: move to cadobject
-    int linesNo = 100;
+    int linesNo = (int)length;
     int j=0;
     for (int s = 0; s<Segments.length(); s++) {
         for (int i = 0; i <= linesNo; i++) {
@@ -68,12 +83,6 @@ void Bezier::InitializeBezier()
         }
     }
 
-    //initialize Curve
-    for (int i = 0; i < n-1; i++) {
-        pointsCurve.append(markers[i]->point);
-        indicesCurve.append(QPoint(i, i+1));
-    }
-    pointsCurve.append(markers.last()->point);
 }
 
 QVector4D Bezier::getBezierPoint(Segment seg, float t)

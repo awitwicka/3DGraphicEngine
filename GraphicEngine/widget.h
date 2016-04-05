@@ -13,7 +13,6 @@
 class Widget : public QWidget
 {
     Q_OBJECT
-    QMatrix4x4 worldMatrix, viewMatrix;
     qreal scale;
     //Torus t1;
     QPoint savedMouse;
@@ -31,6 +30,7 @@ public:
     bool isStereo;
     bool showCurve;
     bool IsMultipleSelect;
+    QMatrix4x4 worldMatrix, viewMatrix;
     QList<Marker> markers;
     QList<Bezier> bezier_objects;
     QList<Marker*> selectedMarkers;
