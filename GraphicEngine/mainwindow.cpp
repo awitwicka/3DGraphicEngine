@@ -68,6 +68,23 @@ void MainWindow::on_pushButton_addMarker_clicked()
     t->addTopLevelItem(item);
     w->update();
 }
+
+void MainWindow::visitTree(/*QStringList &list*/QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition){
+    if (item->text(1) == condition)
+        items.append(item);
+    //list << item->text(0);
+    for(int i=0;i<item->childCount(); ++i)
+        visitTree(items, item->child(i), condition);
+}
+
+QList<QTreeWidgetItem*> MainWindow::visitTree(QTreeWidget *tree, QString condition) {
+    //QStringList list;
+    QList<QTreeWidgetItem*> items;
+    for(int i=0;i<tree->topLevelItemCount();++i)
+        visitTree(items, tree->topLevelItem(i), condition);
+    return items;
+}
+
 void MainWindow::on_pushButton_DelMarker_clicked()
 {
     //TODO: Delete from list as well
@@ -75,22 +92,82 @@ void MainWindow::on_pushButton_DelMarker_clicked()
     {
         // Do a few things
     }*/
-
-    //w->DeselectPoint();
     QString idname;
     QList<QTreeWidgetItem*> toDelete = t->selectedItems();
-    foreach (QTreeWidgetItem* it, toDelete) {
-        idname = it->text(1);
-        t->takeTopLevelItem(t->indexOfTopLevelItem(it));
-
-        for (int i = 0; i < w->markers.length(); i++) {
-            if (w->markers[i].idname == idname)
-                w->RemovePoint(i);
+    //getrid of repetitions
+    int j = 0;
+    while(j < toDelete.length()-1) {
+        for(int i = j+1; i<toDelete.length(); i++) {
+            if (toDelete[j]->text(1) == toDelete[i]->text(1)) {
+                toDelete.removeAt(i);
+                i--;
+            }
         }
-        delete it;
-        //break;
+        j++;
     }
 
+    foreach (QTreeWidgetItem* it, toDelete) {
+        idname = it->text(1);
+        //delete marker
+        if(!it->parent()) {
+            for (int i = 0; i < w->markers.length(); i++) {
+                if (w->markers[i].idname == idname)
+                    w->RemovePoint(i);
+            }
+            delete it;
+        //delete from all instances
+        } else {
+            QList<QTreeWidgetItem*> result = visitTree(t, idname);
+            for (int i = 0; i < w->markers.length(); i++) {
+                if (w->markers[i].idname == idname)
+                    w->RemovePoint(i);
+            }
+            foreach (QTreeWidgetItem* t, result) {
+                delete t;
+            }
+        }
+    }
+    w->update();
+}
+
+void MainWindow::on_pushButton_DelSingleMarker_clicked()
+{
+    QString idname;
+    QString name;
+    QString parentIdName;
+    QList<QTreeWidgetItem*> toDelete = t->selectedItems();
+
+    foreach (QTreeWidgetItem* it, toDelete) {
+        idname = it->text(1);
+        name = it->text(0);
+        //delete marker
+        if(!it->parent()) {
+            for (int i = 0; i < w->markers.length(); i++) {
+                if (w->markers[i].idname == idname)
+                    w->RemovePoint(i);
+            }
+            delete it;
+        } else {
+            parentIdName = it->parent()->text(1);
+            for (int i = 0; i < w->bezier_objects.length(); i++) { //TODO: probably change to CADobject list
+                if (w->bezier_objects[i].idname == parentIdName) {
+                    for (int j = 0; j < w->bezier_objects[i].markers.length(); j++) {
+                        if (w->bezier_objects[i].markers[j]->idname == idname)
+                            w->bezier_objects[i].markers.removeAt(j);
+                    }
+                }
+            }
+            delete it;
+            //if not in any curve add again to tree as rop item
+            QList<QTreeWidgetItem*> result = visitTree(t, idname);
+            if (result.length() == 0) {
+                QList<QString> columns = {name, idname};
+                QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
+                item->setFlags(item->flags() | Qt::ItemIsEditable);
+                t->addTopLevelItem(item);
+            }
+        }
+    }
     w->update();
 }
 
@@ -145,6 +222,27 @@ void MainWindow::on_checkBox_multiSelect_clicked(bool checked)
 
 void MainWindow::on_pushButton_addBezier_clicked()
 {
-    w->bezier_objects.append(Bezier(w->selectedMarkers));
+    //crete bezier curve
+    Bezier b = Bezier(w->selectedMarkers);
+    w->bezier_objects.append(b);
+
+    //create and add item to list
+    QList<QString> columns = {b.name, b.idname};
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+    //swap points so they belong to bezier
+    QString idname;
+    QList<QTreeWidgetItem*> points = t->selectedItems();
+    foreach (QTreeWidgetItem* it, points) {
+        idname = it->text(1);
+        if (idname.at(0) == 'p') { //check if some other elements besides points selected
+            QTreeWidgetItem * const clone = it->clone();
+            item->addChild(clone);
+            if(!it->parent())
+                delete it; //delete only if moving from main tree
+        }
+    }
+    t->addTopLevelItem(item);
     w->update();
 }

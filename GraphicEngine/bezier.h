@@ -7,6 +7,7 @@
 
 class Bezier : public CADObject
 {
+    static int id;
     void InitializeBezier();
     QVector4D getBezierPoint(Segment seg, float t);
     void getCurveGeometry();
@@ -14,9 +15,12 @@ class Bezier : public CADObject
     QVector<QVector4D> points;
     QVector<QPoint> indices;
 public:
+    QString name;
+    QString idname;
     Bezier();
     QList<Segment> Segments;
-    Bezier(QList<Marker*> const & markers);
+    QList<Marker*> markers;
+    Bezier(QList<Marker*> const & m);
 
     virtual QVector<QVector4D> getPoints() const;
     virtual void setPoints(const QVector<QVector4D> &value);

@@ -1,14 +1,26 @@
 #include "bezier.h"
 
+int Bezier::id = 0;
+
 Bezier::Bezier()
 {
-
+    name = QString("bezier %1").arg(id);
+    idname = QString("b%1").arg(id);
+    id++;
 }
 
-Bezier::Bezier(const QList<Marker *> &markers)
+Bezier::Bezier(const QList<Marker *> &mark)
+{
+    name = QString("bezier %1").arg(id);
+    idname = QString("b%1").arg(id);
+    id++;
+    markers = mark;
+    InitializeBezier();
+}
+
+void Bezier::InitializeBezier()
 {
     //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
-    //TODO: why deg = 1 why alwa 2 points, why 13178416941 in markers???????
     int n = markers.length();
     if (n>0) {
         QList<Marker*> m;
@@ -23,11 +35,7 @@ Bezier::Bezier(const QList<Marker *> &markers)
             m.clear();
         }
     }
-    InitializeBezier();
-}
 
-void Bezier::InitializeBezier()
-{
     //Clear(); todo: move to cadobject
     int linesNo = 100;
     int j=0;

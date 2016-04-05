@@ -88,6 +88,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_DelSingleMarker">
+               <property name="text">
+                <string>Del Instance</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>

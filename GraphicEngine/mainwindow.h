@@ -32,6 +32,8 @@ private slots:
 
     void on_pushButton_DelMarker_clicked();
 
+    void on_pushButton_DelSingleMarker_clicked();
+
     void on_comboBox_activated(int index);
 
     void on_treeWidget_itemClicked(QTreeWidgetItem *item, int column);
@@ -49,6 +51,9 @@ private:
     Widget* w;
     QListWidget* l;
     QTreeWidget* t;
+
+    void visitTree(QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition);
+    QList<QTreeWidgetItem*> visitTree(QTreeWidget *tree, QString condition);
 };
 
 #endif // MAINWINDOW_H
