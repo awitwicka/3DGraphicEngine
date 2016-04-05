@@ -29,6 +29,7 @@ class Widget : public QWidget
 public:
     //KeyPress(QWidget *parent = 0);
     bool isStereo;
+    bool showCurve;
     bool IsMultipleSelect;
     QList<Marker> markers;
     QList<Bezier> bezier_objects;

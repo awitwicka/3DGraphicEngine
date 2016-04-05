@@ -55,6 +55,16 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
+              <widget class="QCheckBox" name="checkBox_curve">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="text">
+                <string>Show Curve</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="pushButton_addBezier">
                <property name="text">
                 <string>Add Bezier</string>

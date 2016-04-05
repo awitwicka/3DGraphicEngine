@@ -30,6 +30,7 @@ class CADObject{
         QVector<QVector4D> points;
         QVector<QPoint> indices;
     protected:
+        virtual void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo, QVector<QVector4D> points, QVector<QPoint> indices);
 };
 
 #endif // CADOBJECT_H

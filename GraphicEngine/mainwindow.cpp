@@ -246,3 +246,15 @@ void MainWindow::on_pushButton_addBezier_clicked()
     t->addTopLevelItem(item);
     w->update();
 }
+
+void MainWindow::on_checkBox_curve_clicked(bool checked)
+{
+    if(checked) {
+        w->showCurve = true;
+    }
+    if(!checked) {
+        t->setSelectionMode(QAbstractItemView::SingleSelection);
+        w->showCurve = false;
+    }
+    w->update();
+}

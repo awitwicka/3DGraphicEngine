@@ -30,6 +30,13 @@ Bezier::Bezier(const QList<Marker *> &mark)
     InitializeBezier();
 }
 
+void Bezier::DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+{
+    Color = Qt::green;
+    Draw(painter, matrix, isStereo, pointsCurve, indicesCurve);
+    Color = Qt::white;
+}
+
 void Bezier::InitializeBezier()
 {
     Clear();
@@ -60,6 +67,13 @@ void Bezier::InitializeBezier()
             indices.append(QPoint(j, j+1));
         }
     }
+
+    //initialize Curve
+    for (int i = 0; i < n-1; i++) {
+        pointsCurve.append(markers[i]->point);
+        indicesCurve.append(QPoint(i, i+1));
+    }
+    pointsCurve.append(markers.last()->point);
 }
 
 QVector4D Bezier::getBezierPoint(Segment seg, float t)
@@ -84,6 +98,8 @@ void Bezier::Clear()
 {
     indices.clear();
     points.clear();
+    indicesCurve.clear();
+    pointsCurve.clear();
     Segments.clear(); //todo:are they disposed?
 }
 

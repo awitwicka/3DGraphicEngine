@@ -13,6 +13,8 @@ class Bezier : public CADObject
 
     QVector<QVector4D> points;
     QVector<QPoint> indices;
+    QVector<QVector4D> pointsCurve;
+    QVector<QPoint> indicesCurve;
 
     void Clear();
 public:
@@ -23,6 +25,7 @@ public:
     QList<Segment> Segments;
     QList<Marker*> markers;
     Bezier(QList<Marker*> const & m);
+    void DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 
     virtual QVector<QVector4D> getPoints() const;
     virtual void setPoints(const QVector<QVector4D> &value);

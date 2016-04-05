@@ -15,6 +15,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     highlighColor = Qt::yellow;
     normalColor = Qt::white;
     IsMultipleSelect = false;
+    showCurve = false;
     setFocusPolicy(Qt::StrongFocus);
     //setMouseTracking(true);
 }
@@ -35,8 +36,11 @@ void Widget::paintEvent(QPaintEvent *)
     cursor.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
-    for (int i = 0; i< bezier_objects.length(); i++)
+    for (int i = 0; i< bezier_objects.length(); i++) {
         bezier_objects[i].Draw(painter, worldMatrix, isStereo);
+        if (showCurve)
+            bezier_objects[i].DrawCurve(painter, worldMatrix, isStereo);
+    }
     //foreach (Marker m, markers) { //czy operuje na kopach???
     //    m.Draw(painter, worldMatrix, isStereo);
     //}

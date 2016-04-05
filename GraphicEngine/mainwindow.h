@@ -46,6 +46,8 @@ private slots:
 
     void on_pushButton_addBezier_clicked();
 
+    void on_checkBox_curve_clicked(bool checked);
+
 private:
     Ui::MainWindow *ui;
     Widget* w;
