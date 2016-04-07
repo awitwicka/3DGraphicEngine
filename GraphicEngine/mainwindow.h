@@ -18,6 +18,9 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void visitTree(QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition);
+    QList<QTreeWidgetItem*> visitTree(QTreeWidget *tree, QString condition);
+
 private slots:
     void on_pushButton_clicked();
 
@@ -48,14 +51,14 @@ private slots:
 
     void on_checkBox_curve_clicked(bool checked);
 
+    void on_checkBox_ppushBezier_clicked(bool checked);
+
 private:
     Ui::MainWindow *ui;
     Widget* w;
     QListWidget* l;
     QTreeWidget* t;
-
-    void visitTree(QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition);
-    QList<QTreeWidgetItem*> visitTree(QTreeWidget *tree, QString condition);
+    bool isPushBezier;
 };
 
 #endif // MAINWINDOW_H

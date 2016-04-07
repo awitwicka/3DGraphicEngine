@@ -5,6 +5,7 @@
 #include <QMatrix4x4>
 #include <QVector4D>
 #include <QVector>
+#include <QTreeWidget>
 #include "torus.h"
 #include "marker.h"
 #include "cursor.h"
@@ -21,9 +22,12 @@ class Widget : public QWidget
     QColor normalColor;
     QColor highlighColor;
     //QList<CADObject> objects;
-
     //objs[i]->f(u,v);
     //void DrawCursor
+
+    //TODO use from gui, now function duplicates
+    void visitTree(/*QStringList &list*/QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition);
+    QList<QTreeWidgetItem*> visitTree(QTreeWidget *tree, QString condition);
 
 public:
     //KeyPress(QWidget *parent = 0);
@@ -35,6 +39,7 @@ public:
     QList<Bezier> bezier_objects;
     QList<Marker*> selectedMarkers;
     Torus t1;
+    QTreeWidget* tree;
     explicit Widget(QWidget *parent = 0);
     void paintEvent(QPaintEvent*);
     void wheelEvent(QWheelEvent*event);

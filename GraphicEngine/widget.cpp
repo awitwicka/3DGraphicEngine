@@ -125,6 +125,9 @@ void Widget::mousePressEvent(QMouseEvent *event)
                     if (x >= worldX-offset && x <= worldX+offset &&
                         y >= worldY-offset && y <= worldY+offset) {
                         HandlePointSelection(i, IsMultipleSelect);
+                        QList<QTreeWidgetItem*> result = visitTree(tree, markers[i].idname);
+                        for(int i = 0; i < result.length(); i++)
+                            tree->setCurrentItem(result[i]);
                         break;
                     }
                 }
@@ -265,6 +268,9 @@ void Widget::keyPressEvent(QKeyEvent *event)
             if (dist > cursor.range)
                 return;
             HandlePointSelection(index, IsMultipleSelect);
+            QList<QTreeWidgetItem*> result = visitTree(tree, markers[index].idname);
+            for(int i = 0; i < result.length(); i++)
+                tree->setCurrentItem(result[i]);
         }
         break;
     default:
@@ -277,3 +283,18 @@ void Widget::switchSceneMode(int index) {
     sceneMode = index;
 }
 
+void Widget::visitTree(/*QStringList &list*/QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition){
+    if (item->text(1) == condition)
+        items.append(item);
+    //list << item->text(0);
+    for(int i=0;i<item->childCount(); ++i)
+        visitTree(items, item->child(i), condition);
+}
+
+QList<QTreeWidgetItem*> Widget::visitTree(QTreeWidget *tree, QString condition) {
+    //QStringList list;
+    QList<QTreeWidgetItem*> items;
+    for(int i=0;i<tree->topLevelItemCount();++i)
+        visitTree(items, tree->topLevelItem(i), condition);
+    return items;
+}

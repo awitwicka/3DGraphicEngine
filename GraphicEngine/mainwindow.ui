@@ -93,6 +93,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="pushButton_DelMarker">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Del</string>
                </property>
@@ -139,6 +142,13 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QCheckBox" name="checkBox_ppushBezier">
+         <property name="text">
+          <string>Push to Bezier</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QCheckBox" name="checkBox_multiSelect">
          <property name="text">

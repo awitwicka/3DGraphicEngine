@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
     t->addTopLevelItem(item);
     //findChild<QSpinBox*>("spinBox_U")->setValue(w.t1.Usegments);
+    w->tree = t;
+    isPushBezier = false;
 }
 
 MainWindow::~MainWindow()
@@ -60,12 +62,30 @@ void MainWindow::on_pushButton_addMarker_clicked()
 {
     Marker m = Marker(0, 0, 0);
     w->markers.append(m);
-    //l->addItem(QListWidgetItem());
-    //QList<QTreeWid8getItem *> items;
+
     QList<QString> columns = {m.name, m.idname};
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
     item->setFlags(item->flags() | Qt::ItemIsEditable);
-    t->addTopLevelItem(item);
+
+    int count = 0;
+    QString idname;
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        for (int i = 0; i < w->bezier_objects.length(); i++) {
+            if (w->bezier_objects[i].idname == idname) {
+                w->bezier_objects[i].markers.append(&w->markers.last());
+                QTreeWidgetItem * const clone = item->clone();
+                //QTreeWidgetItem *item = new QTreeWidgetItem(it, QStringList(columns)); //parent, columns names...
+                //item->setFlags(item->flags() | Qt::ItemIsEditable);
+                it->addChild(clone);
+                count++;
+            }
+        }
+
+    }
+    if (count == 0)
+        t->addTopLevelItem(item);
     w->update();
 }
 
@@ -114,6 +134,17 @@ void MainWindow::on_pushButton_DelMarker_clicked()
                 if (w->markers[i].idname == idname)
                     w->RemovePoint(i);
             }
+            for (int i = 0; i < w->bezier_objects.length(); i++) {
+                if (w->bezier_objects[i].idname == idname) {
+                    for(int i=0;i<it->childCount(); ++i) {
+                        QTreeWidgetItem * const clone = it->child(i)->clone();
+                        QList<QTreeWidgetItem*> result = visitTree(t, it->child(i)->text(1));
+                        if (result.length() == 1)
+                            t->addTopLevelItem(clone);
+                        delete it->child(i);
+                    }
+                }
+            }
             delete it;
         //delete from all instances
         } else {
@@ -146,6 +177,19 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
                 if (w->markers[i].idname == idname)
                     w->RemovePoint(i);
             }
+            for (int i = 0; i < w->bezier_objects.length(); i++) {
+                if (w->bezier_objects[i].idname == idname) {
+                    for(int i=0;i<it->childCount(); i++) { //TODO: to use that add with correct parent
+                    //for (int i=0; i<w->bezier_objects[i].markers.length(); i++) {
+                        QTreeWidgetItem * const clone = it->child(i)->clone();
+                        QList<QTreeWidgetItem*> result = visitTree(t, it->child(i)->text(1));
+                        if (result.length() == 1)
+                            t->addTopLevelItem(clone);
+                        delete it->child(i);
+                    }
+                    w->bezier_objects.removeAt(i);
+                }
+            }
             delete it;
         } else {
             parentIdName = it->parent()->text(1);
@@ -154,6 +198,10 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
                     for (int j = 0; j < w->bezier_objects[i].markers.length(); j++) {
                         if (w->bezier_objects[i].markers[j]->idname == idname)
                             w->bezier_objects[i].markers.removeAt(j);
+                    }
+                    for (int k = 0; k < w->markers.length(); k++) {
+                        if (w->markers[i].idname == idname)
+                            w->RemovePoint(i);
                     }
                 }
             }
@@ -178,6 +226,9 @@ void MainWindow::on_comboBox_activated(int index)
 
 void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
 {
+    //QApplication::mouseButtons().
+    //if(event->buttons() & Qt::RightButton) {
+
     QString idname = item->text(1);
     for (int i = 0; i < w->markers.length(); i++) {
         if (w->markers[i].idname == idname) {
@@ -186,6 +237,28 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
             //w->markers.removeAt(i);
             //function to select marker etc (refactor from switch)
     }
+    //add new points
+    QString parentidname = item->text(1);
+    if (isPushBezier && parentidname.at(0) == 'b') {
+        QList<QTreeWidgetItem*> selected = t->selectedItems();
+        for (int i = 0; i < w->bezier_objects.length(); i++) {
+            if (w->bezier_objects[i].idname == parentidname) {
+
+                foreach (QTreeWidgetItem* it, selected) {
+                    for (int j = 0; j<w->markers.length(); j++) {
+                        if (w->markers[j].idname == it->text(1)) {
+                            w->bezier_objects[i].markers.append(&w->markers[j]);
+                            QTreeWidgetItem * const clone = it->clone();
+                            item->addChild(clone);
+                        }
+
+                    }
+                }
+            }
+        }
+    //lol
+    }
+
     w->update();
 }
 
@@ -222,6 +295,8 @@ void MainWindow::on_checkBox_multiSelect_clicked(bool checked)
 
 void MainWindow::on_pushButton_addBezier_clicked()
 {
+    if (w->selectedMarkers.length() <= 0)
+        return;
     //crete bezier curve
     Bezier b = Bezier(w->selectedMarkers, w->worldMatrix);
     w->bezier_objects.append(b);
@@ -239,11 +314,16 @@ void MainWindow::on_pushButton_addBezier_clicked()
         if (idname.at(0) == 'p') { //check if some other elements besides points selected
             QTreeWidgetItem * const clone = it->clone();
             item->addChild(clone);
+            //t->setCurrentItem(item->child(item->childCount()-1));
             if(!it->parent())
                 delete it; //delete only if moving from main tree
         }
     }
     t->addTopLevelItem(item);
+
+    //select items under new bezier
+    for (int i = 0; i<item->childCount(); i++)
+        t->setCurrentItem(item->child(i));
     w->update();
 }
 
@@ -257,4 +337,14 @@ void MainWindow::on_checkBox_curve_clicked(bool checked)
         w->showCurve = false;
     }
     w->update();
+}
+
+void MainWindow::on_checkBox_ppushBezier_clicked(bool checked)
+{
+    if(checked) {
+        isPushBezier = true;
+    }
+    if(!checked) {
+        isPushBezier = false;
+    }
 }
