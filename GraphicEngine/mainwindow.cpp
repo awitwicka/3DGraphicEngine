@@ -185,12 +185,13 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
                         QList<QTreeWidgetItem*> result = visitTree(t, it->child(i)->text(1));
                         if (result.length() == 1)
                             t->addTopLevelItem(clone);
-                        delete it->child(i);
+                        //delete it->child(i);
                     }
+                    delete it;
                     w->bezier_objects.removeAt(i);
                 }
             }
-            delete it;
+            //delete it;
         } else {
             parentIdName = it->parent()->text(1);
             for (int i = 0; i < w->bezier_objects.length(); i++) { //TODO: probably change to CADobject list
@@ -253,6 +254,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
                         }
 
                     }
+                    if(!it->parent() && it->text(1).at(0) == 'p') //ok?
+                        delete it;
                 }
             }
         }
