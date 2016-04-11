@@ -10,6 +10,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     //TODO: store object on the scene in the QList<CADObject> objects;
     isStereo = false;
     sceneMode = 0;
+    curveMode = 0;
     t1 = Torus();
     cursor = Cursor();
     highlighColor = Qt::yellow;
@@ -36,16 +37,36 @@ void Widget::paintEvent(QPaintEvent *)
     cursor.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
-    for (int i = 0; i< bezier_objects.length(); i++) {
+    /*for (int i = 0; i< bezier_objects.length(); i++) {
         //TODO: only if zoom points/grabbing/points no change
         bezier_objects[i].InitializeBezier(worldMatrix);
         bezier_objects[i].Draw(painter, worldMatrix, isStereo);
         if (showCurve)
             bezier_objects[i].DrawCurve(painter, worldMatrix, isStereo);
+
+    }*/
+    switch(curveMode) {
+        case 0: //b-spline
+            for (int i = 0; i< curves.length(); i++) {
+                //TODO: only if zoom points/grabbing/points no change
+                curves[i].InitializeBSpline(worldMatrix);
+                curves[i].Draw(painter, worldMatrix, isStereo);
+                if (showCurve)
+                    curves[i].DrawPolygon(painter, worldMatrix, isStereo);
+            }
+            break;
+        case 1: //bezier
+            for (int i = 0; i< curves.length(); i++) {
+                //TODO: only if zoom points/grabbing/points no change
+                curves[i].InitializeBezier(worldMatrix);
+                curves[i].Draw(painter, worldMatrix, isStereo);
+                if (showCurve)
+                    curves[i].DrawPolygon(painter, worldMatrix, isStereo);
+            }
+            break;
+        default:
+            break;
     }
-    //foreach (Marker m, markers) { //czy operuje na kopach???
-    //    m.Draw(painter, worldMatrix, isStereo);
-    //}
 }
 
 void Widget::wheelEvent(QWheelEvent * event)
@@ -279,8 +300,15 @@ void Widget::keyPressEvent(QKeyEvent *event)
     update();
 }
 
-void Widget::switchSceneMode(int index) {
+void Widget::switchSceneMode(int index)
+{
     sceneMode = index;
+}
+
+void Widget::switchCurveMode(int index)
+{
+    curveMode = index;
+    update();
 }
 
 void Widget::visitTree(/*QStringList &list*/QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition){

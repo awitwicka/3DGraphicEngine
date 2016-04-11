@@ -20,17 +20,16 @@ public:
 
     void visitTree(QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition);
     QList<QTreeWidgetItem*> visitTree(QTreeWidget *tree, QString condition);
+    void RemoveRepetitions(QList<QTreeWidgetItem*> toDelete);
+    //int FindObjById(QList<CADObject> &list, QString idname);
 
 private slots:
-    void on_pushButton_clicked();
-
-    void on_spinBox_R_editingFinished();
-
     void on_spinBox_U_valueChanged(int arg1);
 
     void on_spinBox_V_valueChanged(int arg1);
 
     void on_checkBox_stereo_toggled(bool checked);    
+
     void on_pushButton_addMarker_clicked();
 
     void on_pushButton_DelMarker_clicked();
@@ -52,6 +51,8 @@ private slots:
     void on_checkBox_curve_clicked(bool checked);
 
     void on_checkBox_ppushBezier_clicked(bool checked);
+
+    void on_comboBox_2_activated(int index);
 
 private:
     Ui::MainWindow *ui;

@@ -40,7 +40,6 @@ void Bezier::DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
 void Bezier::InitializeBezier(QMatrix4x4 matrix)
 {
     Clear();
-
     int n = markers.length();
     float length = 0;
     //initialize Curve
@@ -53,7 +52,6 @@ void Bezier::InitializeBezier(QMatrix4x4 matrix)
         q2 = q2/q2.w();
         length += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
     }
-
     pointsCurve.append(markers.last()->point);
     //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
 
@@ -66,17 +64,17 @@ void Bezier::InitializeBezier(QMatrix4x4 matrix)
                     m.append(markers[i]);
                 i++;
             }
-            Segments.append(Segment(m));
+            BezierSegments.append(Segment(m));
             m.clear();
         }
     }
 
-    //Clear(); todo: move to cadobject
+    //Clear() todo: move to cadobject
     int linesNo = (int)length;
     int j=0;
-    for (int s = 0; s<Segments.length(); s++) {
+    for (int s = 0; s<BezierSegments.length(); s++) {
         for (int i = 0; i <= linesNo; i++) {
-            points.append(getBezierPoint(Segments[s], (float)i/(float)linesNo));
+            points.append(getBezierPoint(BezierSegments[s], (float)i/(float)linesNo));
         }
         for (j; j < (linesNo*(s+1)); j++) {
             indices.append(QPoint(j, j+1));
@@ -103,13 +101,18 @@ QVector4D Bezier::getBezierPoint(Segment seg, float t)
     return p;
 }
 
+void Bezier::ChangeToBSpline()
+{
+
+}
+
 void Bezier::Clear()
 {
     indices.clear();
     points.clear();
     indicesCurve.clear();
     pointsCurve.clear();
-    Segments.clear(); //todo:are they disposed?
+    BezierSegments.clear(); //todo:are they disposed?
 }
 
 QVector<QPoint> Bezier::getIndices() const

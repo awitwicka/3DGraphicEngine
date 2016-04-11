@@ -16,13 +16,15 @@ class Bezier : public CADObject
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
 
+    void ChangeToBSpline();
+
     void Clear();
 public:
     void InitializeBezier(QMatrix4x4 matrix);
     QString name;
     QString idname;
     Bezier();
-    QList<Segment> Segments;
+    QList<Segment> BezierSegments;
     QList<Marker*> markers;
     Bezier(QList<Marker*> const & m, QMatrix4x4 matrix);
     void DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo);

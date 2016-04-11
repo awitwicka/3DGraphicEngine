@@ -10,6 +10,8 @@
 #include "marker.h"
 #include "cursor.h"
 #include "bezier.h"
+#include "bspline.h"
+#include "curve.h"
 
 class Widget : public QWidget
 {
@@ -18,6 +20,7 @@ class Widget : public QWidget
     //Torus t1;
     QPoint savedMouse;
     int sceneMode;
+    int curveMode;
     Cursor cursor;
     QColor normalColor;
     QColor highlighColor;
@@ -36,7 +39,9 @@ public:
     bool IsMultipleSelect;
     QMatrix4x4 worldMatrix, viewMatrix;
     QList<Marker> markers;
-    QList<Bezier> bezier_objects;
+    //QList<Bezier> bezier_objects;
+    //QList<BSpline> bsplines;
+    QList<Curve> curves;
     QList<Marker*> selectedMarkers;
     Torus t1;
     QTreeWidget* tree;
@@ -46,6 +51,7 @@ public:
     void mousePressEvent(QMouseEvent*event);
     void mouseMoveEvent(QMouseEvent*event);
     void switchSceneMode(int index);
+    void switchCurveMode(int index);
     void keyPressEvent(QKeyEvent*event);
 
     void HandlePointSelection(int i, bool IsMultiSelect);

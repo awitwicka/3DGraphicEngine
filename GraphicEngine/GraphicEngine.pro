@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     cursor.cpp \
     constants.cpp \
     bezier.cpp \
-    segment.cpp
+    segment.cpp \
+    bspline.cpp \
+    curve.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -33,6 +35,8 @@ HEADERS  += mainwindow.h \
     cursor.h \
     constants.h \
     bezier.h \
-    segment.h
+    segment.h \
+    bspline.h \
+    curve.h
 
 FORMS    += mainwindow.ui

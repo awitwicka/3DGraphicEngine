@@ -67,8 +67,22 @@
              <item>
               <widget class="QPushButton" name="pushButton_addBezier">
                <property name="text">
-                <string>Add Bezier</string>
+                <string>Add Curve</string>
                </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="comboBox_2">
+               <item>
+                <property name="text">
+                 <string>B-Spline</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Bezier</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item>
@@ -92,19 +106,19 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="pushButton_DelSingleMarker">
+               <property name="text">
+                <string>Del Instance</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="pushButton_DelMarker">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
                 <string>Del</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_DelSingleMarker">
-               <property name="text">
-                <string>Del Instance</string>
                </property>
               </widget>
              </item>
@@ -303,7 +317,7 @@
       </property>
       <column>
        <property name="text">
-        <string notr="true">1</string>
+        <string notr="true">Hierarchy</string>
        </property>
       </column>
      </widget>
