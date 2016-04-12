@@ -1,50 +1,52 @@
-#include "curve.h"
+#include "curveC2.h"
 
-int Curve::id = 0;
+int CurveC2::id = 0;
 
-Curve::Curve()
+CurveC2::CurveC2()
 {
-    name = QString("curve %1").arg(id);
+    name = QString("curveC2 %1").arg(id);
     idname = QString("b%1").arg(id);
     isBezier = false;
+    degree = 3;
     id++;
 }
 
-Curve::Curve(const QList<Marker *> &m, QMatrix4x4 matrix)
+CurveC2::CurveC2(const QList<Marker *> &m, QMatrix4x4 matrix)
 {
-    name = QString("curve %1").arg(id);
+    name = QString("curveC2 %1").arg(id);
     idname = QString("b%1").arg(id);
     isBezier = false;
+    degree = 3;
     id++;
-    markers = m;
-    InitializeBezier(matrix);
+    boorMarkers = m;
+    InitializeBSpline(matrix);
 }
 
-void Curve::InitializeBezier(QMatrix4x4 matrix)
+void CurveC2::InitializeBezier(QMatrix4x4 matrix)
 {
     Clear();
-    int n = markers.length();
+    int n = bezierMarkers.length();
     float length = 0;
     //initialize Curve
     for (int i = 0; i < n-1; i++) {
-        pointsCurve.append(markers[i]->point);
+        pointsCurve.append(bezierMarkers[i].point);
         indicesCurve.append(QPoint(i, i+1));
-        QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[i]->point;
-        QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[i+1]->point;
+        QVector4D q1 = Constants::perspectiveMatrix*matrix*bezierMarkers[i].point;
+        QVector4D q2 = Constants::perspectiveMatrix*matrix*bezierMarkers[i+1].point;
         q1 = q1/q1.w();
         q2 = q2/q2.w();
         length += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
     }
-    pointsCurve.append(markers.last()->point);
+    pointsCurve.append(bezierMarkers.last().point);
     //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
 
     if (n>0) {
         QList<Marker*> m;
         for (int i = 1; i < n; i) {
-            m.append(markers[i-1]);
+            m.append(&bezierMarkers[i-1]);
             for (int c = 0; c<3; c++) {
                 if (i<n)
-                    m.append(markers[i]);
+                    m.append(&bezierMarkers[i]);
                 i++;
             }
             BezierSegments.append(Segment(m));
@@ -65,32 +67,32 @@ void Curve::InitializeBezier(QMatrix4x4 matrix)
     }
 }
 
-void Curve::InitializeBSpline(QMatrix4x4 matrix)
+void CurveC2::InitializeBSpline(QMatrix4x4 matrix)
 {
     Clear();
     //get points number
-    int n = markers.length();
+    int n = boorMarkers.length();
     float length = 0;
     //initialize Curve
     for (int i = 0; i < n-1; i++) {
-        pointsCurve.append(markers[i]->point);
+        pointsCurve.append(boorMarkers[i]->point);
         indicesCurve.append(QPoint(i, i+1));
-        QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[i]->point;
-        QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[i+1]->point;
+        QVector4D q1 = Constants::perspectiveMatrix*matrix*boorMarkers[i]->point;
+        QVector4D q2 = Constants::perspectiveMatrix*matrix*boorMarkers[i+1]->point;
         q1 = q1/q1.w();
         q2 = q2/q2.w();
         length += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
     }
-    pointsCurve.append(markers.last()->point);
+    pointsCurve.append(boorMarkers.last()->point);
 
     //algorithm
     int linesNo = (int)length;
-    int order = 4; //k = degreee+1
-    int controlPointsNo = markers.length(); //n+1
+    int order = degree+1; //k = degreee+1
+    int controlPointsNo = boorMarkers.length(); //n+1
     if(controlPointsNo >= order) {
         //initiate knot vector
         int knotSize = order + controlPointsNo;
-        QList<int> knots;
+        QList<int> knots; //TODO Vector
         for(int i = 0; i < knotSize; i++)
             knots.append(i);
         //Clear();
@@ -100,12 +102,13 @@ void Curve::InitializeBSpline(QMatrix4x4 matrix)
             // k-1 = subCurveOrder-1
             // n+1 = always the number of total control points
             float t = ( (float)i/(float)linesNo ) * ( controlPointsNo - (order-1) ) + order-1;
-            //get point
+            //get poin
+
             QVector4D q;
             for(int i=1; i <= controlPointsNo; i++)
             {
                 float weightForControl = getBSplineWeight(t, i, order, knots);
-                q += weightForControl * markers.at(i-1)->point;
+                q += weightForControl * boorMarkers.at(i-1)->point;
             }
             points.append(q);
         }
@@ -115,7 +118,7 @@ void Curve::InitializeBSpline(QMatrix4x4 matrix)
     }
 }
 
-QVector4D Curve::getBezierPoint(Segment seg, float t)
+QVector4D CurveC2::getBezierPoint(Segment seg, float t)
 {
     QVector4D* tmp = new QVector4D[seg.markers.length()];
     for (int i = 0; i < seg.pointsNo; i++) {
@@ -137,7 +140,7 @@ QVector4D Curve::getBezierPoint(Segment seg, float t)
 //k = curve order = power/degree +1. eg, to break whole curve into cubics use a curve order of 4
 //cps = number of total control points
 //t = current step/interp value
-float Curve::getBSplineWeight(float t, int i, int k, QList<int> knots)
+float CurveC2::getBSplineWeight(float t, int i, int k, QList<int> knots)
 {
     //test if we've reached the bottom of the recursive call
     // When getting the index for the knot function i remember to subtract 1 from i because of the difference caused by us counting from i=1 to n+1 and indexing a vector from 0
@@ -165,12 +168,41 @@ float Curve::getBSplineWeight(float t, int i, int k, QList<int> knots)
     return subweightA + subweightB;
 }
 
-void Curve::ChangeToBezier()
+void CurveC2::ChangeToBezier()
 {
-
+    //WORKS ONLY FOR CUBIC BSPLINES!!!!
+    if (boorMarkers.length() < degree+1)
+        return;
+    int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
+    bezierMarkers.clear();
+    //level1
+    QList<QVector4D> level1;
+    for (int i = 0; i<boorMarkers.length()-1; i++) {
+        QVector4D q1 = boorMarkers[i]->point;
+        QVector4D q2 = boorMarkers[i+1]->point;
+        QVector4D q13 = q1 + (1.0f/3.0f)*(q2 - q1);
+        QVector4D q23 = q1 + (2.0f/3.0f)*(q2 - q1);
+        level1.append(q13);
+        level1.append(q23);
+    }
+    //level2
+    QList<QVector4D> level2;
+    for (int i = 0; i<boorMarkers.length()-2; i++) {
+        QVector4D q1 = level1[i*2+1];
+        QVector4D q2 = level1[(i+1)*2];
+        QVector4D q12 = q1 + 0.5f*(q2 - q1);
+        level2.append(q12);
+    }
+    //bezier
+    for (int i = 0; i <SegmentsNo; i++) {
+        bezierMarkers.append(Marker(level2[i], Qt::gray));
+        bezierMarkers.append(Marker(level1[(i+1)*2], Qt::gray));
+        bezierMarkers.append(Marker(level1[(i+1)*2+1], Qt::gray));
+    }
+    bezierMarkers.append(Marker(level2.back(), Qt::gray));
 }
 
-void Curve::Clear()
+void CurveC2::Clear()
 {
     indices.clear();
     points.clear();
@@ -179,29 +211,29 @@ void Curve::Clear()
     BezierSegments.clear();
 }
 
-void Curve::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+void CurveC2::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
 {
     Color = Qt::green;
     Draw(painter, matrix, isStereo, pointsCurve, indicesCurve);
     Color = Qt::white;
 }
 
-QVector<QPoint> Curve::getIndices() const
+QVector<QPoint> CurveC2::getIndices() const
 {
     return indices;
 }
 
-void Curve::setIndices(const QVector<QPoint> &value)
+void CurveC2::setIndices(const QVector<QPoint> &value)
 {
     indices = value;
 }
 
-QVector<QVector4D> Curve::getPoints() const
+QVector<QVector4D> CurveC2::getPoints() const
 {
     return points;
 }
 
-void Curve::setPoints(const QVector<QVector4D> &value)
+void CurveC2::setPoints(const QVector<QVector4D> &value)
 {
     points = value;
 }

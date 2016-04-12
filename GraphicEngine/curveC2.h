@@ -1,13 +1,14 @@
-#ifndef CURVE_H
-#define CURVE_H
+#ifndef CURVEC2_H
+#define CURVEC2_H
 
 #include "cadobject.h"
 #include "marker.h"
 #include "segment.h"
 
-class Curve : public CADObject
+class CurveC2 : public CADObject
 {
     static int id;
+    int degree;
     QList<Segment> BezierSegments;
     QVector<QVector4D> points;
     QVector<QPoint> indices;
@@ -17,21 +18,23 @@ class Curve : public CADObject
     void Clear();
     QVector4D getBezierPoint(Segment seg, float t);
     float getBSplineWeight(float t, int i, int k, QList<int> knots);
-    void ChangeToBezier();
+
     //void getCurveGeometry();
 public:
 
     QString name;
     QString idname;
     bool isBezier;
-    QList<Marker*> markers;
+    QList<Marker*> boorMarkers;
+    QList<Marker> bezierMarkers; //punkty 'virtualne'
 
-    Curve();
-    Curve(QList<Marker*> const & m, QMatrix4x4 matrix);
+    CurveC2();
+    CurveC2(QList<Marker*> const & m, QMatrix4x4 matrix);
     void InitializeBezier(QMatrix4x4 matrix);
     void InitializeBSpline(QMatrix4x4 matrix);
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void ChangeToOpposite();
+    void ChangeToBezier();
 
     virtual QVector<QVector4D> getPoints() const;
     virtual void setPoints(const QVector<QVector4D> &value);
@@ -39,4 +42,4 @@ public:
     virtual void setIndices(const QVector<QPoint> &value);
 };
 
-#endif // CURVE_H
+#endif // CURVEC2_H

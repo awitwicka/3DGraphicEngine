@@ -90,7 +90,7 @@ void MainWindow::on_pushButton_addMarker_clicked()
         idname = it->text(1);
         for (int i = 0; i < w->curves.length(); i++) {
             if (w->curves[i].idname == idname) {
-                w->curves[i].markers.append(&w->markers.last());
+                w->curves[i].boorMarkers.append(&w->markers.last());
                 QTreeWidgetItem * const clone = item->clone();
                 //QTreeWidgetItem *item = new QTreeWidgetItem(it, QStringList(columns)); //parent, columns names...
                 //item->setFlags(item->flags() | Qt::ItemIsEditable);
@@ -195,9 +195,9 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
             parentIdName = it->parent()->text(1);
             for (int i = 0; i < w->curves.length(); i++) { //TODO: probably change to CADobject list
                 if (w->curves[i].idname == parentIdName) {
-                    for (int j = 0; j < w->curves[i].markers.length(); j++) {
-                        if (w->curves[i].markers[j]->idname == idname)
-                            w->curves[i].markers.removeAt(j);
+                    for (int j = 0; j < w->curves[i].boorMarkers.length(); j++) {
+                        if (w->curves[i].boorMarkers[j]->idname == idname)
+                            w->curves[i].boorMarkers.removeAt(j);
                     }
                     for (int k = 0; k < w->markers.length(); k++) {
                         if (w->markers[i].idname == idname)
@@ -242,7 +242,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
                 foreach (QTreeWidgetItem* it, selected) {
                     for (int j = 0; j<w->markers.length(); j++) {
                         if (w->markers[j].idname == it->text(1)) {
-                            w->curves[i].markers.append(&w->markers[j]);
+                            w->curves[i].boorMarkers.append(&w->markers[j]);
                             QTreeWidgetItem * const clone = it->clone();
                             item->addChild(clone);
                         }
@@ -277,7 +277,7 @@ void MainWindow::on_pushButton_addBezier_clicked()
         return;
     //crete bezier curve
     //Bezier b = Bezier(w->selectedMarkers, w->worldMatrix);
-    Curve c = Curve(w->selectedMarkers, w->worldMatrix);
+    CurveC2 c = CurveC2(w->selectedMarkers, w->worldMatrix);
     w->curves.append(c);
 
     //create and add item to list
@@ -355,4 +355,5 @@ void MainWindow::on_comboBox_activated(int index)
 void MainWindow::on_comboBox_2_activated(int index)
 {
     w->switchCurveMode(index);
+    w->update();
 }

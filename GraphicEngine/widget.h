@@ -11,7 +11,7 @@
 #include "cursor.h"
 #include "bezier.h"
 #include "bspline.h"
-#include "curve.h"
+#include "curveC2.h"
 
 class Widget : public QWidget
 {
@@ -41,22 +41,27 @@ public:
     QList<Marker> markers;
     //QList<Bezier> bezier_objects;
     //QList<BSpline> bsplines;
-    QList<Curve> curves;
+    QList<CurveC2> curves;
     QList<Marker*> selectedMarkers;
     Torus t1;
+
     QTreeWidget* tree;
     explicit Widget(QWidget *parent = 0);
+
     void paintEvent(QPaintEvent*);
     void wheelEvent(QWheelEvent*event);
     void mousePressEvent(QMouseEvent*event);
     void mouseMoveEvent(QMouseEvent*event);
-    void switchSceneMode(int index);
-    void switchCurveMode(int index);
     void keyPressEvent(QKeyEvent*event);
 
+    //points handling
     void HandlePointSelection(int i, bool IsMultiSelect);
     void RemovePoint(int i);
     void DeselectPoint();
+
+    void switchSceneMode(int index);
+    void switchCurveMode(int index);
+    void UpdateSceneElements();
 
 signals:
     void cursorPosChanged(QVector4D pos, QVector4D posScreen);

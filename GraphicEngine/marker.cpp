@@ -16,11 +16,29 @@ Marker::Marker()
     id++;
 }
 
+Marker::Marker(QVector4D position) : size(10)
+{
+    point = position;
+    name = QString("point %1").arg(id);
+    idname = QString("p%1").arg(id);
+    IsSelected= false;
+    id++;
+}
+
+Marker::Marker(QVector4D position, QColor color) : size(10)
+{
+    Color = color;
+    point = position;
+    name = QString("point %1").arg(id);
+    idname = QString("p%1").arg(id);
+    IsSelected= false;
+    id++;
+}
+
 Marker::Marker(float x, float y, float z) : size(10)
 {
     name = QString("point %1").arg(id);// + "1");
     idname = QString("p%1").arg(id);
-    //point(x, y,  z);
     point = QVector4D(x, y, z, 1);
     IsSelected= false;
     id++;

@@ -19,6 +19,8 @@ public:
     QVector4D pointWorld;
     Marker();
     //~Marker() {};
+    Marker(QVector4D position);
+    Marker(QVector4D position, QColor color);
     Marker(float x, float y, float z);
     void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 

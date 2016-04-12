@@ -49,17 +49,18 @@ void Widget::paintEvent(QPaintEvent *)
         case 0: //b-spline
             for (int i = 0; i< curves.length(); i++) {
                 //TODO: only if zoom points/grabbing/points no change
-                curves[i].InitializeBSpline(worldMatrix);
                 curves[i].Draw(painter, worldMatrix, isStereo);
                 if (showCurve)
                     curves[i].DrawPolygon(painter, worldMatrix, isStereo);
+                //here draw virtual bezier points
             }
             break;
         case 1: //bezier
             for (int i = 0; i< curves.length(); i++) {
                 //TODO: only if zoom points/grabbing/points no change
-                curves[i].InitializeBezier(worldMatrix);
                 curves[i].Draw(painter, worldMatrix, isStereo);
+                for (int j = 0; j < curves[i].bezierMarkers.length(); j++)
+                    curves[i].bezierMarkers[j].Draw(painter, worldMatrix, isStereo); ;
                 if (showCurve)
                     curves[i].DrawPolygon(painter, worldMatrix, isStereo);
             }
@@ -214,7 +215,6 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             }
             break;
         case 1: //Edit Points
-
             if(event->buttons() & Qt::LeftButton) {
                 float dx = event->pos().x() - savedMouse.x();
                 float dy = event->pos().y() - savedMouse.y();
@@ -252,6 +252,7 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
                     //TODO update only if point a part of any bezier curve //event on pointschange?
                     //for(int i = 0; i<bezier_objects.length(); i++)
                         //bezier_objects[i].InitializeBezier(worldMatrix);
+                    UpdateSceneElements();
                 }
             }
             break;
@@ -308,7 +309,31 @@ void Widget::switchSceneMode(int index)
 void Widget::switchCurveMode(int index)
 {
     curveMode = index;
-    update();
+    UpdateSceneElements();
+}
+
+void Widget::UpdateSceneElements()
+{
+    //TODO upadate only curve that has changed!!!
+    //TODO: change to bez only if clicked change/in bezier mode
+    for (int i = 0; i<curves.length(); i++)
+        curves[i].ChangeToBezier();
+
+    switch(curveMode) {
+        case 0: //b-spline
+            for (int i = 0; i< curves.length(); i++) {
+                curves[i].InitializeBSpline(worldMatrix);
+            }
+            break;
+        case 1: //bezier
+            for (int i = 0; i< curves.length(); i++) {
+                curves[i].InitializeBezier(worldMatrix);
+            }
+            break;
+        default:
+            break;
+    }
+
 }
 
 void Widget::visitTree(/*QStringList &list*/QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition){
