@@ -30,7 +30,7 @@ public:
 
     CurveC2();
     CurveC2(QList<Marker*> const & m, QMatrix4x4 matrix);
-    void InitializeBezier(QMatrix4x4 matrix);
+    void InitializeBezierC2(QMatrix4x4 matrix);
     void InitializeBSpline(QMatrix4x4 matrix);
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void ChangeToOpposite();

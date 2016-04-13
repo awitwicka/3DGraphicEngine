@@ -22,8 +22,12 @@ CurveC2::CurveC2(const QList<Marker *> &m, QMatrix4x4 matrix)
     InitializeBSpline(matrix);
 }
 
-void CurveC2::InitializeBezier(QMatrix4x4 matrix)
+void CurveC2::InitializeBezierC2(QMatrix4x4 matrix)
 {
+    //WORKS ONLY FOR CUBIC BSPLINES!!!!
+    if (boorMarkers.length() < degree+1)
+        return;
+
     Clear();
     int n = bezierMarkers.length();
     float length = 0;
@@ -68,7 +72,7 @@ void CurveC2::InitializeBezier(QMatrix4x4 matrix)
 }
 
 void CurveC2::InitializeBSpline(QMatrix4x4 matrix)
-{
+{   
     Clear();
     //get points number
     int n = boorMarkers.length();

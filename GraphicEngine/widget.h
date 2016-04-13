@@ -66,6 +66,8 @@ public:
 
     void SelectIfInRange(QList<Marker> & m, bool isVirtualMarker);
 
+    void MovePoints(QMouseEvent *event);
+
 signals:
     void cursorPosChanged(QVector4D pos, QVector4D posScreen);
 

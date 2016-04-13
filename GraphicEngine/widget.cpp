@@ -189,6 +189,40 @@ void Widget::mousePressEvent(QMouseEvent *event)
     update();
 }
 
+void Widget::MovePoints(QMouseEvent *event)
+{
+    if (selectedMarkers.length() > 0 || selectedVirtualMarker!=nullptr) {
+        //only if cursor in range
+        /*float dist = sqrt((cursor.center - selectedMarker->point).lengthSquared());
+        if (dist > cursor.range)
+            return;
+        */
+        float dx = event->pos().x() - savedMouse.x();
+        float dy = event->pos().y() - savedMouse.y();
+
+        if (event->modifiers() & Qt::ShiftModifier ) {
+            cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
+            for (int i = 0; i < selectedMarkers.length(); i++)
+                selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
+            if (selectedVirtualMarker!=nullptr)
+                selectedVirtualMarker->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
+        }
+        else {
+            cursor.center += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
+            for (int i = 0; i < selectedMarkers.length(); i++)
+                selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
+            if (selectedVirtualMarker!=nullptr)
+                selectedVirtualMarker->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
+        }
+        savedMouse = QPoint(event->pos().x(), event->pos().y());
+        //TODO update only if point a part of any bezier curve //event on pointschange?
+        //for(int i = 0; i<bezier_objects.length(); i++)
+            //bezier_objects[i].InitializeBezier(worldMatrix);
+        //TODO::HERE MOVE BOOR POINTS IN RESPECT TO MOBED BEZIER POINT
+        UpdateSceneElements();
+    }
+}
+
 void Widget::mouseMoveEvent(QMouseEvent *event)
 {    
     switch(sceneMode) {
@@ -257,31 +291,7 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
             }
             if(event->buttons() & Qt::RightButton) {
                 //move point
-                if (selectedMarkers.length() > 0) {
-                    //only if cursor in range
-                    /*float dist = sqrt((cursor.center - selectedMarker->point).lengthSquared());
-                    if (dist > cursor.range)
-                        return;
-                    */
-                    float dx = event->pos().x() - savedMouse.x();
-                    float dy = event->pos().y() - savedMouse.y();
-
-                    if (event->modifiers() & Qt::ShiftModifier ) {
-                        cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
-                        for (int i = 0; i < selectedMarkers.length(); i++)
-                            selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
-                    }
-                    else {
-                        cursor.center += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
-                        for (int i = 0; i < selectedMarkers.length(); i++)
-                            selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
-                    }
-                    savedMouse = QPoint(event->pos().x(), event->pos().y());
-                    //TODO update only if point a part of any bezier curve //event on pointschange?
-                    //for(int i = 0; i<bezier_objects.length(); i++)
-                        //bezier_objects[i].InitializeBezier(worldMatrix);
-                    UpdateSceneElements();
-                }
+                MovePoints(event);
             }
             break;
         default:
@@ -356,7 +366,7 @@ void Widget::UpdateSceneElements()
             break;
         case 1: //bezier
             for (int i = 0; i< curves.length(); i++) {
-                curves[i].InitializeBezier(worldMatrix);
+                curves[i].InitializeBezierC2(worldMatrix);
             }
             break;
         default:
