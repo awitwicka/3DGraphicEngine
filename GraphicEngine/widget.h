@@ -12,6 +12,7 @@
 #include "bezier.h"
 #include "bspline.h"
 #include "curveC2.h"
+//#include "virtualmarker.h"
 
 class Widget : public QWidget
 {

@@ -197,6 +197,8 @@ void Widget::MovePoints(QMouseEvent *event)
         if (dist > cursor.range)
             return;
         */
+        QVector4D oldPos;
+
         float dx = event->pos().x() - savedMouse.x();
         float dy = event->pos().y() - savedMouse.y();
 
@@ -204,21 +206,28 @@ void Widget::MovePoints(QMouseEvent *event)
             cursor.center += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
             for (int i = 0; i < selectedMarkers.length(); i++)
                 selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
-            if (selectedVirtualMarker!=nullptr)
-                selectedVirtualMarker->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0);
+            if (selectedVirtualMarker!=nullptr) {
+                oldPos = selectedVirtualMarker->point;
+                selectedVirtualMarker->point += worldMatrix.inverted()*QVector4D(dx,0,dy,0); 
+            }
         }
         else {
             cursor.center += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
             for (int i = 0; i < selectedMarkers.length(); i++)
                 selectedMarkers[i]->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
-            if (selectedVirtualMarker!=nullptr)
+            if (selectedVirtualMarker!=nullptr) {
+                oldPos = selectedVirtualMarker->point;
                 selectedVirtualMarker->point += worldMatrix.inverted()*QVector4D(dx,dy,0,0);
+            }
         }
         savedMouse = QPoint(event->pos().x(), event->pos().y());
         //TODO update only if point a part of any bezier curve //event on pointschange?
         //for(int i = 0; i<bezier_objects.length(); i++)
             //bezier_objects[i].InitializeBezier(worldMatrix);
         //TODO::HERE MOVE BOOR POINTS IN RESPECT TO MOBED BEZIER POINT
+        if (selectedVirtualMarker!=nullptr) {
+             selectedVirtualMarker->Parent->AdjustOtherPoints(selectedVirtualMarker, oldPos);
+        }
         UpdateSceneElements();
     }
 }

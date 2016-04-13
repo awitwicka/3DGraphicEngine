@@ -4,6 +4,7 @@
 #include "cadobject.h"
 #include "marker.h"
 #include "segment.h"
+#include "virtualmarker.h"
 
 class CurveC2 : public CADObject
 {
@@ -20,6 +21,11 @@ class CurveC2 : public CADObject
     float getBSplineWeight(float t, int i, int k, QList<int> knots);
 
     //void getCurveGeometry();
+    struct VirtualMarkInfo {
+        QVector4D position;
+        Marker* parent;
+        Marker* partner;
+    };
 public:
 
     QString name;
@@ -35,7 +41,7 @@ public:
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void ChangeToOpposite();
     void ChangeToBezier();
-    void AdjustOtherPoints();
+    void AdjustOtherPoints(Marker* m, QVector4D oldPosition);
 
     virtual QVector<QVector4D> getPoints() const;
     virtual void setPoints(const QVector<QVector4D> &value);

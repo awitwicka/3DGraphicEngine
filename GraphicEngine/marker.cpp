@@ -1,5 +1,5 @@
 #include "marker.h"
-
+#include "curveC2.h"
 
 QColor Marker::getColor() const
 {
@@ -42,6 +42,18 @@ Marker::Marker(float x, float y, float z) : size(10)
     point = QVector4D(x, y, z, 1);
     IsSelected= false;
     id++;
+}
+
+Marker::Marker(QVector4D position, QColor color, Marker *parent, Marker *partner, CurveC2 *parentCurve) : size(10)
+{
+    point = position;
+    name = QString("point %1").arg(id);// + "1");
+    idname = QString("p%1").arg(id);
+    IsSelected= false;
+    Color = color;
+    Parent = parentCurve;
+    boorParent = parent;
+    //Parents.append(parentCurve);
 }
 
 void Marker::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)

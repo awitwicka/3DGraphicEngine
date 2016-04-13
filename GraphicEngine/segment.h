@@ -1,9 +1,9 @@
 #ifndef SEGMENT_H
 #define SEGMENT_H
 
-#include "marker.h"
 #include <QList>
-
+#include "marker.h"
+//class Marker;
 
 class Segment {
 public:

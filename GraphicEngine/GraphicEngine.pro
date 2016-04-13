@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     bezier.cpp \
     segment.cpp \
     bspline.cpp \
-    curveC2.cpp
+    curveC2.cpp \
+    virtualmarker.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -37,6 +38,7 @@ HEADERS  += mainwindow.h \
     bezier.h \
     segment.h \
     bspline.h \
-    curveC2.h
+    curveC2.h \
+    virtualmarker.h
 
 FORMS    += mainwindow.ui

@@ -180,6 +180,47 @@ void CurveC2::ChangeToBezier()
     int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
     bezierMarkers.clear();
     //level1
+    QList<VirtualMarkInfo> level1;
+    for (int i = 0; i < boorMarkers.length()-1; i++) {
+        QVector4D q1 = boorMarkers[i]->point;
+        QVector4D q2 = boorMarkers[i+1]->point;
+
+        VirtualMarkInfo v13;
+        v13.position = q1 + (1.0f/3.0f)*(q2 - q1);
+        v13.parent = boorMarkers[i];
+        v13.partner = boorMarkers[i+1];
+        level1.append(v13);
+
+        VirtualMarkInfo v23;
+        v23.position = q1 + (2.0f/3.0f)*(q2 - q1);
+        v23.parent = boorMarkers[i+1];
+        v23.partner = boorMarkers[i];
+        level1.append(v23);
+    }
+    //level2
+    QList<VirtualMarkInfo> level2;
+    for (int i = 0; i<boorMarkers.length()-2; i++) {
+        QVector4D q1 = level1[i*2+1].position;
+        QVector4D q2 = level1[(i+1)*2].position;
+
+        VirtualMarkInfo v12;
+        v12.position = q1 + 0.5f*(q2 - q1);
+        v12.parent = boorMarkers[i+1];
+        v12.partner = nullptr;
+        level2.append(v12);
+    }
+    //bezier
+    for (int i = 0; i <SegmentsNo; i++) {
+        bezierMarkers.append(Marker(level2[i].position, Qt::gray, level2[i].parent, level2[i].partner, this));
+        bezierMarkers.append(Marker(level1[(i+1)*2].position, Qt::gray, level1[(i+1)*2].parent, level1[(i+1)*2].partner, this));
+        bezierMarkers.append(Marker(level1[(i+1)*2+1].position, Qt::gray, level1[(i+1)*2+1].parent, level1[(i+1)*2+1].partner, this));
+    }
+    bezierMarkers.append(Marker(level2.back().position, Qt::gray, level2.back().parent, level2.back().partner, this));
+    /*if (boorMarkers.length() < degree+1)
+        return;
+    int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
+    bezierMarkers.clear();
+    //level1
     QList<QVector4D> level1;
     for (int i = 0; i<boorMarkers.length()-1; i++) {
         QVector4D q1 = boorMarkers[i]->point;
@@ -203,12 +244,13 @@ void CurveC2::ChangeToBezier()
         bezierMarkers.append(Marker(level1[(i+1)*2], Qt::gray));
         bezierMarkers.append(Marker(level1[(i+1)*2+1], Qt::gray));
     }
-    bezierMarkers.append(Marker(level2.back(), Qt::gray));
+    bezierMarkers.append(Marker(level2.back(), Qt::gray));*/
 }
 
-void CurveC2::AdjustOtherPoints()
+void CurveC2::AdjustOtherPoints(Marker* m, QVector4D oldPosition)
 {
-
+    m->boorParent->point = m->boorParent->point + (3.0/2.0)*(m->point - oldPosition);
+    //ChangeToBezier();
 }
 
 void CurveC2::Clear()
