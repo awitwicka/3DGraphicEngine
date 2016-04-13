@@ -202,6 +202,11 @@ void CurveC2::ChangeToBezier()
     bezierMarkers.append(Marker(level2.back(), Qt::gray));
 }
 
+void CurveC2::AdjustOtherPoints()
+{
+
+}
+
 void CurveC2::Clear()
 {
     indices.clear();

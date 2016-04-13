@@ -13,11 +13,13 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     curveMode = 0;
     t1 = Torus();
     cursor = Cursor();
+    //TODO move to point class
     highlighColor = Qt::yellow;
     normalColor = Qt::white;
     IsMultipleSelect = false;
     showCurve = false;
     setFocusPolicy(Qt::StrongFocus);
+    selectedVirtualMarker = nullptr;
     //setMouseTracking(true);
 }
 
@@ -88,10 +90,11 @@ void Widget::wheelEvent(QWheelEvent * event)
 
 void Widget::HandlePointSelection(int i, bool IsMultiSelect)
 { 
-    //deselect all selected markers
-    //if (selectedMarker != nullptr)
-        //selectedMarker->setColor(normalColor);
-    //selectedMarker = &markers[i];
+    if (selectedVirtualMarker != nullptr) {
+        selectedVirtualMarker->setColor(normalColor);
+        selectedVirtualMarker->IsSelected = false;
+        selectedVirtualMarker = nullptr;
+    }
 
     if (!IsMultiSelect) {
         for (int i = 0; i < selectedMarkers.length(); i++){
@@ -125,9 +128,45 @@ void Widget::RemovePoint(int i)
     markers.removeAt(i);
 }
 
-void Widget::DeselectPoint()
+void Widget::SelectVirtualDeselectAll(Marker* m)
 {
-    //selectedMarker = nullptr;
+    for (int i = 0; i < selectedMarkers.length(); i++){
+        selectedMarkers[i]->setColor(normalColor);
+        selectedMarkers[i]->IsSelected = false;
+    }
+    selectedMarkers.clear();
+
+    if (selectedVirtualMarker != nullptr) {
+        selectedVirtualMarker->setColor(normalColor);
+        selectedVirtualMarker->IsSelected = false;
+    }
+    selectedVirtualMarker = m;
+    selectedVirtualMarker->setColor(highlighColor);
+    selectedVirtualMarker->IsSelected = true;
+
+    cursor.center = QVector4D(m->point.x(),m->point.y(),m->point.z(),1);
+    cursor.updateCursor(worldMatrix);
+}
+
+void Widget::SelectIfInRange(QList<Marker> &mark, bool isVirtualMarker)
+{
+    for (int i = 0; i < mark.length(); i++) {
+        float offset = mark[i].getSize()/2;
+        float x = savedMouse.x()-width()/2;
+        float y = savedMouse.y()-height()/2;
+        float worldX = mark[i].pointWorld.x();
+        float worldY = mark[i].pointWorld.y();
+        if (x >= worldX-offset && x <= worldX+offset && y >= worldY-offset && y <= worldY+offset) {
+            if (!isVirtualMarker)
+                HandlePointSelection(i, IsMultipleSelect);
+            else
+                SelectVirtualDeselectAll(&mark[i]);
+            QList<QTreeWidgetItem*> result = visitTree(tree, mark[i].idname);
+            for(int i = 0; i < result.length(); i++)
+                tree->setCurrentItem(result[i]);
+            break;
+        }
+    }
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
@@ -138,21 +177,10 @@ void Widget::mousePressEvent(QMouseEvent *event)
             break;
         case 1: //Edit Points
             if(event->buttons() & Qt::LeftButton) {
-                for (int i = 0; i < markers.length(); i++) {
-                    float offset = markers[i].getSize()/2;
-                    float x = savedMouse.x()-width()/2;
-                    float y = savedMouse.y()-height()/2;
-                    float worldX = markers[i].pointWorld.x();
-                    float worldY = markers[i].pointWorld.y();
-                    if (x >= worldX-offset && x <= worldX+offset &&
-                        y >= worldY-offset && y <= worldY+offset) {
-                        HandlePointSelection(i, IsMultipleSelect);
-                        QList<QTreeWidgetItem*> result = visitTree(tree, markers[i].idname);
-                        for(int i = 0; i < result.length(); i++)
-                            tree->setCurrentItem(result[i]);
-                        break;
-                    }
-                }
+                SelectIfInRange(markers, false);
+                if (showCurve)
+                    for (int i = 0; i<curves.length(); i++)
+                        SelectIfInRange(curves[i].bezierMarkers, true);
             }
             break;
         default:
@@ -310,6 +338,7 @@ void Widget::switchCurveMode(int index)
 {
     curveMode = index;
     UpdateSceneElements();
+    update();
 }
 
 void Widget::UpdateSceneElements()

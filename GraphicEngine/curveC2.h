@@ -35,6 +35,7 @@ public:
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void ChangeToOpposite();
     void ChangeToBezier();
+    void AdjustOtherPoints();
 
     virtual QVector<QVector4D> getPoints() const;
     virtual void setPoints(const QVector<QVector4D> &value);

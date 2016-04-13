@@ -43,6 +43,7 @@ public:
     //QList<BSpline> bsplines;
     QList<CurveC2> curves;
     QList<Marker*> selectedMarkers;
+    Marker* selectedVirtualMarker;
     Torus t1;
 
     QTreeWidget* tree;
@@ -57,11 +58,13 @@ public:
     //points handling
     void HandlePointSelection(int i, bool IsMultiSelect);
     void RemovePoint(int i);
-    void DeselectPoint();
+    void SelectVirtualDeselectAll(Marker* m);
 
     void switchSceneMode(int index);
     void switchCurveMode(int index);
     void UpdateSceneElements();
+
+    void SelectIfInRange(QList<Marker> & m, bool isVirtualMarker);
 
 signals:
     void cursorPosChanged(QVector4D pos, QVector4D posScreen);
