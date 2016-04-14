@@ -35,18 +35,18 @@ void Widget::paintEvent(QPaintEvent *)
     //DRAWING OBJECTS ON THE SCENE
     //TODO: loop through all existing objects on the scene: for()
     //TODO: draw axis in the middle of the scene
-    t1.Draw(painter, worldMatrix, isStereo);
+    //t1.Draw(painter, worldMatrix, isStereo);
     cursor.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
-    /*for (int i = 0; i< bezier_objects.length(); i++) {
+    for (int i = 0; i< bezier_objects.length(); i++) {
         //TODO: only if zoom points/grabbing/points no change
         bezier_objects[i].InitializeBezier(worldMatrix);
         bezier_objects[i].Draw(painter, worldMatrix, isStereo);
         if (showCurve)
             bezier_objects[i].DrawCurve(painter, worldMatrix, isStereo);
 
-    }*/
+    }
     switch(curveMode) {
         case 0: //b-spline
             for (int i = 0; i< curves.length(); i++) {
@@ -128,6 +128,15 @@ void Widget::RemovePoint(int i)
     markers.removeAt(i);
 }
 
+void Widget::DeselectSelectedVirtual()
+{
+    if (selectedVirtualMarker != nullptr) {
+        selectedVirtualMarker->setColor(normalColor);
+        selectedVirtualMarker->IsSelected = false;
+        selectedVirtualMarker = nullptr;
+    }
+}
+
 void Widget::SelectVirtualDeselectAll(Marker* m)
 {
     for (int i = 0; i < selectedMarkers.length(); i++){
@@ -157,13 +166,13 @@ void Widget::SelectIfInRange(QList<Marker> &mark, bool isVirtualMarker)
         float worldX = mark[i].pointWorld.x();
         float worldY = mark[i].pointWorld.y();
         if (x >= worldX-offset && x <= worldX+offset && y >= worldY-offset && y <= worldY+offset) {
-            if (!isVirtualMarker)
+            if (!isVirtualMarker) {
                 HandlePointSelection(i, IsMultipleSelect);
-            else
+                QList<QTreeWidgetItem*> result = visitTree(tree, mark[i].idname);
+                for(int i = 0; i < result.length(); i++)
+                    tree->setCurrentItem(result[i]);
+            }else
                 SelectVirtualDeselectAll(&mark[i]);
-            QList<QTreeWidgetItem*> result = visitTree(tree, mark[i].idname);
-            for(int i = 0; i < result.length(); i++)
-                tree->setCurrentItem(result[i]);
             break;
         }
     }
@@ -177,10 +186,11 @@ void Widget::mousePressEvent(QMouseEvent *event)
             break;
         case 1: //Edit Points
             if(event->buttons() & Qt::LeftButton) {
-                SelectIfInRange(markers, false);
-                if (showCurve)
+                    SelectIfInRange(markers, false);
+                if (showCurve) {
                     for (int i = 0; i<curves.length(); i++)
                         SelectIfInRange(curves[i].bezierMarkers, true);
+                }
             }
             break;
         default:
@@ -356,6 +366,9 @@ void Widget::switchSceneMode(int index)
 void Widget::switchCurveMode(int index)
 {
     curveMode = index;
+    selectedVirtualMarker = nullptr;
+    for (int i = 0; i<curves.length(); i++)
+        curves[i].InitializeBezierMarkers();
     UpdateSceneElements();
     update();
 }
@@ -364,9 +377,6 @@ void Widget::UpdateSceneElements()
 {
     //TODO upadate only curve that has changed!!!
     //TODO: change to bez only if clicked change/in bezier mode
-    for (int i = 0; i<curves.length(); i++)
-        curves[i].ChangeToBezier();
-
     switch(curveMode) {
         case 0: //b-spline
             for (int i = 0; i< curves.length(); i++) {
@@ -375,8 +385,9 @@ void Widget::UpdateSceneElements()
             break;
         case 1: //bezier
             for (int i = 0; i< curves.length(); i++) {
+                curves[i].ChangeToBezier();
                 curves[i].InitializeBezierC2(worldMatrix);
-            }
+            }   
             break;
         default:
             break;

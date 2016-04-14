@@ -101,11 +101,6 @@ QVector4D Bezier::getBezierPoint(Segment seg, float t)
     return p;
 }
 
-void Bezier::ChangeToBSpline()
-{
-
-}
-
 void Bezier::Clear()
 {
     indices.clear();

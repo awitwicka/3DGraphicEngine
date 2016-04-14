@@ -22,7 +22,6 @@ class Widget : public QWidget
     QPoint savedMouse;
     int sceneMode;
     int curveMode;
-    Cursor cursor;
     QColor normalColor;
     QColor highlighColor;
     //QList<CADObject> objects;
@@ -34,13 +33,14 @@ class Widget : public QWidget
     QList<QTreeWidgetItem*> visitTree(QTreeWidget *tree, QString condition);
 
 public:
+    Cursor cursor;
     //KeyPress(QWidget *parent = 0);
     bool isStereo;
     bool showCurve;
     bool IsMultipleSelect;
     QMatrix4x4 worldMatrix, viewMatrix;
     QList<Marker> markers;
-    //QList<Bezier> bezier_objects;
+    QList<Bezier> bezier_objects;
     //QList<BSpline> bsplines;
     QList<CurveC2> curves;
     QList<Marker*> selectedMarkers;
@@ -59,6 +59,7 @@ public:
     //points handling
     void HandlePointSelection(int i, bool IsMultiSelect);
     void RemovePoint(int i);
+    void DeselectSelectedVirtual();
     void SelectVirtualDeselectAll(Marker* m);
 
     void switchSceneMode(int index);

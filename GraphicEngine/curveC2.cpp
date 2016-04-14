@@ -19,6 +19,7 @@ CurveC2::CurveC2(const QList<Marker *> &m, QMatrix4x4 matrix)
     degree = 3;
     id++;
     boorMarkers = m;
+
     InitializeBSpline(matrix);
 }
 
@@ -178,7 +179,67 @@ void CurveC2::ChangeToBezier()
     if (boorMarkers.length() < degree+1)
         return;
     int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
+    //bezierMarkers.clear();
+    //level1
+    QList<VirtualMarkInfo> level1;
+    for (int i = 0; i < boorMarkers.length()-1; i++) {
+        QVector4D q1 = boorMarkers[i]->point;
+        QVector4D q2 = boorMarkers[i+1]->point;
+
+        VirtualMarkInfo v13;
+        v13.position = q1 + (1.0f/3.0f)*(q2 - q1);
+        v13.parent = boorMarkers[i];
+        v13.partner = boorMarkers[i+1];
+        level1.append(v13);
+
+        VirtualMarkInfo v23;
+        v23.position = q1 + (2.0f/3.0f)*(q2 - q1);
+        v23.parent = boorMarkers[i+1];
+        v23.partner = boorMarkers[i];
+        level1.append(v23);
+    }
+    //level2
+    QList<VirtualMarkInfo> level2;
+    for (int i = 0; i<boorMarkers.length()-2; i++) {
+        QVector4D q1 = level1[i*2+1].position;
+        QVector4D q2 = level1[(i+1)*2].position;
+
+        VirtualMarkInfo v12;
+        v12.position = q1 + 0.5f*(q2 - q1);
+        v12.parent = boorMarkers[i+1];
+        v12.partner = nullptr;
+        level2.append(v12);
+    }
+    //bezier
+    int count = 0;
+    for (int i = 0; i <SegmentsNo; i++) {
+        bezierMarkers[count].point = level2[i].position;
+        bezierMarkers[count].boorParent = level2[i].parent;
+        bezierMarkers[count].Parent = this;
+
+        bezierMarkers[count+1].point = level1[(i+1)*2].position;
+        bezierMarkers[count+1].boorParent = level1[(i+1)*2].parent;
+        bezierMarkers[count+1].Parent = this;
+
+        bezierMarkers[count+2].point = level1[(i+1)*2+1].position;
+        bezierMarkers[count+2].boorParent = level1[(i+1)*2+1].parent;
+        bezierMarkers[count+2].Parent = this;
+        count+=3;
+    }
+    bezierMarkers.last().point = level2.back().position;
+    bezierMarkers.last().boorParent = level2.back().parent;
+    bezierMarkers.last().Parent = this;
+}
+
+void CurveC2::InitializeBezierMarkers()
+{
     bezierMarkers.clear();
+    //for (int i = 0; i<40; i++) //approx
+      //  bezierMarkers.append(Marker()); //erase id++ from constructor
+    if (boorMarkers.length() < degree+1)
+        return;
+    int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
+    //bezierMarkers.clear();
     //level1
     QList<VirtualMarkInfo> level1;
     for (int i = 0; i < boorMarkers.length()-1; i++) {
@@ -216,35 +277,6 @@ void CurveC2::ChangeToBezier()
         bezierMarkers.append(Marker(level1[(i+1)*2+1].position, Qt::gray, level1[(i+1)*2+1].parent, level1[(i+1)*2+1].partner, this));
     }
     bezierMarkers.append(Marker(level2.back().position, Qt::gray, level2.back().parent, level2.back().partner, this));
-    /*if (boorMarkers.length() < degree+1)
-        return;
-    int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
-    bezierMarkers.clear();
-    //level1
-    QList<QVector4D> level1;
-    for (int i = 0; i<boorMarkers.length()-1; i++) {
-        QVector4D q1 = boorMarkers[i]->point;
-        QVector4D q2 = boorMarkers[i+1]->point;
-        QVector4D q13 = q1 + (1.0f/3.0f)*(q2 - q1);
-        QVector4D q23 = q1 + (2.0f/3.0f)*(q2 - q1);
-        level1.append(q13);
-        level1.append(q23);
-    }
-    //level2
-    QList<QVector4D> level2;
-    for (int i = 0; i<boorMarkers.length()-2; i++) {
-        QVector4D q1 = level1[i*2+1];
-        QVector4D q2 = level1[(i+1)*2];
-        QVector4D q12 = q1 + 0.5f*(q2 - q1);
-        level2.append(q12);
-    }
-    //bezier
-    for (int i = 0; i <SegmentsNo; i++) {
-        bezierMarkers.append(Marker(level2[i], Qt::gray));
-        bezierMarkers.append(Marker(level1[(i+1)*2], Qt::gray));
-        bezierMarkers.append(Marker(level1[(i+1)*2+1], Qt::gray));
-    }
-    bezierMarkers.append(Marker(level2.back(), Qt::gray));*/
 }
 
 void CurveC2::AdjustOtherPoints(Marker* m, QVector4D oldPosition)

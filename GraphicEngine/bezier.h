@@ -16,8 +16,6 @@ class Bezier : public CADObject
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
 
-    void ChangeToBSpline();
-
     void Clear();
 public:
     void InitializeBezier(QMatrix4x4 matrix);

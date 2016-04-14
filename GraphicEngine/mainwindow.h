@@ -54,6 +54,8 @@ private slots:
 
     void on_comboBox_2_activated(int index);
 
+    void on_pushButton_addC0_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

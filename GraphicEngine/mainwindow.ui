@@ -65,6 +65,13 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="pushButton_addC0">
+               <property name="text">
+                <string>Add C0</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="pushButton_addBezier">
                <property name="text">
                 <string>Add Curve</string>

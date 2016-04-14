@@ -4,7 +4,6 @@
 #include "cadobject.h"
 #include "marker.h"
 #include "segment.h"
-#include "virtualmarker.h"
 
 class CurveC2 : public CADObject
 {
@@ -41,6 +40,7 @@ public:
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void ChangeToOpposite();
     void ChangeToBezier();
+    void InitializeBezierMarkers();
     void AdjustOtherPoints(Marker* m, QVector4D oldPosition);
 
     virtual QVector<QVector4D> getPoints() const;
