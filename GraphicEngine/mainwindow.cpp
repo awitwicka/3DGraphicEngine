@@ -74,20 +74,11 @@ void MainWindow::on_checkBox_stereo_toggled(bool checked)
     w->update();
 }
 
-void MainWindow::on_pushButton_addMarker_clicked()
+int MainWindow::AddMarkerToObjs(QList<QTreeWidgetItem*> objsList, /*QList<CADObject> objs,*/ QTreeWidgetItem *item)
 {
-    Marker m = Marker(w->cursor.center);
-    w->markers.append(m);
-
-    QList<QString> columns = {m.name, m.idname};
-    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-
     int count = 0;
-    QString idname;
-    QList<QTreeWidgetItem*> selected = t->selectedItems();
-    foreach (QTreeWidgetItem* it, selected) {
-        idname = it->text(1);
+    foreach (QTreeWidgetItem* it, objsList) {
+        QString idname = it->text(1);
         for (int i = 0; i < w->curves.length(); i++) {
             if (w->curves[i].idname == idname) {
                 w->curves[i].boorMarkers.append(&w->markers.last());
@@ -99,6 +90,22 @@ void MainWindow::on_pushButton_addMarker_clicked()
             }
         }
     }
+    return count;
+}
+
+void MainWindow::on_pushButton_addMarker_clicked()
+{
+    //create new item
+    Marker m = Marker(w->cursor.center);
+    w->markers.append(m);
+    QList<QString> columns = {m.name, m.idname};
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+    int count = 0;
+    QString idname;
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    count += AddMarkerToObjs(selected, item);
     if (count == 0)
         t->addTopLevelItem(item);
 
@@ -107,6 +114,7 @@ void MainWindow::on_pushButton_addMarker_clicked()
     w->DeselectSelectedVirtual();
     for (int i = 0; i<w->curves.length(); i++)
         w->curves[i].InitializeBezierMarkers();
+    w->UpdateSceneElements();
     w->update();
 }
 
@@ -197,8 +205,7 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
                     }
                     delete it;
                     w->curves.removeAt(i);
-                } else
-                    delete it;
+                }
             }
             if (w->curves.length() == 0)
                 delete it;
@@ -232,6 +239,7 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
     w->DeselectSelectedVirtual();
     for (int i = 0; i<w->curves.length(); i++)
         w->curves[i].InitializeBezierMarkers();
+    w->UpdateSceneElements();
     w->update();
 }
 

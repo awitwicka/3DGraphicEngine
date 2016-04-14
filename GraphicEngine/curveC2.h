@@ -47,6 +47,7 @@ public:
     virtual void setPoints(const QVector<QVector4D> &value);
     virtual QVector<QPoint> getIndices() const;
     virtual void setIndices(const QVector<QPoint> &value);
+    QList<Marker *> getMarkers() const;
 };
 
 #endif // CURVEC2_H

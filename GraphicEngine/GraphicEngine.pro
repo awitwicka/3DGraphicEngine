@@ -24,7 +24,6 @@ SOURCES += main.cpp\
     constants.cpp \
     bezier.cpp \
     segment.cpp \
-    bspline.cpp \
     curveC2.cpp 
 
 HEADERS  += mainwindow.h \
@@ -36,7 +35,6 @@ HEADERS  += mainwindow.h \
     constants.h \
     bezier.h \
     segment.h \
-    bspline.h \
     curveC2.h 
 
 FORMS    += mainwindow.ui

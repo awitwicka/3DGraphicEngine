@@ -23,6 +23,8 @@ public:
     void RemoveRepetitions(QList<QTreeWidgetItem*> toDelete);
     //int FindObjById(QList<CADObject> &list, QString idname);
 
+    int AddMarkerToObjs(QList<QTreeWidgetItem*> objsList, /*QList<CADObject> objs,*/ QTreeWidgetItem *item);
+
 private slots:
     void on_spinBox_U_valueChanged(int arg1);
 

@@ -21,6 +21,11 @@ Bezier::Bezier()
     id++;
 }
 
+QList<Marker *> Bezier::getMarkers() const
+{
+    return markers;
+}
+
 Bezier::Bezier(const QList<Marker *> &mark, QMatrix4x4 matrix)
 {
     name = QString("bezier %1").arg(id);

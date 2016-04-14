@@ -10,7 +10,6 @@
 #include "marker.h"
 #include "cursor.h"
 #include "bezier.h"
-#include "bspline.h"
 #include "curveC2.h"
 //#include "virtualmarker.h"
 
@@ -41,7 +40,6 @@ public:
     QMatrix4x4 worldMatrix, viewMatrix;
     QList<Marker> markers;
     QList<Bezier> bezier_objects;
-    //QList<BSpline> bsplines;
     QList<CurveC2> curves;
     QList<Marker*> selectedMarkers;
     Marker* selectedVirtualMarker;

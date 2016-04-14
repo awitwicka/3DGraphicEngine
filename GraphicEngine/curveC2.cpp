@@ -173,6 +173,11 @@ float CurveC2::getBSplineWeight(float t, int i, int k, QList<int> knots)
     return subweightA + subweightB;
 }
 
+QList<Marker *> CurveC2::getMarkers() const
+{
+    return boorMarkers;
+}
+
 void CurveC2::ChangeToBezier()
 {
     //WORKS ONLY FOR CUBIC BSPLINES!!!!
