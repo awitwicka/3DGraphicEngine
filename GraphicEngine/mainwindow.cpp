@@ -193,22 +193,23 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
                 if (w->markers[i].idname == idname)
                     w->RemovePoint(i);
             }
-            for (int i = 0; i < w->curves.length(); i++) {
-                if (w->curves[i].idname == idname) {
-                    for(int i=0;i<it->childCount(); i++) { //TODO: to use that add with correct parent
-                    //for (int i=0; i<w->curves[i].markers.length(); i++) {
-                        QTreeWidgetItem * const clone = it->child(i)->clone();
-                        QList<QTreeWidgetItem*> result = visitTree(t, it->child(i)->text(1));
-                        if (result.length() == 1)
-                            t->addTopLevelItem(clone);
-                        //delete it->child(i);
+            if (w->curves.length() != 0) {
+                for (int i = 0; i < w->curves.length(); i++) {
+                    if (w->curves[i].idname == idname) {
+                        for(int i=0;i<it->childCount(); i++) { //TODO: to use that add with correct parent
+                        //for (int i=0; i<w->curves[i].markers.length(); i++) {
+                            QTreeWidgetItem * const clone = it->child(i)->clone();
+                            QList<QTreeWidgetItem*> result = visitTree(t, it->child(i)->text(1));
+                            if (result.length() == 1)
+                                t->addTopLevelItem(clone);
+                            //delete it->child(i);
+                        }
+                        delete it;
+                        w->curves.removeAt(i);
                     }
-                    delete it;
-                    w->curves.removeAt(i);
                 }
-            }
-            if (w->curves.length() == 0)
-                delete it;
+            } else
+                  delete it;
         } else {
             parentIdName = it->parent()->text(1);
             for (int i = 0; i < w->curves.length(); i++) { //TODO: probably change to CADobject list

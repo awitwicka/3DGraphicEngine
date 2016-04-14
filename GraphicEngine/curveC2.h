@@ -30,7 +30,7 @@ public:
     QString name;
     QString idname;
     bool isBezier;
-    QList<Marker*> boorMarkers;
+    QList<Marker*> boorMarkers; //boor markers
     QList<Marker> bezierMarkers; //punkty 'virtualne'
 
     CurveC2();

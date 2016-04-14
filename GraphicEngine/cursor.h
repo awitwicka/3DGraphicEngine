@@ -16,8 +16,6 @@ public:
     float range;
     Cursor();
     //~Cursor() {};
-    QVector<QVector4D> points;
-    QVector<QPoint> indices;
     void updateCursor(QMatrix4x4 world);
     float getSize() const;
     void setSize(float value);

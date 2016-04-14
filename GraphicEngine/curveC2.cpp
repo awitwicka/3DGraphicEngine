@@ -26,10 +26,11 @@ CurveC2::CurveC2(const QList<Marker *> &m, QMatrix4x4 matrix)
 void CurveC2::InitializeBezierC2(QMatrix4x4 matrix)
 {
     //WORKS ONLY FOR CUBIC BSPLINES!!!!
+    Clear();
     if (boorMarkers.length() < degree+1)
         return;
 
-    Clear();
+
     int n = bezierMarkers.length();
     float length = 0;
     //initialize Curve
@@ -75,6 +76,10 @@ void CurveC2::InitializeBezierC2(QMatrix4x4 matrix)
 void CurveC2::InitializeBSpline(QMatrix4x4 matrix)
 {   
     Clear();
+    if (boorMarkers.length() < degree+1)
+        return;
+
+
     //get points number
     int n = boorMarkers.length();
     float length = 0;
@@ -143,7 +148,6 @@ QVector4D CurveC2::getBezierPoint(Segment seg, float t)
 
 //i = the weight we're looking for, i should go from 1 to n+1, where n+1 is equal to the total number of control points.
 //k = curve order = power/degree +1. eg, to break whole curve into cubics use a curve order of 4
-//cps = number of total control points
 //t = current step/interp value
 float CurveC2::getBSplineWeight(float t, int i, int k, QList<int> knots)
 {
@@ -157,20 +161,18 @@ float CurveC2::getBSplineWeight(float t, int i, int k, QList<int> knots)
             return 0;
     }
 
-    float numeratorA = ( t - knots.at(i-1) );
-    float denominatorA = ( knots.at(i + k-2) - knots.at(i-1) );
-    float numeratorB = ( knots.at(i + k-1) - t );
-    float denominatorB = ( knots.at(i + k-1) - knots.at(i) );
+    float d1 = ( knots.at(i + k-2) - knots.at(i-1) );
+    float d2 = ( knots.at(i + k-1) - knots.at(i) );
 
-    float subweightA = 0;
-    float subweightB = 0;
+    float N1 = 0;
+    float N2 = 0;
 
-    if( denominatorA != 0 )
-        subweightA = numeratorA / denominatorA * getBSplineWeight(t, i, k-1, knots);
-    if( denominatorB != 0 )
-        subweightB = numeratorB / denominatorB * getBSplineWeight(t, i+1, k-1, knots);
+    if( d1 != 0 )
+        N1 = ( t - knots.at(i-1) ) / d1 * getBSplineWeight(t, i, k-1, knots);
+    if( d2 != 0 )
+        N2 = ( knots.at(i + k-1) - t ) / d2 * getBSplineWeight(t, i+1, k-1, knots);
 
-    return subweightA + subweightB;
+    return N1 + N2;
 }
 
 QList<Marker *> CurveC2::getMarkers() const
