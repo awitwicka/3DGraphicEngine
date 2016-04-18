@@ -18,7 +18,7 @@ CurveC2::CurveC2(const QList<Marker *> &m, QMatrix4x4 matrix)
     isBezier = false;
     degree = 3;
     id++;
-    boorMarkers = m;
+    markers = m;
 
     InitializeBSpline(matrix);
 }
@@ -27,7 +27,7 @@ void CurveC2::InitializeBezierC2(QMatrix4x4 matrix)
 {
     //WORKS ONLY FOR CUBIC BSPLINES!!!!
     Clear();
-    if (boorMarkers.length() < degree+1)
+    if (markers.length() < degree+1)
         return;
 
 
@@ -76,29 +76,29 @@ void CurveC2::InitializeBezierC2(QMatrix4x4 matrix)
 void CurveC2::InitializeBSpline(QMatrix4x4 matrix)
 {   
     Clear();
-    if (boorMarkers.length() < degree+1)
+    if (markers.length() < degree+1)
         return;
 
 
     //get points number
-    int n = boorMarkers.length();
+    int n = markers.length();
     float length = 0;
     //initialize Curve
     for (int i = 0; i < n-1; i++) {
-        pointsCurve.append(boorMarkers[i]->point);
+        pointsCurve.append(markers[i]->point);
         indicesCurve.append(QPoint(i, i+1));
-        QVector4D q1 = Constants::perspectiveMatrix*matrix*boorMarkers[i]->point;
-        QVector4D q2 = Constants::perspectiveMatrix*matrix*boorMarkers[i+1]->point;
+        QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[i]->point;
+        QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[i+1]->point;
         q1 = q1/q1.w();
         q2 = q2/q2.w();
         length += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
     }
-    pointsCurve.append(boorMarkers.last()->point);
+    pointsCurve.append(markers.last()->point);
 
     //algorithm
     int linesNo = (int)length;
     int order = degree+1; //k = degreee+1
-    int controlPointsNo = boorMarkers.length(); //n+1
+    int controlPointsNo = markers.length(); //n+1
     if(controlPointsNo >= order) {
         //initiate knot vector
         int knotSize = order + controlPointsNo;
@@ -118,7 +118,7 @@ void CurveC2::InitializeBSpline(QMatrix4x4 matrix)
             for(int i=1; i <= controlPointsNo; i++)
             {
                 float weightForControl = getBSplineWeight(t, i, order, knots);
-                q += weightForControl * boorMarkers.at(i-1)->point;
+                q += weightForControl * markers.at(i-1)->point;
             }
             points.append(q);
         }
@@ -177,43 +177,43 @@ float CurveC2::getBSplineWeight(float t, int i, int k, QList<int> knots)
 
 QList<Marker *> CurveC2::getMarkers() const
 {
-    return boorMarkers;
+    return markers;
 }
 
 void CurveC2::ChangeToBezier()
 {
     //WORKS ONLY FOR CUBIC BSPLINES!!!!
-    if (boorMarkers.length() < degree+1)
+    if (markers.length() < degree+1)
         return;
-    int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
+    int SegmentsNo = (markers.length()-1) - (degree-1);//no odcinkow - (degree-1)
     //bezierMarkers.clear();
     //level1
     QList<VirtualMarkInfo> level1;
-    for (int i = 0; i < boorMarkers.length()-1; i++) {
-        QVector4D q1 = boorMarkers[i]->point;
-        QVector4D q2 = boorMarkers[i+1]->point;
+    for (int i = 0; i < markers.length()-1; i++) {
+        QVector4D q1 = markers[i]->point;
+        QVector4D q2 = markers[i+1]->point;
 
         VirtualMarkInfo v13;
         v13.position = q1 + (1.0f/3.0f)*(q2 - q1);
-        v13.parent = boorMarkers[i];
-        v13.partner = boorMarkers[i+1];
+        v13.parent = markers[i];
+        v13.partner = markers[i+1];
         level1.append(v13);
 
         VirtualMarkInfo v23;
         v23.position = q1 + (2.0f/3.0f)*(q2 - q1);
-        v23.parent = boorMarkers[i+1];
-        v23.partner = boorMarkers[i];
+        v23.parent = markers[i+1];
+        v23.partner = markers[i];
         level1.append(v23);
     }
     //level2
     QList<VirtualMarkInfo> level2;
-    for (int i = 0; i<boorMarkers.length()-2; i++) {
+    for (int i = 0; i<markers.length()-2; i++) {
         QVector4D q1 = level1[i*2+1].position;
         QVector4D q2 = level1[(i+1)*2].position;
 
         VirtualMarkInfo v12;
         v12.position = q1 + 0.5f*(q2 - q1);
-        v12.parent = boorMarkers[i+1];
+        v12.parent = markers[i+1];
         v12.partner = nullptr;
         level2.append(v12);
     }
@@ -243,37 +243,37 @@ void CurveC2::InitializeBezierMarkers()
     bezierMarkers.clear();
     //for (int i = 0; i<40; i++) //approx
       //  bezierMarkers.append(Marker()); //erase id++ from constructor
-    if (boorMarkers.length() < degree+1)
+    if (markers.length() < degree+1)
         return;
-    int SegmentsNo = (boorMarkers.length()-1) - (degree-1);//no odcinkow - (degree-1)
+    int SegmentsNo = (markers.length()-1) - (degree-1);//no odcinkow - (degree-1)
     //bezierMarkers.clear();
     //level1
     QList<VirtualMarkInfo> level1;
-    for (int i = 0; i < boorMarkers.length()-1; i++) {
-        QVector4D q1 = boorMarkers[i]->point;
-        QVector4D q2 = boorMarkers[i+1]->point;
+    for (int i = 0; i < markers.length()-1; i++) {
+        QVector4D q1 = markers[i]->point;
+        QVector4D q2 = markers[i+1]->point;
 
         VirtualMarkInfo v13;
         v13.position = q1 + (1.0f/3.0f)*(q2 - q1);
-        v13.parent = boorMarkers[i];
-        v13.partner = boorMarkers[i+1];
+        v13.parent = markers[i];
+        v13.partner = markers[i+1];
         level1.append(v13);
 
         VirtualMarkInfo v23;
         v23.position = q1 + (2.0f/3.0f)*(q2 - q1);
-        v23.parent = boorMarkers[i+1];
-        v23.partner = boorMarkers[i];
+        v23.parent = markers[i+1];
+        v23.partner = markers[i];
         level1.append(v23);
     }
     //level2
     QList<VirtualMarkInfo> level2;
-    for (int i = 0; i<boorMarkers.length()-2; i++) {
+    for (int i = 0; i<markers.length()-2; i++) {
         QVector4D q1 = level1[i*2+1].position;
         QVector4D q2 = level1[(i+1)*2].position;
 
         VirtualMarkInfo v12;
         v12.position = q1 + 0.5f*(q2 - q1);
-        v12.parent = boorMarkers[i+1];
+        v12.parent = markers[i+1];
         v12.partner = nullptr;
         level2.append(v12);
     }

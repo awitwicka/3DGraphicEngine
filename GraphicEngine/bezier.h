@@ -4,26 +4,21 @@
 #include "cadobject.h"
 #include "marker.h"
 #include "segment.h"
+#include "cadmarkerobject.h"
 
-class Bezier : public CADObject
+class Bezier : public CADObject, public CADMarkerObject
 {
     static int id;
     QVector4D getBezierPoint(Segment seg, float t);
     void getCurveGeometry();
 
-    QVector<QVector4D> points;
-    QVector<QPoint> indices;
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
-
     void Clear();
 public:
     void InitializeBezier(QMatrix4x4 matrix);
-    QString name;
-    QString idname;
     Bezier();
     QList<Segment> BezierSegments;
-    QList<Marker*> markers;
     Bezier(QList<Marker*> const & m, QMatrix4x4 matrix);
     void DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 

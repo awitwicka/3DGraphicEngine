@@ -4,14 +4,13 @@
 #include "cadobject.h"
 #include "marker.h"
 #include "segment.h"
+#include "cadmarkerobject.h"
 
-class CurveC2 : public CADObject
+class CurveC2 : public CADObject, public CADMarkerObject
 {
     static int id;
     int degree;
     QList<Segment> BezierSegments;
-    QVector<QVector4D> points;
-    QVector<QPoint> indices;
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
 
@@ -26,11 +25,7 @@ class CurveC2 : public CADObject
         Marker* partner;
     };
 public:
-
-    QString name;
-    QString idname;
     bool isBezier;
-    QList<Marker*> boorMarkers; //boor markers
     QList<Marker> bezierMarkers; //punkty 'virtualne'
 
     CurveC2();
