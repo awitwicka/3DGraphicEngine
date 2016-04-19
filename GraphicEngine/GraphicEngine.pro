@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     bezier.cpp \
     segment.cpp \
     curveC2.cpp \ 
-    cadmarkerobject.cpp
+    cadmarkerobject.cpp \
+    bsinterpolation.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -37,6 +38,7 @@ HEADERS  += mainwindow.h \
     bezier.h \
     segment.h \
     curveC2.h \ 
-    cadmarkerobject.h
+    cadmarkerobject.h \
+    bsinterpolation.h
 
 FORMS    += mainwindow.ui
