@@ -58,6 +58,8 @@ private slots:
 
     void on_pushButton_addC0_clicked();
 
+    void on_pushButton_addInterp_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

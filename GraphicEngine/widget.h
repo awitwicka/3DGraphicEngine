@@ -11,6 +11,7 @@
 #include "cursor.h"
 #include "bezier.h"
 #include "curveC2.h"
+#include "bsinterpolation.h"
 //#include "virtualmarker.h"
 
 class Widget : public QWidget
@@ -41,6 +42,7 @@ public:
     QList<Marker> markers;
     QList<Bezier> bezier_objects;
     QList<CurveC2> curves;
+    QList<BSInterpolation> curves_interpolation;
     QList<Marker*> selectedMarkers;
     Marker* selectedVirtualMarker;
     Torus t1;

@@ -15,6 +15,7 @@ public:
 
     CADMarkerObject();
     virtual ~CADMarkerObject()=0;
+    virtual void InitializeBezier(QMatrix4x4 matrix);
 };
 
 #endif // CADMARKEROBJECT_H

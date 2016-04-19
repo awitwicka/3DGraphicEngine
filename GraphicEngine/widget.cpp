@@ -47,6 +47,13 @@ void Widget::paintEvent(QPaintEvent *)
             bezier_objects[i].DrawCurve(painter, worldMatrix, isStereo);
 
     }
+    for (int i = 0; i< curves_interpolation.length(); i++) {
+        //TODO: only if zoom points/grabbing/points no change
+        curves_interpolation[i].InitializeBezier(worldMatrix);
+        curves_interpolation[i].Draw(painter, worldMatrix, isStereo);
+        //if (showCurve)
+            //curves_interpolation[i].DrawCurve(painter, worldMatrix, isStereo);
+    }
     switch(curveMode) {
         case 0: //b-spline
             for (int i = 0; i< curves.length(); i++) {

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>916</width>
+    <width>1042</width>
     <height>529</height>
    </rect>
   </property>
@@ -74,7 +74,14 @@
              <item>
               <widget class="QPushButton" name="pushButton_addBezier">
                <property name="text">
-                <string>Add Curve</string>
+                <string>Add C2</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_addInterp">
+               <property name="text">
+                <string>Add Interp</string>
                </property>
               </widget>
              </item>
@@ -336,8 +343,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>916</width>
-     <height>21</height>
+     <width>1042</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>

@@ -1,3 +1,4 @@
+#include "bsinterpolation.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -414,5 +415,39 @@ void MainWindow::on_pushButton_addC0_clicked()
     //select items under new bezier
     for (int i = 0; i<item->childCount(); i++)
         t->setCurrentItem(item->child(i));
+    w->update();
+}
+
+void MainWindow::on_pushButton_addInterp_clicked()
+{
+    if (w->selectedMarkers.length() <= 0)
+        return;
+    //crete bezier curve
+    BSInterpolation b = BSInterpolation(w->selectedMarkers, w->worldMatrix);
+    w->curves_interpolation.append(b);
+/*
+    //create and add item to list
+    QList<QString> columns = {b.name, b.idname};
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+    //swap points so they belong to bezier
+    QString idname;
+    QList<QTreeWidgetItem*> points = t->selectedItems();
+    foreach (QTreeWidgetItem* it, points) {
+        idname = it->text(1);
+        if (idname.at(0) == 'p') { //check if some other elements besides points selected
+            QTreeWidgetItem * const clone = it->clone();
+            item->addChild(clone);
+            //t->setCurrentItem(item->child(item->childCount()-1));
+            if(!it->parent())
+                delete it; //delete only if moving from main tree
+        }
+    }
+    t->addTopLevelItem(item);
+
+    //select items under new bezier
+    for (int i = 0; i<item->childCount(); i++)
+        t->setCurrentItem(item->child(i));*/
     w->update();
 }
