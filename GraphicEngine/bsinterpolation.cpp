@@ -54,13 +54,16 @@ void BSInterpolation::CalculateControlPoints()
     int p = 3;
     //basis functions
     int n1 = parameters.length();
-    QMatrix4x4 N = QMatrix4x4(0,n1,n1);
-    for (int r = 0; r<n1; r++) {
-        for (int i=-1; i<p+1; i++) {
-            QVector4D n1 = getBSplineWeight(parameters[0], i+1, p+1, knots);
-            N.row(0) = ni;
-       }
+    QList<float> diag0; //low diag
+    QList<float> diag1; //middle diag
+    QList<float> diag2; //upper diag
+    for (int i = 0; i<n1; i++) {
+        diag1.append(getBSplineWeight(parameters[i], i+1, p+1, knots)); //Ni{ti}
+        diag0.append(getBSplineWeight(parameters[i], i, p+1, knots)); //Ni-1{ti}
+        diag2.append(getBSplineWeight(parameters[i], i+2, p+1, knots)); //Ni+1{ti}
     }
+    //get d table
+    QList<float> dx;
 }
 
 //k = p+1 - degree+1
