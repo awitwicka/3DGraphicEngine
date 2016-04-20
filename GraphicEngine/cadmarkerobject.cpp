@@ -10,7 +10,7 @@ CADMarkerObject::~CADMarkerObject()
 
 }
 
-void CADMarkerObject::InitializeBezier(QMatrix4x4 matrix)
+void CADMarkerObject::InitializeBSpline(QMatrix4x4 matrix)
 {
     //TO DO: IMPLEMENT VIRTUAL METHOD
     /*Clear();

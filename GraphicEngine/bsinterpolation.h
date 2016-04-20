@@ -17,7 +17,7 @@ class BSInterpolation : public CADObject, public CADMarkerObject
     QList<Marker*> DataPoints;
     QList<Marker> ControlPoints;
     QList<float> parameters;
-    QList<float> knots;
+    QList<float> knots;  
     void CalculateParameters();
     void CalculateControlPoints();
     float getBSplineWeight(float t, int i, int k, QList<float> knots, int n);
@@ -26,7 +26,8 @@ public:
     BSInterpolation(QList<Marker*> const & m, QMatrix4x4 matrix);
     //TODO: virtualize
     QList<Segment> BezierSegments;
-    void InitializeBezier(QMatrix4x4 matrix);
+     void InitializeInterpolation(QMatrix4x4 matrix);
+    void InitializeBSpline(QMatrix4x4 matrix);
     QVector4D getBezierPoint(Segment seg, float t);
 };
 

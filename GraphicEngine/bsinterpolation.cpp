@@ -14,14 +14,24 @@ BSInterpolation::BSInterpolation(const QList<Marker *> &m, QMatrix4x4 matrix)
     id++;
 
     DataPoints = m;
-    CalculateParameters();
-    CalculateControlPoints();
-    InitializeBezier(matrix);
+    InitializeInterpolation(matrix);
 }
 
-void BSInterpolation::InitializeBezier(QMatrix4x4 matrix)
+void BSInterpolation::InitializeInterpolation(QMatrix4x4 matrix)
 {
     Clear();
+    CalculateParameters();
+    CalculateControlPoints();
+    InitializeBSpline(matrix);
+}
+
+void BSInterpolation::InitializeBSpline(QMatrix4x4 matrix)
+{
+    if (markers.length() < degree+1)
+        return;
+
+
+    //get points number
     int n = markers.length();
     float length = 0;
     //initialize Curve
@@ -35,31 +45,36 @@ void BSInterpolation::InitializeBezier(QMatrix4x4 matrix)
         length += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
     }
     pointsCurve.append(markers.last()->point);
-    //divide on as many curves of the 3th deg: ex: 4 3 3 3.... 3 2/1
 
-    if (n>0) {
-        QList<Marker*> m;
-        for (int i = 1; i < n; i) {
-            m.append(markers[i-1]);
-            for (int c = 0; c<3; c++) {
-                if (i<n)
-                    m.append(markers[i]);
-                i++;
-            }
-            BezierSegments.append(Segment(m));
-            m.clear();
-        }
-    }
-
-    //Clear() todo: move to cadobject
+    //algorithm
     int linesNo = (int)length;
-    int j=0;
-    for (int s = 0; s<BezierSegments.length(); s++) {
-        for (int i = 0; i <= linesNo; i++) {
-            points.append(getBezierPoint(BezierSegments[s], (float)i/(float)linesNo));
+    int order = degree+1; //k = degreee+1
+    int controlPointsNo = markers.length(); //n+1
+    if(controlPointsNo >= order) {
+        //initiate knot vector
+        int knotSize = order + controlPointsNo;
+        /*QList<float> knots; //TODO Vector
+        for(int i = 0; i < knotSize; i++)
+            knots.append(i);*/
+        //Clear();
+        for (int i = 0; i<=linesNo; i++) {
+            // use steps to get a 0-1 range value for progression along the curve
+            // then get that value into the range [k-1, n+1]
+            // k-1 = subCurveOrder-1
+            // n+1 = always the number of total control points
+            float t = ( (float)i/(float)linesNo );// * ( controlPointsNo - (degree) ) + degree;
+            //get poin
+
+            QVector4D q;
+            for(int i=0; i < controlPointsNo; i++)
+            {
+                float weightForControl = getBSplineWeight(t, i, degree, knots, parameters.length()-1);
+                q += weightForControl * markers.at(i)->point;
+            }
+            points.append(q);
         }
-        for (j; j < (linesNo*(s+1)); j++) {
-            indices.append(QPoint(j, j+1));
+        for (int i = 0; i<linesNo; i++) {
+            indices.append(QPoint(i, i+1));
         }
     }
 }
@@ -123,6 +138,32 @@ void BSInterpolation::CalculateParameters()
 
 void BSInterpolation::CalculateControlPoints()
 {
+    /*int p = 3;
+    int n1 = parameters.length();
+
+    //get n table
+    QList<QList<float>> rows;
+    QList<float> row;
+    for (int t = 0; t<n1; t++) {
+        for (int i = 0; i<n1; i++)
+            row.append(getBSplineWeight(parameters[t], i, p, knots, n1-1)); //Ni{ti}
+        rows.append(row);
+       //row.clear();
+    }
+    //get d table
+    QList<float> dx; //datapoints.x
+    QList<float> dy;
+    QList<float> dz;
+    for (int i = 0; i<DataPoints.length(); i++) {
+        dx.append(DataPoints[i]->point.x());
+        dy.append(DataPoints[i]->point.y());
+        dz.append(DataPoints[i]->point.z());
+    }
+
+    */
+
+    //3DIAG SOLVER
+
     //assume degree 3
     int p = 3;
     //basis functions
@@ -224,4 +265,9 @@ void BSInterpolation::Clear()
     indicesCurve.clear();
     pointsCurve.clear();
     BezierSegments.clear();
+    knots.clear();
+    parameters.clear();
+    ControlPoints.clear();
+    markers.clear();
 }
+

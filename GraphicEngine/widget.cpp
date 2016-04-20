@@ -49,7 +49,7 @@ void Widget::paintEvent(QPaintEvent *)
     }
     for (int i = 0; i< curves_interpolation.length(); i++) {
         //TODO: only if zoom points/grabbing/points no change
-        curves_interpolation[i].InitializeBezier(worldMatrix);
+        curves_interpolation[i].InitializeInterpolation(worldMatrix);
         curves_interpolation[i].Draw(painter, worldMatrix, isStereo);
         //if (showCurve)
             //curves_interpolation[i].DrawCurve(painter, worldMatrix, isStereo);
