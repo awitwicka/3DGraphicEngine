@@ -37,6 +37,8 @@ public:
     virtual QVector<QPoint> getIndices() const;
     virtual void setIndices(const QVector<QPoint> &value);
     QList<Marker *> getMarkers() const;
+private:
+    void initializeDiagonals(float** diagMatrix, int n);
 };
 
 #endif // BSPLINEINTERPOLATION_H

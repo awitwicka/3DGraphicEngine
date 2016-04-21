@@ -30,6 +30,7 @@ public:
     Marker(QVector4D position);
     Marker(QVector4D position, QColor color);
     Marker(float x, float y, float z);
+    Marker(float x, float y, float z, QColor color);
     Marker(QVector4D position, QColor color, Marker* parent, Marker* partner, CurveC2* parentCurve);
 
     void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);

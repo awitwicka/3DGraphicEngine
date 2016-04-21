@@ -44,6 +44,15 @@ Marker::Marker(float x, float y, float z) : size(10)
     id++;
 }
 
+Marker::Marker(float x, float y, float z, QColor color) : size(10)
+{
+    name = QString("point %1").arg(id);// + "1");
+    idname = QString("p%1").arg(id);
+    point = QVector4D(x, y, z, 1);
+    IsSelected= false;
+    Color = color;
+}
+
 Marker::Marker(QVector4D position, QColor color, Marker *parent, Marker *partner, CurveC2 *parentCurve) : size(10)
 {
     point = position;

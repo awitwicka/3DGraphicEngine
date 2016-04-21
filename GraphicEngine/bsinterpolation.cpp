@@ -24,12 +24,28 @@ BSInterpolation::BSInterpolation(const QList<Marker *> &m, QMatrix4x4 matrix)
 
 void BSInterpolation::InitializeInterpolation(QMatrix4x4 matrix)
 {
+    if (markers.length() == 1)
+        return;
     if (markers.length() >= 4)
         degree = 3;
     if (markers.length() == 3)
         degree = 2;
     if (markers.length() == 2)
         degree = 1;
+
+
+    //remove double
+    int count = 0;
+    for (int i = 0; i<markers.length()-1; i++) {
+        if (markers[i]->point.x() == markers[i+1]->point.x() &&
+                markers[i]->point.y() == markers[i+1]->point.y() &&
+                markers[i]->point.z() == markers[i+1]->point.z()) {
+            count++;
+        }
+    }
+    if (count > 0)
+        return;
+
     Clear();
     CalculateParameters();
     CalculateControlPoints();
@@ -204,21 +220,8 @@ void BSInterpolation::solveEq(float **a, unsigned long n, int m1, int m2, float 
     }
 }
 
-void BSInterpolation::CalculateControlPoints()
+void BSInterpolation::initializeDiagonals(float** diagMatrix, int n)
 {
-    const int SUB_DIAG_COUNT = 2;
-    const int SUPER_DIAG_COUNT = 2;
-    const int DIAG_COUNT = 5;
-
-    int n = parameters.length();
-    float** diagMatrix = (float**)malloc(sizeof(float*) * (n+1));
-    float** lowerMatrix = (float**)malloc(sizeof(float*) * (n+1));
-    for(int i = 1; i < n+1;i++){
-        diagMatrix[i] = (float*)malloc(sizeof(float) * (DIAG_COUNT+1));
-        lowerMatrix[i] = (float*)malloc(sizeof(float) * (SUB_DIAG_COUNT+1));
-    }
-    unsigned long* index = (unsigned long*)malloc(sizeof(unsigned long) * (n+1));
-
     diagMatrix[1][1] = 0;
     diagMatrix[2][1] = 0;
     for(int i = 3; i < n+1; i++)
@@ -235,9 +238,27 @@ void BSInterpolation::CalculateControlPoints()
         diagMatrix[i][5] = getBSplineWeight(parameters[i-1], i+1, degree, knots, n);
     diagMatrix[n][5] = 0;
     diagMatrix[n-1][5] = 0;
+}
+
+void BSInterpolation::CalculateControlPoints()
+{
+    const int lowerDiagNo = 2; //m1
+    const int upperDiagNo = 2; //m2
+    const int diagNo = 5;
+
+    int n = parameters.length();
+    float** diagMatrix = (float**)malloc(sizeof(float*) * (n+1));
+    float** lowerMatrix = (float**)malloc(sizeof(float*) * (n+1));
+    for(int i = 1; i < n+1;i++){
+        diagMatrix[i] = (float*)malloc(sizeof(float) * (diagNo+1));
+        lowerMatrix[i] = (float*)malloc(sizeof(float) * (lowerDiagNo+1));
+    }
+    unsigned long* index = (unsigned long*)malloc(sizeof(unsigned long) * (n+1));
+
+    initializeDiagonals(diagMatrix, n);
 
     float evenOdd = 0;
-    LU(diagMatrix, n, SUB_DIAG_COUNT, SUPER_DIAG_COUNT, lowerMatrix, index, &evenOdd);
+    LU(diagMatrix, n, lowerDiagNo, upperDiagNo, lowerMatrix, index, &evenOdd);
 
     //get d table
     float* dx = (float*)malloc(sizeof(float) * (n+1));
@@ -249,11 +270,11 @@ void BSInterpolation::CalculateControlPoints()
         dz[i] = markers[i-1]->point.z();
     }
 
-    solveEq(diagMatrix, n , SUB_DIAG_COUNT, SUPER_DIAG_COUNT, lowerMatrix, index, dx);
-    solveEq(diagMatrix, n , SUB_DIAG_COUNT, SUPER_DIAG_COUNT, lowerMatrix, index, dy);
-    solveEq(diagMatrix, n , SUB_DIAG_COUNT, SUPER_DIAG_COUNT, lowerMatrix, index, dz);
+    solveEq(diagMatrix, n , lowerDiagNo, upperDiagNo, lowerMatrix, index, dx);
+    solveEq(diagMatrix, n , lowerDiagNo, upperDiagNo, lowerMatrix, index, dy);
+    solveEq(diagMatrix, n , lowerDiagNo, upperDiagNo, lowerMatrix, index, dz);
     for (int i = 1; i<n+1; i++) {
-        ControlPoints.append(Marker(dx[i], dy[i], dz[i]));
+        ControlPoints.append(Marker(dx[i], dy[i], dz[i], Qt::gray));
         //markers.append(&ControlPoints[i-1]);
     }
     delete dx;
