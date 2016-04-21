@@ -57,6 +57,7 @@ void BSInterpolation::InitializeBSpline(QMatrix4x4 matrix)
     int controlPointsNo = ControlPoints.length(); //n+1
     if(controlPointsNo >= order) {
 
+        
         for (int i = 0; i<linesNo; i++) { //przedzial otwarty
 
             float t = ( (float)i/(float)linesNo );// * ( controlPointsNo - (degree) ) + degree;
