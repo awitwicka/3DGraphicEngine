@@ -24,6 +24,12 @@ BSInterpolation::BSInterpolation(const QList<Marker *> &m, QMatrix4x4 matrix)
 
 void BSInterpolation::InitializeInterpolation(QMatrix4x4 matrix)
 {
+    if (markers.length() >= 4)
+        degree = 3;
+    if (markers.length() == 3)
+        degree = 2;
+    if (markers.length() == 2)
+        degree = 1;
     Clear();
     CalculateParameters();
     CalculateControlPoints();
@@ -56,6 +62,7 @@ void BSInterpolation::InitializeBSpline(QMatrix4x4 matrix)
     int order = degree+1; //k = degreee+1
     int controlPointsNo = ControlPoints.length(); //n+1
     if(controlPointsNo >= order) {
+
 
         for (int i = 0; i<linesNo; i++) { //przedzial otwarty
 
