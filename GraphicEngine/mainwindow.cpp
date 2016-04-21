@@ -80,9 +80,9 @@ int MainWindow::AddMarkerToObjs(QList<QTreeWidgetItem*> objsList, /*QList<CADMar
     int count = 0;
     foreach (QTreeWidgetItem* it, objsList) {
         QString idname = it->text(1);
-        for (int i = 0; i < w->curves.length(); i++) {
-            if (w->curves[i].idname == idname) {
-                w->curves[i].markers.append(&w->markers.last());
+        for (int i = 0; i < w->curves_interpolation.length(); i++) {
+            if (w->curves_interpolation[i].idname == idname) {
+                w->curves_interpolation[i].markers.append(&w->markers.last());
                 QTreeWidgetItem * const clone = item->clone();
                 //QTreeWidgetItem *item = new QTreeWidgetItem(it, QStringList(columns)); //parent, columns names...
                 //item->setFlags(item->flags() | Qt::ItemIsEditable);
@@ -114,6 +114,7 @@ void MainWindow::on_pushButton_addMarker_clicked()
     //bezier c2 //todo send signal to redraw given curve
     w->DeselectSelectedVirtual();
     for (int i = 0; i<w->curves.length(); i++)
+        //w->curves_interpolation[i].InitializeInterpolation();
         w->curves[i].InitializeBezierMarkers();
     w->UpdateSceneElements();
     w->update();
@@ -194,9 +195,9 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
                 if (w->markers[i].idname == idname)
                     w->RemovePoint(i);
             }
-            if (w->curves.length() != 0) {
-                for (int i = 0; i < w->curves.length(); i++) {
-                    if (w->curves[i].idname == idname) {
+            if (w->curves_interpolation.length() != 0) {
+                for (int i = 0; i < w->curves_interpolation.length(); i++) {
+                    if (w->curves_interpolation[i].idname == idname) {
                         for(int i=0;i<it->childCount(); i++) { //TODO: to use that add with correct parent
                         //for (int i=0; i<w->curves[i].markers.length(); i++) {
                             QTreeWidgetItem * const clone = it->child(i)->clone();
@@ -206,18 +207,18 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
                             //delete it->child(i);
                         }
                         delete it;
-                        w->curves.removeAt(i);
+                        w->curves_interpolation.removeAt(i);
                     }
                 }
             } else
                   delete it;
         } else {
             parentIdName = it->parent()->text(1);
-            for (int i = 0; i < w->curves.length(); i++) { //TODO: probably change to CADobject list
-                if (w->curves[i].idname == parentIdName) {
-                    for (int j = 0; j < w->curves[i].markers.length(); j++) {
-                        if (w->curves[i].markers[j]->idname == idname)
-                            w->curves[i].markers.removeAt(j);
+            for (int i = 0; i < w->curves_interpolation.length(); i++) { //TODO: probably change to CADobject list
+                if (w->curves_interpolation[i].idname == parentIdName) {
+                    for (int j = 0; j < w->curves_interpolation[i].markers.length(); j++) {
+                        if (w->curves_interpolation[i].markers[j]->idname == idname)
+                            w->curves_interpolation[i].markers.removeAt(j);
                     }
                     for (int k = 0; k < w->markers.length(); k++) {
                         if (w->markers[i].idname == idname)
@@ -262,13 +263,13 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     QString parentidname = item->text(1);
     if (isPushBezier && parentidname.at(0) == 'b') {
         QList<QTreeWidgetItem*> selected = t->selectedItems();
-        for (int i = 0; i < w->curves.length(); i++) {
-            if (w->curves[i].idname == parentidname) {
+        for (int i = 0; i < w->curves_interpolation.length(); i++) {
+            if (w->curves_interpolation[i].idname == parentidname) {
 
                 foreach (QTreeWidgetItem* it, selected) {
                     for (int j = 0; j<w->markers.length(); j++) {
                         if (w->markers[j].idname == it->text(1)) {
-                            w->curves[i].markers.append(&w->markers[j]);
+                            w->curves_interpolation[i].markers.append(&w->markers[j]);
                             QTreeWidgetItem * const clone = it->clone();
                             item->addChild(clone);
                         }
@@ -423,11 +424,11 @@ void MainWindow::on_pushButton_addInterp_clicked()
     if (w->selectedMarkers.length() <= 0)
         return;
     //crete bezier curve
-    BSInterpolation b = BSInterpolation(w->selectedMarkers, w->worldMatrix);
-    w->curves_interpolation.append(b);
-/*
+    BSInterpolation s = BSInterpolation(w->selectedMarkers, w->worldMatrix);
+    w->curves_interpolation.append(s);
+
     //create and add item to list
-    QList<QString> columns = {b.name, b.idname};
+    QList<QString> columns = {s.name, s.idname};
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
     item->setFlags(item->flags() | Qt::ItemIsEditable);
 
@@ -448,6 +449,6 @@ void MainWindow::on_pushButton_addInterp_clicked()
 
     //select items under new bezier
     for (int i = 0; i<item->childCount(); i++)
-        t->setCurrentItem(item->child(i));*/
+        t->setCurrentItem(item->child(i));
     w->update();
 }
