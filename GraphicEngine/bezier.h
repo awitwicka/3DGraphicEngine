@@ -16,11 +16,11 @@ class Bezier : public CADObject, public CADMarkerObject
     QVector<QPoint> indicesCurve;
     void Clear();
 public:
-    void InitializeBezier(QMatrix4x4 matrix);
+    void InitializeSpline(QMatrix4x4 matrix);
     Bezier();
     QList<Segment> BezierSegments;
     Bezier(QList<Marker*> const & m, QMatrix4x4 matrix);
-    void DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+    void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 
     virtual QVector<QVector4D> getPoints() const;
     virtual void setPoints(const QVector<QVector4D> &value);

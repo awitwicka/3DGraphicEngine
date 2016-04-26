@@ -5,7 +5,7 @@ int CurveC2::id = 0;
 CurveC2::CurveC2()
 {
     name = QString("curveC2 %1").arg(id);
-    idname = QString("b%1").arg(id);
+    idname = QString("c%1").arg(id);
     isBezier = false;
     degree = 3;
     id++;
@@ -14,22 +14,23 @@ CurveC2::CurveC2()
 CurveC2::CurveC2(const QList<Marker *> &m, QMatrix4x4 matrix)
 {
     name = QString("curveC2 %1").arg(id);
-    idname = QString("b%1").arg(id);
+    idname = QString("c%1").arg(id);
     isBezier = false;
     degree = 3;
     id++;
     markers = m;
 
-    InitializeBSpline(matrix);
+    InitializeSpline(matrix);
+    InitializeBezierMarkers(); //initialize onece at creation
 }
 
 void CurveC2::InitializeBezierC2(QMatrix4x4 matrix)
 {
+    ChangeToBezier();
     //WORKS ONLY FOR CUBIC BSPLINES!!!!
     Clear();
     if (markers.length() < degree+1)
         return;
-
 
     int n = bezierMarkers.length();
     float length = 0;
@@ -73,7 +74,7 @@ void CurveC2::InitializeBezierC2(QMatrix4x4 matrix)
     }
 }
 
-void CurveC2::InitializeBSpline(QMatrix4x4 matrix)
+void CurveC2::InitializeSpline(QMatrix4x4 matrix)
 {   
     Clear();
     if (markers.length() < degree+1)

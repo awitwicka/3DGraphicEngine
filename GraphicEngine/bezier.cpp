@@ -32,17 +32,17 @@ Bezier::Bezier(const QList<Marker *> &mark, QMatrix4x4 matrix)
     idname = QString("b%1").arg(id);
     id++;
     markers = mark;
-    InitializeBezier(matrix);
+    InitializeSpline(matrix);
 }
 
-void Bezier::DrawCurve(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+void Bezier::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
 {
     Color = Qt::green;
     Draw(painter, matrix, isStereo, pointsCurve, indicesCurve);
     Color = Qt::white;
 }
 
-void Bezier::InitializeBezier(QMatrix4x4 matrix)
+void Bezier::InitializeSpline(QMatrix4x4 matrix)
 {
     Clear();
     int n = markers.length();

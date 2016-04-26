@@ -39,43 +39,32 @@ void Widget::paintEvent(QPaintEvent *)
     cursor.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
-    for (int i = 0; i< bezier_objects.length(); i++) {
-        //TODO: only if zoom points/grabbing/points no change
-        bezier_objects[i].InitializeBezier(worldMatrix);
-        bezier_objects[i].Draw(painter, worldMatrix, isStereo);
-        if (showCurve)
-            bezier_objects[i].DrawCurve(painter, worldMatrix, isStereo);
 
-    }
-    for (int i = 0; i< curves_interpolation.length(); i++) {
-        //TODO: only if zoom points/grabbing/points no change
-        curves_interpolation[i].InitializeInterpolation(worldMatrix);
-        curves_interpolation[i].Draw(painter, worldMatrix, isStereo);
-        //if (showCurve)
-            //curves_interpolation[i].DrawCurve(painter, worldMatrix, isStereo);
-    }
-    switch(curveMode) {
-        case 0: //b-spline
-            for (int i = 0; i< curves.length(); i++) {
-                //TODO: only if zoom points/grabbing/points no change
-                curves[i].Draw(painter, worldMatrix, isStereo);
-                if (showCurve)
-                    curves[i].DrawPolygon(painter, worldMatrix, isStereo);
-                //here draw virtual bezier points
+
+    //DRAW SPLINES
+    for (int i = 0; i< Splines.length(); i++) {
+        //todo move to updatescene and move to CADObject
+        //Splines[i]->InitializeSpline(worldMatrix);
+        CADObject* obj = dynamic_cast<CADObject*>(Splines[i]);
+        obj->Draw(painter, worldMatrix, isStereo);
+
+        if (dynamic_cast<CurveC2*>(Splines[i])) {
+        //if(Splines[i]->idname.at(0) == 's') //is BSinterpolation (change to typeof later)
+            CurveC2* c = dynamic_cast<CurveC2*>(Splines[i]);
+            switch(curveMode) {
+                case 0: //b-spline
+                    break;
+                case 1: //bezier
+                    //draw bezier markers
+                    for (int j = 0; j < c->bezierMarkers.length(); j++)
+                        c->bezierMarkers[j].Draw(painter, worldMatrix, isStereo); ;
+                    break;
+                default:
+                    break;
             }
-            break;
-        case 1: //bezier
-            for (int i = 0; i< curves.length(); i++) {
-                //TODO: only if zoom points/grabbing/points no change
-                curves[i].Draw(painter, worldMatrix, isStereo);
-                for (int j = 0; j < curves[i].bezierMarkers.length(); j++)
-                    curves[i].bezierMarkers[j].Draw(painter, worldMatrix, isStereo); ;
-                if (showCurve)
-                    curves[i].DrawPolygon(painter, worldMatrix, isStereo);
-            }
-            break;
-        default:
-            break;
+        }
+        if (showCurve)
+            Splines[i]->DrawPolygon(painter, worldMatrix, isStereo);
     }
 }
 
@@ -195,8 +184,12 @@ void Widget::mousePressEvent(QMouseEvent *event)
             if(event->buttons() & Qt::LeftButton) {
                     SelectIfInRange(markers, false);
                 if (showCurve) {
-                    for (int i = 0; i<curves.length(); i++)
-                        SelectIfInRange(curves[i].bezierMarkers, true);
+                    for (int i = 0; i< Splines.length(); i++) {
+                        if (dynamic_cast<CurveC2*>(Splines[i])) {
+                            CurveC2* c = dynamic_cast<CurveC2*>(Splines[i]);
+                            SelectIfInRange(c->bezierMarkers, true);
+                        }
+                    }
                 }
             }
             break;
@@ -374,8 +367,6 @@ void Widget::switchCurveMode(int index)
 {
     curveMode = index;
     selectedVirtualMarker = nullptr;
-    for (int i = 0; i<curves.length(); i++)
-        curves[i].InitializeBezierMarkers();
     UpdateSceneElements();
     update();
 }
@@ -384,22 +375,35 @@ void Widget::UpdateSceneElements()
 {
     //TODO upadate only curve that has changed!!!
     //TODO: change to bez only if clicked change/in bezier mode
-    switch(curveMode) {
-        case 0: //b-spline
-            for (int i = 0; i< curves.length(); i++) {
-                curves[i].InitializeBSpline(worldMatrix);
+    for (int i = 0; i< Splines.length(); i++) {
+        Splines[i]->InitializeSpline(worldMatrix);
+        if (dynamic_cast<CurveC2*>(Splines[i])) {
+            CurveC2* c = dynamic_cast<CurveC2*>(Splines[i]);
+            switch(curveMode) {
+                case 0: //b-spline
+                    //c->InitializeSpline(worldMatrix); //fill point/indices with bspline
+                    break;
+                case 1: //bezier
+                    c->InitializeBezierC2(worldMatrix);//fill point/indices with bezier
+                    break;
+                default:
+                    break;
             }
-            break;
-        case 1: //bezier
-            for (int i = 0; i< curves.length(); i++) {
-                curves[i].ChangeToBezier();
-                curves[i].InitializeBezierC2(worldMatrix);
-            }   
-            break;
-        default:
-            break;
+        }
     }
 
+}
+
+//need to keep pointers while moving so clear the list only on points no change
+void Widget::UpdateOnMarkersChanged()
+{
+    for (int i = 0; i< Splines.length(); i++) {
+        Splines[i]->InitializeSpline(worldMatrix);
+        if (dynamic_cast<CurveC2*>(Splines[i])) {
+            CurveC2* c = dynamic_cast<CurveC2*>(Splines[i]);
+            c->InitializeBezierMarkers();
+        }
+    }
 }
 
 void Widget::visitTree(/*QStringList &list*/QList<QTreeWidgetItem*> &items, QTreeWidgetItem *item, QString condition){

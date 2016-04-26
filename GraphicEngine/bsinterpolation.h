@@ -28,7 +28,7 @@ public:
     BSInterpolation();
     BSInterpolation(QList<Marker*> const & m, QMatrix4x4 matrix);
     //TODO: virtualize
-    void InitializeInterpolation(QMatrix4x4 matrix);
+    void InitializeSpline(QMatrix4x4 matrix);
     void InitializeBSpline(QMatrix4x4 matrix);
     QVector4D getBezierPoint(Segment seg, float t);
 

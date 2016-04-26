@@ -39,10 +39,8 @@ public:
     bool showCurve;
     bool IsMultipleSelect;
     QMatrix4x4 worldMatrix, viewMatrix;
+    QList<CADMarkerObject*> Splines;
     QList<Marker> markers;
-    QList<Bezier> bezier_objects;
-    QList<CurveC2> curves;
-    QList<BSInterpolation> curves_interpolation;
     QList<Marker*> selectedMarkers;
     Marker* selectedVirtualMarker;
     Torus t1;
@@ -65,6 +63,7 @@ public:
     void switchSceneMode(int index);
     void switchCurveMode(int index);
     void UpdateSceneElements();
+    void UpdateOnMarkersChanged();
 
     void SelectIfInRange(QList<Marker> & m, bool isVirtualMarker);
 

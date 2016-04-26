@@ -15,7 +15,8 @@ public:
 
     CADMarkerObject();
     virtual ~CADMarkerObject()=0;
-    virtual void InitializeBSpline(QMatrix4x4 matrix);
+    virtual void InitializeSpline(QMatrix4x4 matrix)=0;
+    virtual void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 };
 
 #endif // CADMARKEROBJECT_H

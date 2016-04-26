@@ -19,10 +19,10 @@ BSInterpolation::BSInterpolation(const QList<Marker *> &m, QMatrix4x4 matrix)
     id++;
 
     markers = m;
-    InitializeInterpolation(matrix);
+    InitializeSpline(matrix);
 }
 
-void BSInterpolation::InitializeInterpolation(QMatrix4x4 matrix)
+void BSInterpolation::InitializeSpline(QMatrix4x4 matrix)
 {
     if (markers.length() == 1)
         return;
