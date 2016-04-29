@@ -5,7 +5,7 @@
 #define DEGREE 3
 #define ORDER DEGREE+1
 
-class BicubicSegment : CADObject
+class BicubicSegment : public CADObject
 {
     //-1 for lack of data
     QVector4D getBezierPoint(QVector4D points[ORDER], float t);
@@ -13,11 +13,12 @@ class BicubicSegment : CADObject
     QVector4D getBezierPointRow(int index, float t);
     void Clear();
 public:
-    int U = 4;
-    int V = 4;
-    float segLength;
+    int U;
+    int V;
+    //float segLengthX;
+    //float segLengthY;
     BicubicSegment();
-    BicubicSegment(QList<Marker*> m, int u, int v, float length);
+    BicubicSegment(QList<Marker*> m, int u, int v/*, float width, float height*/);
     void InitializeSpline(QMatrix4x4 matrix);
     int pointsNo;
     Marker* markers[ORDER][ORDER];

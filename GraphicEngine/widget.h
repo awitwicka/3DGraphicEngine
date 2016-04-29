@@ -12,6 +12,7 @@
 #include "bezier.h"
 #include "curveC2.h"
 #include "bsinterpolation.h"
+#include "bezierplane.h"
 //#include "virtualmarker.h"
 
 class Widget : public QWidget
@@ -19,6 +20,7 @@ class Widget : public QWidget
     Q_OBJECT
     qreal scale;
     //Torus t1;
+    BezierPlane b1;
     QPoint savedMouse;
     int sceneMode;
     int curveMode;

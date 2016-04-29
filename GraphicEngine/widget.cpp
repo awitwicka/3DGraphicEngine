@@ -21,6 +21,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     setFocusPolicy(Qt::StrongFocus);
     selectedVirtualMarker = nullptr;
     //setMouseTracking(true);
+    b1 = BezierPlane(worldMatrix);
 }
 
 void Widget::paintEvent(QPaintEvent *)
@@ -39,7 +40,7 @@ void Widget::paintEvent(QPaintEvent *)
     cursor.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
-
+    b1.Draw(painter, worldMatrix, isStereo);
 
     //DRAW SPLINES
     for (int i = 0; i< Splines.length(); i++) {

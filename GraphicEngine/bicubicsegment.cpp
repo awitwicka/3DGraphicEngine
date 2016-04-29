@@ -5,13 +5,14 @@ BicubicSegment::BicubicSegment()
 
 }
 
-BicubicSegment::BicubicSegment(QList<Marker *> m, int u, int v, float length)
+BicubicSegment::BicubicSegment(QList<Marker *> m, int u, int v/*, float width, float height*/)
 {
     if (m.length() != ORDER*ORDER)
         return;
     U = u;
     V = v;
-    segLength = length;
+    //segLengthX = width;
+    //segLengthY = height;
     for (int y = 0; y<ORDER; y++) {
         for (int x = 0; x<ORDER; x++) {
             markers[x][y] = m[y*ORDER + x];
@@ -21,18 +22,16 @@ BicubicSegment::BicubicSegment(QList<Marker *> m, int u, int v, float length)
 
 void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
 {
-    float unitX = segLength/U;
-    float unitY = segLength/V;
+    //float unitX = segLengthX/U;
+    //float unitY = segLengthY/V;
     Clear();
-
-
 
     int linesNo = 100;//(int)length;
     for (int u = 0; u < U+1; u++) {
         //calculate points
         QVector4D data[ORDER];
         for (int i = 0; i<ORDER; i++)
-           data[i] = getBezierPointRow(i, (u*unitX)/(unitX*U));
+           data[i] = getBezierPointRow(i, (u/**unitX*/)/(float)(/*unitX**/U));
         //get bezier line from calculated points
         for (int i = 0; i <= linesNo; i++)
             points.append(getBezierPoint(data, (float)i/(float)linesNo));
@@ -44,7 +43,7 @@ void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
         //calculate points
         QVector4D data[ORDER];
         for (int i = 0; i<ORDER; i++)
-           data[i] = getBezierPointCol(i, (v*unitY)/(unitY*V));
+           data[i] = getBezierPointCol(i, (v/**unitY*/)/(float)(/*unitY**/V));
         //get bezier line from calculated points
         for (int i = 0; i <= linesNo; i++)
             points.append(getBezierPoint(data, (float)i/(float)linesNo));
