@@ -10,7 +10,6 @@ class Bezier : public CADObject, public CADMarkerObject
 {
     static int id;
     QVector4D getBezierPoint(Segment seg, float t);
-    void getCurveGeometry();
 
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;

@@ -81,7 +81,7 @@ void Bezier::InitializeSpline(QMatrix4x4 matrix)
         for (int i = 0; i <= linesNo; i++) {
             points.append(getBezierPoint(BezierSegments[s], (float)i/(float)linesNo));
         }
-        for (j; j < (linesNo*(s+1)); j++) {
+        for (j; j <(linesNo*(s+1)); j++) {
             indices.append(QPoint(j, j+1));
         }
     }
