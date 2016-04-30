@@ -21,7 +21,8 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     setFocusPolicy(Qt::StrongFocus);
     selectedVirtualMarker = nullptr;
     //setMouseTracking(true);
-    b1 = BezierPlane(worldMatrix);
+    CADSplinePatch* b1 = new BezierPlane(worldMatrix);
+    SplinePatches.append(b1);
 }
 
 void Widget::paintEvent(QPaintEvent *)
@@ -34,13 +35,11 @@ void Widget::paintEvent(QPaintEvent *)
     painter.setPen(Qt::white);
 
     //DRAWING OBJECTS ON THE SCENE
-    //TODO: loop through all existing objects on the scene: for()
     //TODO: draw axis in the middle of the scene
     //t1.Draw(painter, worldMatrix, isStereo);
     cursor.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
-    b1.Draw(painter, worldMatrix, isStereo);
 
     //DRAW SPLINES
     for (int i = 0; i< Splines.length(); i++) {
@@ -67,6 +66,14 @@ void Widget::paintEvent(QPaintEvent *)
         if (showCurve)
             Splines[i]->DrawPolygon(painter, worldMatrix, isStereo);
     }
+    //DRAW SPLINE_PATCHES
+    for (int i = 0; i< SplinePatches.length(); i++) {
+        CADObject* obj = dynamic_cast<CADObject*>(SplinePatches[i]);
+        obj->Draw(painter, worldMatrix, isStereo);
+
+        for (int j = 0; j<SplinePatches[i]->markers.length(); j++)
+            SplinePatches[i]->markers[j].Draw(painter, worldMatrix, isStereo);
+    }
 }
 
 void Widget::wheelEvent(QWheelEvent * event)
@@ -85,7 +92,7 @@ void Widget::wheelEvent(QWheelEvent * event)
     update();
 }
 
-void Widget::HandlePointSelection(int i, bool IsMultiSelect)
+void Widget::HandlePointSelection(Marker* marker, bool IsMultiSelect)
 { 
     if (selectedVirtualMarker != nullptr) {
         selectedVirtualMarker->setColor(normalColor);
@@ -99,23 +106,23 @@ void Widget::HandlePointSelection(int i, bool IsMultiSelect)
             selectedMarkers[i]->IsSelected = false;
         }
         selectedMarkers.clear();
-        selectedMarkers.append(&markers[i]);
-        markers[i].setColor(highlighColor);
-        markers[i].IsSelected = true;
+        selectedMarkers.append(marker); //TODO check if marker adress is same in both lists
+        marker->setColor(highlighColor);
+        marker->IsSelected = true;
     } else {
-        if (markers[i].IsSelected) {
-            selectedMarkers.removeAll(&markers[i]);
-            markers[i].setColor(normalColor);
-            markers[i].IsSelected = false;
+        if (marker->IsSelected) {
+            selectedMarkers.removeAll(marker); //TODO check if marker adress is same in both lists
+            marker->setColor(normalColor);
+            marker->IsSelected = false;
 
         } else {
-            selectedMarkers.append(&markers[i]);
-            markers[i].setColor(highlighColor);
-            markers[i].IsSelected = true;
+            selectedMarkers.append(marker); //TODO check if marker adress is same in both lists
+            marker->setColor(highlighColor);
+            marker->IsSelected = true;
         }
     }
 
-    cursor.center = QVector4D(markers[i].point.x(),markers[i].point.y(),markers[i].point.z(),1);
+    cursor.center = QVector4D(marker->point.x(),marker->point.y(),marker->point.z(),1);
     cursor.updateCursor(worldMatrix);
 }
 
@@ -164,7 +171,7 @@ void Widget::SelectIfInRange(QList<Marker> &mark, bool isVirtualMarker)
         float worldY = mark[i].pointWorld.y();
         if (x >= worldX-offset && x <= worldX+offset && y >= worldY-offset && y <= worldY+offset) {
             if (!isVirtualMarker) {
-                HandlePointSelection(i, IsMultipleSelect);
+                HandlePointSelection(&mark[i], IsMultipleSelect);
                 QList<QTreeWidgetItem*> result = visitTree(tree, mark[i].idname);
                 for(int i = 0; i < result.length(); i++)
                     tree->setCurrentItem(result[i]);
@@ -183,7 +190,9 @@ void Widget::mousePressEvent(QMouseEvent *event)
             break;
         case 1: //Edit Points
             if(event->buttons() & Qt::LeftButton) {
-                    SelectIfInRange(markers, false);
+                SelectIfInRange(markers, false);
+                for (int i = 0; i<SplinePatches.length(); i++)
+                    SelectIfInRange(SplinePatches[i]->markers, false); //TODO Handle deleting points, if points common with Spline Curves
                 if (showCurve) {
                     for (int i = 0; i< Splines.length(); i++) {
                         if (dynamic_cast<CurveC2*>(Splines[i])) {
@@ -329,6 +338,7 @@ void Widget::keyPressEvent(QKeyEvent *event)
 
         break;
     case 1: //Edit Points
+        //TODO podpinaj markery do siatki
         if(event->key() == Qt::Key_Space) {
             float dist; //TODO get init dist
             float index;
@@ -347,7 +357,7 @@ void Widget::keyPressEvent(QKeyEvent *event)
 
             if (dist > cursor.range)
                 return;
-            HandlePointSelection(index, IsMultipleSelect);
+            HandlePointSelection(&markers[index], IsMultipleSelect);
             QList<QTreeWidgetItem*> result = visitTree(tree, markers[index].idname);
             for(int i = 0; i < result.length(); i++)
                 tree->setCurrentItem(result[i]);
@@ -391,6 +401,9 @@ void Widget::UpdateSceneElements()
                     break;
             }
         }
+    }
+    for (int i = 0; i< SplinePatches.length(); i++) {
+        SplinePatches[i]->InitializeSpline(worldMatrix);
     }
 
 }

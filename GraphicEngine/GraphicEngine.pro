@@ -28,7 +28,8 @@ SOURCES += main.cpp\
     cadmarkerobject.cpp \
     bsinterpolation.cpp \
     bezierplane.cpp \
-    bicubicsegment.cpp
+    bicubicsegment.cpp \
+    cadsplinepatch.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -43,6 +44,7 @@ HEADERS  += mainwindow.h \
     cadmarkerobject.h \
     bsinterpolation.h \
     bezierplane.h \
-    bicubicsegment.h
+    bicubicsegment.h \
+    cadsplinepatch.h
 
 FORMS    += mainwindow.ui

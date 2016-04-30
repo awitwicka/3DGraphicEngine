@@ -2,10 +2,10 @@
 #define BEZIERPLANE_H
 
 #include "cadobject.h"
-#include "cadmarkerobject.h"
 #include "bicubicsegment.h"
+#include "cadsplinepatch.h"
 
-class BezierPlane : public CADObject, public CADMarkerObject
+class BezierPlane : public CADObject, public CADSplinePatch
 {
     static int id;
     //QVector4D getBezierPoint(BicubicSegment seg, float t);
@@ -26,9 +26,9 @@ public:
     BezierPlane();
     BezierPlane(QMatrix4x4 matrix);
     QList<BicubicSegment> BezierSegments;
-    QList<QList<Marker*>> BezierSegMarkers;
+    QVector<QList<Marker*>> BezierSegMarkers;
+    //QList<Marker*[]> BezierSegMarkers;
 
-    QList<Marker> markers; //TODO check if not colliding with abstract MArker* markers
     void InitializeSpline(QMatrix4x4 matrix);
     void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 
@@ -38,7 +38,7 @@ public:
     virtual void setPoints(const QVector<QVector4D> &value);
     virtual QVector<QPoint> getIndices() const;
     virtual void setIndices(const QVector<QPoint> &value);
-    QList<Marker *> getMarkers();
+    QList<Marker> getMarkers();
 };
 
 #endif // BEZIERPLANE_H

@@ -42,6 +42,7 @@ public:
     bool IsMultipleSelect;
     QMatrix4x4 worldMatrix, viewMatrix;
     QList<CADMarkerObject*> Splines;
+    QList<CADSplinePatch*> SplinePatches;
     QList<Marker> markers;
     QList<Marker*> selectedMarkers;
     Marker* selectedVirtualMarker;
@@ -57,7 +58,7 @@ public:
     void keyPressEvent(QKeyEvent*event);
 
     //points handling
-    void HandlePointSelection(int i, bool IsMultiSelect);
+    void HandlePointSelection(Marker* marker, bool IsMultiSelect);
     void RemovePoint(int i);
     void DeselectSelectedVirtual();
     void SelectVirtualDeselectAll(Marker* m);

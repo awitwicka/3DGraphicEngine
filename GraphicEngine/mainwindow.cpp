@@ -265,7 +265,7 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     QString idname = item->text(1);
     for (int i = 0; i < w->markers.length(); i++) {
         if (w->markers[i].idname == idname) {
-           w->HandlePointSelection(i, w->IsMultipleSelect);
+           w->HandlePointSelection(&w->markers[i], w->IsMultipleSelect);
         }
             //w->markers.removeAt(i);
             //function to select marker etc (refactor from switch)

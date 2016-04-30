@@ -1,13 +1,16 @@
 #ifndef BICUBICSEGMENT_H
 #define BICUBICSEGMENT_H
 
+#include "cadsplinepatch.h"
 #include "marker.h"
 #define DEGREE 3
-#define ORDER DEGREE+1
+#define ORDER 4
 
-class BicubicSegment : public CADObject
+class BicubicSegment : public CADObject, public CADSplinePatch
 {
-    //-1 for lack of data
+    QVector<QVector4D> pointsCurve;
+    QVector<QPoint> indicesCurve;
+
     QVector4D getBezierPoint(QVector4D points[ORDER], float t);
     QVector4D getBezierPointCol(int index, float t);
     QVector4D getBezierPointRow(int index, float t);
@@ -18,7 +21,7 @@ public:
     //float segLengthX;
     //float segLengthY;
     BicubicSegment();
-    BicubicSegment(QList<Marker*> m, int u, int v/*, float width, float height*/);
+    BicubicSegment(QList<Marker*>* m, int u, int v, QMatrix4x4 matrix);
     void InitializeSpline(QMatrix4x4 matrix);
     int pointsNo;
     Marker* markers[ORDER][ORDER];

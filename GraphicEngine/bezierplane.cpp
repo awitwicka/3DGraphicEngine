@@ -9,7 +9,7 @@ BezierPlane::BezierPlane()
 
 }
 
-BezierPlane::BezierPlane(QMatrix4x4 matrix) : U(5), V(5), Width(400), Height(500), X(3), Y(3)
+BezierPlane::BezierPlane(QMatrix4x4 matrix) : U(5), V(5), Width(500), Height(400), X(3), Y(3)
 {
     name = QString("BezierPlane %1").arg(id);
     idname = QString("bp%1").arg(id);
@@ -25,21 +25,31 @@ void BezierPlane::InitializeMarkers()
     float bicubicWidth = Width/X;
     float bicubicHeight = Height/Y;
 
-    float unitX = bicubicWidth/ORDER;
-    float unitY = bicubicHeight/ORDER;
+    float unitX = bicubicWidth/ORDER-1;
+    float unitY = bicubicHeight/ORDER-1;
 
+    int count = 0;
     for (int y = 0; y<Y; y++) {
     for (int x = 0; x<X; x++) {
-        QList<Marker*> m;
+        BezierSegMarkers.append(QList<Marker*>());
         for (int i = 0; i<ORDER; i++)
-            for (int j = 0; j<ORDER; j++) {
-                markers.append(Marker((unitX*i)+(bicubicWidth*x), (unitY*j)+(bicubicHeight*y), 0));
-                m.append(&markers[i*(ORDER) + j]);
+            for (int j = 0; j<ORDER; j++) {                
+                //weź z komórki po lewej
+                /*if (j==0 && x>0) {
+                     BezierSegMarkers[y*(Y) + x].append(&markers[i*(ORDER) + j]);
+                //weź z góry
+                } else if (i==0 && y>0) {
+                     BezierSegMarkers[y*(Y) + x].append(&markers[i*(ORDER) + j]);
+                } else {*/
+                    markers.append(Marker((unitX*j)+(bicubicWidth*x), (unitY*i)+(bicubicHeight*y), 0));
+                    BezierSegMarkers[y*(Y) + x].append(&markers[/*i*(ORDER) + j*/count]);
+                    count++;
+                //BezierSegMarkers[y*(Y) + x].append(&markers[/*i*(ORDER) + j*/count]);
             }
-        BezierSegMarkers.append(m);
+        }
     }
     }
-}
+//}
 
 void BezierPlane::Clear()
 {
@@ -51,7 +61,7 @@ void BezierPlane::InitializeSpline(QMatrix4x4 matrix)
 {
     Clear();
     for (int i = 0; i<BezierSegMarkers.length(); i++)
-         BezierSegments.append(BicubicSegment(BezierSegMarkers[i], U, V));
+         BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix));
 }
 
 void BezierPlane::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
@@ -80,10 +90,11 @@ void BezierPlane::setPoints(const QVector<QVector4D> &value)
     points = value;
 }
 
-QList<Marker *> BezierPlane::getMarkers()
+QList<Marker> BezierPlane::getMarkers()
 {
-    QList<Marker*> m;
+    /*QList<Marker*> m;
     for (int i = 0; i<markers.length(); i++)
         m.append(&markers[i]);
-    return m;
+    return m;*/
+    return markers;
 }

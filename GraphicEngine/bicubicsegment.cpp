@@ -5,9 +5,9 @@ BicubicSegment::BicubicSegment()
 
 }
 
-BicubicSegment::BicubicSegment(QList<Marker *> m, int u, int v/*, float width, float height*/)
+BicubicSegment::BicubicSegment(QList<Marker *>* m, int u, int v, QMatrix4x4 matrix)
 {
-    if (m.length() != ORDER*ORDER)
+    if (m->length() != ORDER*ORDER)
         return;
     U = u;
     V = v;
@@ -15,9 +15,10 @@ BicubicSegment::BicubicSegment(QList<Marker *> m, int u, int v/*, float width, f
     //segLengthY = height;
     for (int y = 0; y<ORDER; y++) {
         for (int x = 0; x<ORDER; x++) {
-            markers[x][y] = m[y*ORDER + x];
+            markers[x][y] = (*m)[y*ORDER + x];
         }
     }
+    InitializeSpline(matrix);
 }
 
 void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
@@ -25,20 +26,58 @@ void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
     //float unitX = segLengthX/U;
     //float unitY = segLengthY/V;
     Clear();
+    //calc lines number in curves and curvepath
+    int n = ORDER;
+    float length = 0;
+    float lengthX [ORDER];
+    float lengthY [ORDER];
+    //initialize Curve
+    int count = 0;
+    /*for (int x = 0; x<ORDER; x++) {
+        for (int i = 0; i < n-1; i++) {
+            pointsCurve.append(markers[x][i]->point);
+            indicesCurve.append(QPoint(count, count+1));
+            QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[x][i]->point;
+            QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[x][i+1]->point;
+            q1 = q1/q1.w();
+            q2 = q2/q2.w();
+            lengthX[x] += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
+            count++;
+        }
+        count++;
+        pointsCurve.append(markers[x][n-1]->point);
+    }
+    for (int y = 0; y<ORDER; y++) {
+        for (int i = 0; i < n-1; i++) {
+            pointsCurve.append(markers[i][y]->point);
+            indicesCurve.append(QPoint(count, count+1));
+            QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[i][y]->point;
+            QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[i+1][y]->point;
+            q1 = q1/q1.w();
+            q2 = q2/q2.w();
+            lengthY[y] += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
+            count++;
+        }
+        count++;
+        pointsCurve.append(markers[n-1][y]->point);
+    }*/
 
-    int linesNo = 100;//(int)length;
+    count = 0;
+    int linesNo=100;// = (int)length;
     for (int u = 0; u < U+1; u++) {
         //calculate points
         QVector4D data[ORDER];
         for (int i = 0; i<ORDER; i++)
-           data[i] = getBezierPointRow(i, (u/**unitX*/)/(float)(/*unitX**/U));
+           data[i] = getBezierPointRow(i, u/(float)U);
         //get bezier line from calculated points
         for (int i = 0; i <= linesNo; i++)
             points.append(getBezierPoint(data, (float)i/(float)linesNo));
-        for (int j = 0; j <linesNo; j++)
-            indices.append(QPoint(j, j+1));
+        for (int j = 0; j <linesNo; j++) {
+            indices.append(QPoint(count, count+1));
+            count++;
+        }
+        count++;
     }
-
     for (int v = 0; v < V+1; v++) {
         //calculate points
         QVector4D data[ORDER];
@@ -47,25 +86,12 @@ void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
         //get bezier line from calculated points
         for (int i = 0; i <= linesNo; i++)
             points.append(getBezierPoint(data, (float)i/(float)linesNo));
-        for (int j = 0; j <linesNo; j++)
-            indices.append(QPoint(j, j+1));
+        for (int j = 0; j <linesNo; j++) {
+            indices.append(QPoint(count, count+1));
+            count++;
+        }
+        count++;
     }
-
-/*    int n = markers.length();
-    float length = 0;
-    //initialize Curve
-    for (int i = 0; i < n-1; i++) {
-        pointsCurve.append(markers[i]->point);
-        indicesCurve.append(QPoint(i, i+1));
-        QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[i]->point;
-        QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[i+1]->point;
-        q1 = q1/q1.w();
-        q2 = q2/q2.w();
-        length += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
-    }
-    pointsCurve.append(markers.last()->point);
-   */
-
 }
 
 QVector4D BicubicSegment::getBezierPointCol(int index, float t)
@@ -74,7 +100,7 @@ QVector4D BicubicSegment::getBezierPointCol(int index, float t)
     for (int i = 0; i<ORDER; i++) {
         data[i] = markers[i][index]->point;
     }
-    getBezierPoint(data, t);
+    return getBezierPoint(data, t);
 }
 
 QVector4D BicubicSegment::getBezierPointRow(int index, float t)
@@ -83,19 +109,34 @@ QVector4D BicubicSegment::getBezierPointRow(int index, float t)
     for (int i = 0; i<ORDER; i++) {
         data[i] = markers[index][i]->point;
     }
-    getBezierPoint(data, t);
+    return getBezierPoint(data, t);
 }
 
-QVector4D BicubicSegment::getBezierPoint(QVector4D points[ORDER], float t)
+QVector4D BicubicSegment::getBezierPoint(QVector4D pkt[ORDER], float t)
 {
-    int degree = ORDER-1;
+    /*QVector4D* tmp = new QVector4D[seg.markers.length()];
+    for (int i = 0; i < seg.pointsNo; i++) {
+        tmp[i] = seg.markers[i]->point;
+    }
+    int degree = seg.pointsNo-1;
     while (degree > 0) {
         for (int k = 0; k < degree; k++)
-            points[k] = points[k] + t * ( points[k+1] - points[k] );
+            tmp[k] = tmp[k] + t * ( tmp[k+1] - tmp[k] );
         degree--;
     }
     //todo w = 1;
-    QVector4D p = points[0];
+    QVector4D p = tmp[0];
+    delete[] tmp;
+    return p;*/
+
+    int degree = ORDER-1;
+    while (degree > 0) {
+        for (int k = 0; k < degree; k++)
+            pkt[k] = pkt[k] + t * ( pkt[k+1] - pkt[k] );
+        degree--;
+    }
+    //todo w = 1;
+    QVector4D p = pkt[0];
     return p;
 }
 
