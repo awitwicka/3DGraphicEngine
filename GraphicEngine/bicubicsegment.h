@@ -23,6 +23,7 @@ public:
     BicubicSegment();
     BicubicSegment(QList<Marker*>* m, int u, int v, QMatrix4x4 matrix);
     void InitializeSpline(QMatrix4x4 matrix);
+    void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     int pointsNo;
     Marker* markers[ORDER][ORDER];
     //QList<Marker*> markers;

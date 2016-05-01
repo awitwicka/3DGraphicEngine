@@ -21,6 +21,8 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     setFocusPolicy(Qt::StrongFocus);
     selectedVirtualMarker = nullptr;
     //setMouseTracking(true);
+    background.setRgb(105,105,105,255);
+    background = Qt::black;
     CADSplinePatch* b1 = new BezierPlane(worldMatrix);
     SplinePatches.append(b1);
 }
@@ -29,7 +31,7 @@ void Widget::paintEvent(QPaintEvent *)
 {
     //BRUSH AND VIEWPORT SETTINGS
     QPainter painter(this);
-    painter.fillRect(this->rect(),Qt::black);
+    painter.fillRect(this->rect(), background);
     //QRect r = painter.viewport();
     painter.setViewport(width()/2,height()/2,width(),height());
     painter.setPen(Qt::white);
@@ -73,6 +75,8 @@ void Widget::paintEvent(QPaintEvent *)
 
         for (int j = 0; j<SplinePatches[i]->markers.length(); j++)
             SplinePatches[i]->markers[j].Draw(painter, worldMatrix, isStereo);
+        if (showCurve)
+            SplinePatches[i]->DrawPolygon(painter, worldMatrix, isStereo);
     }
 }
 

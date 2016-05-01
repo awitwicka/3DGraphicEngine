@@ -70,6 +70,12 @@ void BezierPlane::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
         BezierSegments[i].Draw(painter, matrix, isStereo);
 }
 
+void BezierPlane::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+{
+    for (int i = 0; i<BezierSegments.length(); i++)
+        BezierSegments[i].DrawPolygon(painter, matrix, isStereo);
+}
+
 QVector<QPoint> BezierPlane::getIndices() const
 {
     return indices;

@@ -26,6 +26,7 @@ class Widget : public QWidget
     int curveMode;
     QColor normalColor;
     QColor highlighColor;
+    QColor background;
     //QList<CADObject> objects;
     //objs[i]->f(u,v);
     //void DrawCursor

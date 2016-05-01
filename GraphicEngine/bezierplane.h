@@ -10,8 +10,8 @@ class BezierPlane : public CADObject, public CADSplinePatch
     static int id;
     //QVector4D getBezierPoint(BicubicSegment seg, float t);
     
-    QVector<QVector4D> pointsCurve;
-    QVector<QPoint> indicesCurve;
+    //QVector<QVector4D> pointsCurve;
+    //QVector<QPoint> indicesCurve;
 
     void InitializeMarkers();
     void Clear();
@@ -31,6 +31,8 @@ public:
 
     void InitializeSpline(QMatrix4x4 matrix);
     void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+    void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+
 
     //void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 

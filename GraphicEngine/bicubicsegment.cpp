@@ -33,7 +33,7 @@ void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
     float lengthY [ORDER];
     //initialize Curve
     int count = 0;
-    /*for (int x = 0; x<ORDER; x++) {
+    for (int x = 0; x<ORDER; x++) {
         for (int i = 0; i < n-1; i++) {
             pointsCurve.append(markers[x][i]->point);
             indicesCurve.append(QPoint(count, count+1));
@@ -60,7 +60,7 @@ void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
         }
         count++;
         pointsCurve.append(markers[n-1][y]->point);
-    }*/
+    }
 
     count = 0;
     int linesNo=100;// = (int)length;
@@ -92,6 +92,13 @@ void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
         }
         count++;
     }
+}
+
+void BicubicSegment::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+{
+    Color = Qt::green;
+    Draw(painter, matrix, isStereo, pointsCurve, indicesCurve);
+    Color = Qt::white;
 }
 
 QVector4D BicubicSegment::getBezierPointCol(int index, float t)
