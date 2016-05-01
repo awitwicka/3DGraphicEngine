@@ -1,6 +1,6 @@
 #include "bezierplane.h"
 
-#define ORDER 3+1
+#define ORDER 4
 
 int BezierPlane::id = 0;
 
@@ -25,8 +25,8 @@ void BezierPlane::InitializeMarkers()
     float bicubicWidth = Width/X;
     float bicubicHeight = Height/Y;
 
-    float unitX = bicubicWidth/ORDER-1;
-    float unitY = bicubicHeight/ORDER-1;
+    float unitX = bicubicWidth/(ORDER-1);
+    float unitY = bicubicHeight/(ORDER-1);
 
     int count = 0;
     for (int y = 0; y<Y; y++) {
@@ -35,21 +35,21 @@ void BezierPlane::InitializeMarkers()
         for (int i = 0; i<ORDER; i++)
             for (int j = 0; j<ORDER; j++) {                
                 //weź z komórki po lewej
-                /*if (j==0 && x>0) {
-                     BezierSegMarkers[y*(Y) + x].append(&markers[i*(ORDER) + j]);
+                if (j==0 && x>0) {
+                    int l = i*ORDER + ORDER-1;
+                    BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[y*(Y) + (x-1)].at(i*ORDER + ORDER-1));
                 //weź z góry
                 } else if (i==0 && y>0) {
-                     BezierSegMarkers[y*(Y) + x].append(&markers[i*(ORDER) + j]);
-                } else {*/
+                    BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[(y-1)*(Y) + x].at((ORDER-1)*ORDER + j));
+                } else {
                     markers.append(Marker((unitX*j)+(bicubicWidth*x), (unitY*i)+(bicubicHeight*y), 0));
-                    BezierSegMarkers[y*(Y) + x].append(&markers[/*i*(ORDER) + j*/count]);
+                    BezierSegMarkers[y*(Y) + x].append(&markers[count]);
                     count++;
-                //BezierSegMarkers[y*(Y) + x].append(&markers[/*i*(ORDER) + j*/count]);
             }
         }
     }
     }
-//}
+}
 
 void BezierPlane::Clear()
 {
