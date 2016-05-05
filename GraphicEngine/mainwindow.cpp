@@ -96,16 +96,18 @@ int MainWindow::AddMarkerToObjs(QList<QTreeWidgetItem*> objsList, /*QList<CADMar
 
 void MainWindow::on_pushButton_addMarker_clicked()
 {
+
+    QString idname;
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+
     //create new item
     Marker m = Marker(w->cursor.center);
     w->markers.append(m);
     QList<QString> columns = {m.name, m.idname};
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0/*t->invisibleRootItem()*/, QStringList(columns)); //parent, columns names...
     item->setFlags(item->flags() | Qt::ItemIsEditable);
-
+    //add marker
     int count = 0;
-    QString idname;
-    QList<QTreeWidgetItem*> selected = t->selectedItems();
     count += AddMarkerToObjs(selected,/* w->curves,*/ item);
     if (count == 0)
         t->addTopLevelItem(item);
@@ -191,51 +193,53 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
         name = it->text(0);
         //delete marker
         if(!it->parent()) {
-            for (int i = 0; i < w->markers.length(); i++) {
-                if (w->markers[i].idname == idname)
-                    w->RemovePoint(i);
-            }
-            if (w->Splines.length() != 0) {
-                for (int i = 0; i < w->Splines.length(); i++) {
-                    if (w->Splines[i]->idname == idname) {
-                        for(int i=0;i<it->childCount(); i++) { //TODO: to use that add with correct parent
-                        //for (int i=0; i<w->curves[i].markers.length(); i++) {
-                            QTreeWidgetItem * const clone = it->child(i)->clone();
-                            QList<QTreeWidgetItem*> result = visitTree(t, it->child(i)->text(1));
-
-                            /*
-                             * int count = 0;
-                            for (int r = 0; r<result.length(); r++) {
-                                if (result[r]->parent()->text(1) != it->text(1))
-                                      count++;
-                            }
-                            if (count == 0)
-                             *
-                             */
-
-                            if (result.length() == 1)
-                                t->addTopLevelItem(clone);
-                            //delete it->child(i);
-                        }
-                        delete it;
-                        w->Splines.removeAt(i);
-                    }
+            if(idname.at(0) == 'g') {
+                delete it;
+                for (int i = 0; i < w->SplinePatches.length(); i++) {
+                    if (w->SplinePatches[i]->idname == idname)
+                        w->SplinePatches.removeAt(i);
                 }
-            } else
-                  delete it;
+            } else {
+                for (int i = 0; i < w->markers.length(); i++) {
+                    if (w->markers[i].idname == idname)
+                        w->RemovePoint(i);
+                }
+                if (w->Splines.length() != 0) {
+                    for (int i = 0; i < w->Splines.length(); i++) {
+                        if (w->Splines[i]->idname == idname) {
+                            for(int i=0;i<it->childCount(); i++) { //TODO: to use that add with correct parent
+                            //for (int i=0; i<w->curves[i].markers.length(); i++) {
+                                QTreeWidgetItem * const clone = it->child(i)->clone();
+                                QList<QTreeWidgetItem*> result = visitTree(t, it->child(i)->text(1));
+
+                                /*
+                                 * int count = 0;
+                                for (int r = 0; r<result.length(); r++) {
+                                    if (result[r]->parent()->text(1) != it->text(1))
+                                          count++;
+                                }
+                                if (count == 0)
+                                 *
+                                 */
+
+                                if (result.length() == 1)
+                                    t->addTopLevelItem(clone);
+                                //delete it->child(i);
+                            }
+                            delete it;
+                            w->Splines.removeAt(i);
+                        }
+                    }
+                } else
+                      delete it;
+            }
         } else {
             parentIdName = it->parent()->text(1);
+            if(parentIdName.at(0) == 'g')
+                return;
             for (int i = 0; i < w->Splines.length(); i++) { //TODO: probably change to CADobject list
                 if (w->Splines[i]->idname == parentIdName) {
-                    /*for (int j = 0; j < w->curves_interpolation[i].markers.length(); j++) {
-                        if (w->curves_interpolation[i].markers[j]->idname == idname)
-                            w->curves_interpolation[i].markers.removeAt(j);
-                    }*/
                     w->Splines[i]->markers.removeAt(it->parent()->indexOfChild((it)));
-                    /*for (int k = 0; k < w->markers.length(); k++) {
-                        if (w->markers[i].idname == idname)
-                            w->RemovePoint(i);
-                    }*/
                 }
             }
             delete it;
@@ -270,6 +274,14 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
             //w->markers.removeAt(i);
             //function to select marker etc (refactor from switch)
     }
+    for (int i = 0; i < w->SplinePatches.length(); i++) {
+        for (int j=0; j < w->SplinePatches[i]->markers.length(); j++) {
+            if (w->SplinePatches[i]->markers[j].idname == idname) {
+                w->HandlePointSelection(&w->SplinePatches[i]->markers[j], w->IsMultipleSelect);
+            }
+        }
+    }
+
     //add new points
     QString parentidname = item->text(1);
     if (isPushBezier && parentidname.at(0) == 's') {
@@ -484,24 +496,15 @@ void MainWindow::on_pushButton_addPatch_clicked()
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
     item->setFlags(item->flags() | Qt::ItemIsEditable);
 
-    //swap points so they belong to bezier
-    QString idname;
-    QList<QTreeWidgetItem*> points = t->selectedItems();
-    foreach (QTreeWidgetItem* it, points) {
-        idname = it->text(1);
-        if (idname.at(0) == 'p') { //check if some other elements besides points selected
-            QTreeWidgetItem * const clone = it->clone();
-            item->addChild(clone);
-            //t->setCurrentItem(item->child(item->childCount()-1));
-            if(!it->parent())
-                delete it; //delete only if moving from main tree
-        }
+    //add points to bezier
+    for (int i = 0; i<s->markers.length(); i++) {
+        columns = {s->markers[i].name, s->markers[i].idname};
+        QTreeWidgetItem *pkt = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+        pkt->setFlags(pkt->flags() | Qt::ItemIsEditable);
+        item->addChild(pkt);
     }
-    t->addTopLevelItem(item);
 
-    //select items under new bezier
-    for (int i = 0; i<item->childCount(); i++)
-        t->setCurrentItem(item->child(i));
+    t->addTopLevelItem(item);
     w->update();
 }
 

@@ -66,7 +66,7 @@ void BezierPlane::InitializeMarkers()
                     } else if (i==0 && y>0) {
                         BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[(y-1)*(Y) + x].at((ORDER-1)*ORDER + j));
                     } else {
-                        markers.append(Marker((unitX*j)+(bicubicWidth*x)+offset.x(), (unitY*i)+(bicubicHeight*y)+offset.y(), offset.z()));
+                        markers.append(Marker((unitX*j)+(bicubicWidth*x)+offset.x(), (unitY*i)+(bicubicHeight*y)+offset.y(), offset.z(), false));
                         BezierSegMarkers[y*(Y) + x].append(&markers[count]);
                         count++;
                 }
@@ -96,7 +96,7 @@ void BezierPlane::InitializeMarkers()
                         BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[y*Y].at(i*ORDER));
                     } else {
                         float rad = alpha*j+alphaSegment*x;
-                        markers.append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z()));
+                        markers.append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z(), false));
                         BezierSegMarkers[y*(Y) + x].append(&markers[count]);
                         count++;
                 }
