@@ -61,13 +61,15 @@ void BezierPlane::InitializeMarkers()
                     //weź z komórki po lewej
                     if (j==0 && x>0) {
                         int l = i*ORDER + ORDER-1;
-                        BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[y*(Y) + (x-1)].at(i*ORDER + ORDER-1));
+                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*(X) + (x-1)].at(i*ORDER + ORDER-1));
                     //weź z góry
                     } else if (i==0 && y>0) {
-                        BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[(y-1)*(Y) + x].at((ORDER-1)*ORDER + j));
+                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[(y-1)*(X) + x].at((ORDER-1)*ORDER + j));
                     } else {
+                        int lol = 3;
+                        lol++;
                         markers.append(Marker((unitX*j)+(bicubicWidth*x)+offset.x(), (unitY*i)+(bicubicHeight*y)+offset.y(), offset.z(), false));
-                        BezierSegMarkers[y*(Y) + x].append(&markers[count]);
+                        BezierSegMarkers[y*(X) + x].append(&markers[count]);
                         count++;
                 }
             }
@@ -88,16 +90,16 @@ void BezierPlane::InitializeMarkers()
                 for (int j = 0; j<ORDER; j++) {
                     //weź z komórki po lewej
                     if (j==0 && x>0) {
-                        BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[y*(Y) + (x-1)].at(i*ORDER + ORDER-1));
+                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*(X) + (x-1)].at(i*ORDER + ORDER-1));
                     //weź z góry
                     } else if (i==0 && y>0) {
-                        BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[(y-1)*(Y) + x].at((ORDER-1)*ORDER + j));
+                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[(y-1)*(X) + x].at((ORDER-1)*ORDER + j));
                     } else if (j==(ORDER-1) && x==(X-1)) {
-                        BezierSegMarkers[y*(Y) + x].append(BezierSegMarkers[y*Y].at(i*ORDER));
+                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*X].at(i*ORDER));
                     } else {
                         float rad = alpha*j+alphaSegment*x;
                         markers.append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z(), false));
-                        BezierSegMarkers[y*(Y) + x].append(&markers[count]);
+                        BezierSegMarkers[y*(X) + x].append(&markers[count]);
                         count++;
                 }
             }
