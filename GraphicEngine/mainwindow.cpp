@@ -463,3 +463,93 @@ void MainWindow::on_pushButton_addInterp_clicked()
         t->setCurrentItem(item->child(i));
     w->update();
 }
+
+void MainWindow::on_comboBox_PatchSelection_activated(int index)
+{
+
+}
+
+void MainWindow::on_pushButton_addPatch_clicked()
+{
+    //crete bezier curve
+    CADSplinePatch* s;
+    if (ui->checkBox_cylinder->isChecked())
+        s = new BezierPlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxR->value(), (float)ui->spinBoxL->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), false);
+    else
+        s = new BezierPlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxW->value(), (float)ui->spinBoxH->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), true);
+    w->SplinePatches.append(s);
+
+    //create and add item to list
+    QList<QString> columns = {s->name, s->idname};
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+
+    //swap points so they belong to bezier
+    QString idname;
+    QList<QTreeWidgetItem*> points = t->selectedItems();
+    foreach (QTreeWidgetItem* it, points) {
+        idname = it->text(1);
+        if (idname.at(0) == 'p') { //check if some other elements besides points selected
+            QTreeWidgetItem * const clone = it->clone();
+            item->addChild(clone);
+            //t->setCurrentItem(item->child(item->childCount()-1));
+            if(!it->parent())
+                delete it; //delete only if moving from main tree
+        }
+    }
+    t->addTopLevelItem(item);
+
+    //select items under new bezier
+    for (int i = 0; i<item->childCount(); i++)
+        t->setCurrentItem(item->child(i));
+    w->update();
+}
+
+void MainWindow::on_spinBoxU_valueChanged(int arg1)
+{
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        if (idname.at(0) == 'g') {
+            idname = it->text(1);
+            //int id = idname.mid(1,1).toInt();
+            for (int i = 0; i<w->SplinePatches.length(); i++) {
+                if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
+                    BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
+                    bp->U = arg1;
+                }
+            }
+        }
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_spinBoxV_valueChanged(int arg1)
+{
+    //TODO update UV of the selected element in the spinBOX
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        //int id = idname.mid(1,1).toInt();
+        for (int i = 0; i<w->SplinePatches.length(); i++) {
+            if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
+                BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
+                bp->V = arg1;
+            }
+        }
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+/*
+ *
+ * idname = it->text(1);
+        if (idname.at(0) == 'g') {
+            BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[idname.mid(1,1).toInt()]);
+            bp->V = arg1;
+        }
+ * */

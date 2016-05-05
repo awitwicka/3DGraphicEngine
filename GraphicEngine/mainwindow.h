@@ -60,6 +60,14 @@ private slots:
 
     void on_pushButton_addInterp_clicked();
 
+    void on_comboBox_PatchSelection_activated(int index);
+
+    void on_pushButton_addPatch_clicked();
+
+    void on_spinBoxU_valueChanged(int arg1);
+
+    void on_spinBoxV_valueChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

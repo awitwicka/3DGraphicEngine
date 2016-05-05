@@ -23,8 +23,8 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     //setMouseTracking(true);
     background.setRgb(105,105,105,255);
     background = Qt::black;
-    CADSplinePatch* b1 = new BezierPlane(worldMatrix);
-    SplinePatches.append(b1);
+    //CADSplinePatch* b1 = new BezierPlane(worldMatrix);
+    //SplinePatches.append(b1);
 }
 
 void Widget::paintEvent(QPaintEvent *)

@@ -80,7 +80,6 @@ void CurveC2::InitializeSpline(QMatrix4x4 matrix)
     if (markers.length() < degree+1)
         return;
 
-
     //get points number
     int n = markers.length();
     float length = 0;

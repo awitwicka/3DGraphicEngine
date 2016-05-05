@@ -16,15 +16,24 @@ class BezierPlane : public CADObject, public CADSplinePatch
     void InitializeMarkers();
     void Clear();
 public:
-    int X;
-    int Y;
+    //true for plane, false for cyllinder
+    bool isPlane;
+    //cylinder
+    int R;
+    int H;
+    //plane
     float Width;
     float Height;
+    //common
+    int X;
+    int Y;
     int U;
     int V;
-    
+    QVector4D offset;
+
     BezierPlane();
     BezierPlane(QMatrix4x4 matrix);
+    BezierPlane(QMatrix4x4 matrix, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane);
     QList<BicubicSegment> BezierSegments;
     QVector<QList<Marker*>> BezierSegMarkers;
     //QList<Marker*[]> BezierSegMarkers;
