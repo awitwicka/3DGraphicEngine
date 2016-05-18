@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     bezierplane.cpp \
     bicubicsegment.cpp \
     cadsplinepatch.cpp \
-    bsplineplane.cpp
+    bsplineplane.cpp \
+    cadloader.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -47,6 +48,7 @@ HEADERS  += mainwindow.h \
     bezierplane.h \
     bicubicsegment.h \
     cadsplinepatch.h \
-    bsplineplane.h
+    bsplineplane.h \
+    cadloader.h
 
 FORMS    += mainwindow.ui

@@ -27,8 +27,8 @@ public:
     //common
     int X;
     int Y;
-    int U;
-    int V;
+    //int U;
+    //int V;
     QVector4D offset;
 
     BezierPlane();

@@ -119,31 +119,31 @@ void BicubicSegment::InitializeSpline(QMatrix4x4 matrix)
     int count = 0;
     for (int x = 0; x<ORDER; x++) {
         for (int i = 0; i < n-1; i++) {
-            pointsCurve.append(bezierMarkers[x][i].point);
+            pointsCurve.append(markers[x][i]->point);
             indicesCurve.append(QPoint(count, count+1));
-            QVector4D q1 = Constants::perspectiveMatrix*matrix*bezierMarkers[x][i].point;
-            QVector4D q2 = Constants::perspectiveMatrix*matrix*bezierMarkers[x][i+1].point;
+            QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[x][i]->point;
+            QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[x][i+1]->point;
             q1 = q1/q1.w();
             q2 = q2/q2.w();
             lengthX[x] += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
             count++;
         }
         count++;
-        pointsCurve.append(bezierMarkers[x][n-1].point);
+        pointsCurve.append(markers[x][n-1]->point);
     }
     for (int y = 0; y<ORDER; y++) {
         for (int i = 0; i < n-1; i++) {
-            pointsCurve.append(bezierMarkers[i][y].point);
+            pointsCurve.append(markers[i][y]->point);
             indicesCurve.append(QPoint(count, count+1));
-            QVector4D q1 = Constants::perspectiveMatrix*matrix*bezierMarkers[i][y].point;
-            QVector4D q2 = Constants::perspectiveMatrix*matrix*bezierMarkers[i+1][y].point;
+            QVector4D q1 = Constants::perspectiveMatrix*matrix*markers[i][y]->point;
+            QVector4D q2 = Constants::perspectiveMatrix*matrix*markers[i+1][y]->point;
             q1 = q1/q1.w();
             q2 = q2/q2.w();
             lengthY[y] += sqrt(pow((q2.x()-q1.x()),2)+pow((q2.y()-q1.y()),2));
             count++;
         }
         count++;
-        pointsCurve.append(bezierMarkers[n-1][y].point);
+        pointsCurve.append(markers[n-1][y]->point);
     }
 
     //BSPLINE

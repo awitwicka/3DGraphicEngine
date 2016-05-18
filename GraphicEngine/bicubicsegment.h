@@ -24,8 +24,8 @@ class BicubicSegment : public CADObject, public CADSplinePatch
         Marker* partner;
     };
 public:
-    int U;
-    int V;
+    //int U;
+    //int V;
     //float segLengthX;
     //float segLengthY;
     BicubicSegment();

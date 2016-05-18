@@ -529,8 +529,9 @@ void MainWindow::on_spinBoxU_valueChanged(int arg1)
             //int id = idname.mid(1,1).toInt();
             for (int i = 0; i<w->SplinePatches.length(); i++) {
                 if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
-                    BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
-                    bp->U = arg1;
+                    //BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
+                    //bp->setU(arg1);
+                    w->SplinePatches[i]->setU(arg1);
                 }
             }
         }
@@ -549,8 +550,9 @@ void MainWindow::on_spinBoxV_valueChanged(int arg1)
         //int id = idname.mid(1,1).toInt();
         for (int i = 0; i<w->SplinePatches.length(); i++) {
             if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
-                BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
-                bp->V = arg1;
+               // BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
+                //bp->setV(arg1);
+                w->SplinePatches[i]->setV(arg1);
             }
         }
     }

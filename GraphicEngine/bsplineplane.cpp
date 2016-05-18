@@ -9,8 +9,10 @@ BSplinePlane::BSplinePlane()
 
 }
 
-BSplinePlane::BSplinePlane(QMatrix4x4 matrix) : U(5), V(5), Width(500), Height(400), X(7), Y(7), H(400), R(100)
+BSplinePlane::BSplinePlane(QMatrix4x4 matrix) : Width(500), Height(400), X(7), Y(7), H(400), R(100)
 {
+    U = 5;
+    V = 5;
     isPlane = true;
     name = QString("BezierPlane %1").arg(id);
     idname = QString("g%1").arg(id);
@@ -110,8 +112,16 @@ void BSplinePlane::InitializeMarkers()
                     } else if (j==(ORDER-1) && x==(X-1)) {
                         BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*X + 2].at(i*ORDER));
                     } else {
-                        float rad = alpha*j+alphaSegment*x;
-                        markers.append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z(), false));
+                        float rad = ((2*pi/X)*(ORDER-1)) + (2*pi/X)*x;
+                        if (x==0 && y==0) {
+                            rad = (2*pi/X)*j;
+                        } else if (x ==0) {
+                            rad = (2*pi/X)*j;
+                        }
+                        if (y==0)
+                            markers.append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z(), false));
+                        else
+                            markers.append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*y)+(bicubicHeight)+offset.z(), false));
                         BezierSegMarkers[y*(X) + x].append(&markers[count]);
                         count++;
                 }

@@ -9,8 +9,10 @@ BezierPlane::BezierPlane()
 
 }
 
-BezierPlane::BezierPlane(QMatrix4x4 matrix) : U(5), V(5), Width(500), Height(400), X(7), Y(7), H(400), R(100)
+BezierPlane::BezierPlane(QMatrix4x4 matrix) : Width(500), Height(400), X(7), Y(7), H(400), R(100)
 {
+    U = 5;
+    V = 5;
     isPlane = true;
     name = QString("BezierPlane %1").arg(id);
     idname = QString("g%1").arg(id);

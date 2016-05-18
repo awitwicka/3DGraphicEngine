@@ -5,6 +5,7 @@
 
 class CADSplinePatch
 {
+
 public:
     QString name;
     QString idname;
@@ -14,6 +15,14 @@ public:
     virtual ~CADSplinePatch()=0;
     virtual void InitializeSpline(QMatrix4x4 matrix)=0;
     virtual void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+
+    virtual int getU() const;
+    virtual void setU(int value);
+    virtual int getV() const;
+    virtual void setV(int value);
+protected:
+    int U;
+    int V;
 };
 
 #endif // CADSPLINEPATCH_H
