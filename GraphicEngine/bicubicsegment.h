@@ -8,24 +8,33 @@
 
 class BicubicSegment : public CADObject, public CADSplinePatch
 {
+    bool isBezier;
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
 
+    void InitializeBezierMarkers();
     QVector4D getBezierPoint(QVector4D points[ORDER], float t);
     QVector4D getBezierPointCol(int index, float t);
     QVector4D getBezierPointRow(int index, float t);
     void Clear();
+
+    struct VirtualMarkInfo {
+        QVector4D position;
+        Marker* parent;
+        Marker* partner;
+    };
 public:
     int U;
     int V;
     //float segLengthX;
     //float segLengthY;
     BicubicSegment();
-    BicubicSegment(QList<Marker*>* m, int u, int v, QMatrix4x4 matrix);
+    BicubicSegment(QList<Marker*>* m, int u, int v, QMatrix4x4 matrix, bool isBezier = true);
     void InitializeSpline(QMatrix4x4 matrix);
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     int pointsNo;
     Marker* markers[ORDER][ORDER];
+    Marker bezierMarkers[ORDER][ORDER];
     //QList<Marker*> markers;
 
     virtual QVector<QVector4D> getPoints() const;

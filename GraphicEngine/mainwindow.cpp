@@ -1,4 +1,5 @@
 #include "bsinterpolation.h"
+#include "bsplineplane.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -485,10 +486,19 @@ void MainWindow::on_pushButton_addPatch_clicked()
 {
     //crete bezier curve
     CADSplinePatch* s;
-    if (ui->checkBox_cylinder->isChecked())
+    if (ui->checkBox_cylinder->isChecked()) {
+        if (ui->comboBox_Patch->currentIndex() == 0)
         s = new BezierPlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxR->value(), (float)ui->spinBoxL->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), false);
+        if (ui->comboBox_Patch->currentIndex() == 1)
+        s = new BSplinePlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxR->value(), (float)ui->spinBoxL->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), false);
+    }
     else
+    {
+        if (ui->comboBox_Patch->currentIndex() == 0)
         s = new BezierPlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxW->value(), (float)ui->spinBoxH->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), true);
+        if (ui->comboBox_Patch->currentIndex() == 1)
+        s = new BSplinePlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxW->value(), (float)ui->spinBoxH->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), true);
+    }
     w->SplinePatches.append(s);
 
     //create and add item to list
