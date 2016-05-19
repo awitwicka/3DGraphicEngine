@@ -35,6 +35,8 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, float U, float V, float X, float Y
         MarkerN = X-1+4;
         MarkerM = Y-1+4;
     } else {
+        if (X<3 || Y<3)
+            return;
         this->R = Param1;
         this->H = Param2;
         MarkerN = X-1+4-3;

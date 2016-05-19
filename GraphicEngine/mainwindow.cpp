@@ -195,7 +195,7 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
         name = it->text(0);
         //delete marker
         if(!it->parent()) {
-            if(idname.at(0) == 'g') {
+            if(idname.at(0) == 'g' || idname.at(0) == 'k') {
                 delete it;
                 for (int i = 0; i < w->SplinePatches.length(); i++) {
                     if (w->SplinePatches[i]->idname == idname)
@@ -237,7 +237,7 @@ void MainWindow::on_pushButton_DelSingleMarker_clicked()
             }
         } else {
             parentIdName = it->parent()->text(1);
-            if(parentIdName.at(0) == 'g')
+            if(parentIdName.at(0) == 'g' || parentIdName.at(0) == 'k')
                 return;
             for (int i = 0; i < w->Splines.length(); i++) { //TODO: probably change to CADobject list
                 if (w->Splines[i]->idname == parentIdName) {
@@ -525,7 +525,7 @@ void MainWindow::on_spinBoxU_valueChanged(int arg1)
     QString idname;
     foreach (QTreeWidgetItem* it, selected) {
         idname = it->text(1);
-        if (idname.at(0) == 'g') {
+        if (idname.at(0) == 'g' || idname.at(0) == 'k') {
             idname = it->text(1);
             //int id = idname.mid(1,1).toInt();
             for (int i = 0; i<w->SplinePatches.length(); i++) {
@@ -578,4 +578,14 @@ void MainWindow::on_pushButton_Save_clicked()
 void MainWindow::on_pushButton_Open_clicked()
 {
     loader.LoadFile();
+}
+
+void MainWindow::on_pushButton_Clear_clicked()
+{
+    t->clear();
+    w->markers.clear();
+    w->SplinePatches.clear();
+    w->Splines.clear();
+    w->UpdateSceneElements();
+    w->update();
 }

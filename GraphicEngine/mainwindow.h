@@ -75,6 +75,8 @@ private slots:
 
     void on_pushButton_Open_clicked();
 
+    void on_pushButton_Clear_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

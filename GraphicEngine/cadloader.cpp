@@ -30,11 +30,13 @@ void CADLoader::LoadFile()
         int n = line.toInt();
         for (int i = 0; i<n; i++) {
             line = stream.readLine();
-            QStringList l = line.split(" ");
+            line.replace(",", ".");
+            //for (QStringList )
+            QStringList l = line.trimmed().split(" ");
             QString x = l[0];
             QString y = l[1];
             QString z = l[2];
-            m.append(Marker(x.toFloat(), y.toFloat(), z.toFloat()));
+            m.append(Marker(x.toFloat()*100, y.toFloat()*100, z.toFloat()*100));
         }
         int objNo = stream.readLine().toInt();
         for (int i = 0; i<objNo; i++) {
@@ -114,6 +116,21 @@ void CADLoader::LoadFile()
                         xm = (nMark-4)+1+3;
                         ym = (mMark-4)+1;
                     }
+
+                   /* QList<Marker> markersReorder;
+                    int count = 0;
+                    while (count<markers.length()) {
+                        for(int r = 0; r<4; r++){
+                        markersReorder.append(markers[count]);
+
+                    }
+
+                    for(int r = 0; r<; r++){
+                        markersReorder.append(markers[4]);
+                    for(int r = 0; r<nMark-1; r++){
+                        markersReorder.append(markers[]);
+                    }
+                    */
                     CADSplinePatch* b = new BSplinePlane(context->worldMatrix, 4, 4, xm, ym, 100, 100, 0, 0, 0, isPlane);
                     for (int r = 0; r<b->markers.length(); r++)
                         b->markers[r].point = markers[r].point;
@@ -145,12 +162,12 @@ void CADLoader::SaveFile()
         stream << n << endl;
 
         for (int i = 0; i<context->markers.length(); i++) {
-            stream << context->markers[i].point.x() << " " << context->markers[i].point.y() << " " << context->markers[i].point.z() << endl;
+            stream << context->markers[i].point.x()/100 << " " << context->markers[i].point.y()/100 << " " << context->markers[i].point.z()/100 << endl;
             m.append(context->markers[i]);
         }
         for (int i = 0; i<context->SplinePatches.length(); i++) {
             for (int j = 0; j<context->SplinePatches[i]->markers.length(); j++) {
-                stream << context->SplinePatches[i]->markers[j].point.x() << " " << context->SplinePatches[i]->markers[j].point.y() << " " << context->SplinePatches[i]->markers[j].point.z() << endl;
+                stream << context->SplinePatches[i]->markers[j].point.x()/100 << " " << context->SplinePatches[i]->markers[j].point.y()/100 << " " << context->SplinePatches[i]->markers[j].point.z()/100 << endl;
                 m.append(context->SplinePatches[i]->markers[j]);
             }
         }
