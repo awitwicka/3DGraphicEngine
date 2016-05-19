@@ -20,6 +20,11 @@ public:
     virtual void setU(int value);
     virtual int getV() const;
     virtual void setV(int value);
+
+    bool isPlane;
+    bool isHorizontal;
+    int MarkerN;
+    int MarkerM;
 protected:
     int U;
     int V;

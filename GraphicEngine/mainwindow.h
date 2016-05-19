@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "cadloader.h"
 #include "widget.h"
 #include <QListWidget>
 #include <QMainWindow>
@@ -14,6 +15,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    CADLoader loader;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -67,6 +69,11 @@ private slots:
     void on_spinBoxU_valueChanged(int arg1);
 
     void on_spinBoxV_valueChanged(int arg1);
+
+
+    void on_pushButton_Save_clicked();
+
+    void on_pushButton_Open_clicked();
 
 private:
     Ui::MainWindow *ui;

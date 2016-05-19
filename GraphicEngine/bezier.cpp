@@ -16,7 +16,7 @@ for (int i=0; i<iNumElements; i++)
 
 Bezier::Bezier()
 {
-    name = QString("bezier %1").arg(id);
+    name = QString("bezier%1").arg(id);
     idname = QString("b%1").arg(id);
     id++;
 }
@@ -28,7 +28,7 @@ QList<Marker *> Bezier::getMarkers() const
 
 Bezier::Bezier(const QList<Marker *> &mark, QMatrix4x4 matrix)
 {
-    name = QString("bezier %1").arg(id);
+    name = QString("bezier%1").arg(id);
     idname = QString("b%1").arg(id);
     id++;
     markers = mark;

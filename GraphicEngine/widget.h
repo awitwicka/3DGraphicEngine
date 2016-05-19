@@ -13,6 +13,7 @@
 #include "curveC2.h"
 #include "bsinterpolation.h"
 #include "bezierplane.h"
+#include "bsplineplane.h"
 //#include "virtualmarker.h"
 
 class Widget : public QWidget

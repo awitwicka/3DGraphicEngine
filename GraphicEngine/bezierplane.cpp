@@ -14,7 +14,7 @@ BezierPlane::BezierPlane(QMatrix4x4 matrix) : Width(500), Height(400), X(7), Y(7
     U = 5;
     V = 5;
     isPlane = true;
-    name = QString("BezierPlane %1").arg(id);
+    name = QString("BezierPlane%1").arg(id);
     idname = QString("g%1").arg(id);
     id++;
     InitializeMarkers();
@@ -32,12 +32,16 @@ BezierPlane::BezierPlane(QMatrix4x4 matrix, float U, float V, float X, float Y, 
     if (isPlane == true) {
         this->Width = Param1;
         this->Height = Param2;
+        MarkerN = (X-1)*3+4;
+        MarkerM = (Y-1)*3+4;
     } else {
         this->R = Param1;
         this->H = Param2;
+        MarkerN = (X-1)*3+4-1;
+        MarkerM = (Y-1)*3+4;
     }
     this->offset = QVector4D(x, y, z, 1);
-    name = QString("BezierPlane %1").arg(id);
+    name = QString("BezierPlane%1").arg(id);
     idname = QString("g%1").arg(id);
     id++;
     InitializeMarkers();

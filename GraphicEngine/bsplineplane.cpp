@@ -14,8 +14,8 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix) : Width(500), Height(400), X(7), Y
     U = 5;
     V = 5;
     isPlane = true;
-    name = QString("BezierPlane %1").arg(id);
-    idname = QString("g%1").arg(id);
+    name = QString("BSplinePlane%1").arg(id);
+    idname = QString("k%1").arg(id);
     id++;
     InitializeMarkers();
     //TODO: change name to update
@@ -32,13 +32,17 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, float U, float V, float X, float Y
     if (isPlane == true) {
         this->Width = Param1;
         this->Height = Param2;
+        MarkerN = X-1+4;
+        MarkerM = Y-1+4;
     } else {
         this->R = Param1;
         this->H = Param2;
+        MarkerN = X-1+4-3;
+        MarkerM = Y-1+4;
     }
     this->offset = QVector4D(x, y, z, 1);
-    name = QString("BezierPlane %1").arg(id);
-    idname = QString("g%1").arg(id);
+    name = QString("BSplinePlane%1").arg(id);
+    idname = QString("k%1").arg(id);
     id++;
     InitializeMarkers();
     //TODO: change name to update

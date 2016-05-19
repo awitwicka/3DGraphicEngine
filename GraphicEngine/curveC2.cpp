@@ -4,7 +4,7 @@ int CurveC2::id = 0;
 
 CurveC2::CurveC2()
 {
-    name = QString("curveC2 %1").arg(id);
+    name = QString("curveC2%1").arg(id);
     idname = QString("c%1").arg(id);
     isBezier = false;
     degree = 3;
@@ -13,7 +13,7 @@ CurveC2::CurveC2()
 
 CurveC2::CurveC2(const QList<Marker *> &m, QMatrix4x4 matrix)
 {
-    name = QString("curveC2 %1").arg(id);
+    name = QString("curveC2%1").arg(id);
     idname = QString("c%1").arg(id);
     isBezier = false;
     degree = 3;

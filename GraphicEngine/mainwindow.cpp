@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //findChild<QSpinBox*>("spinBox_U")->setValue(w.t1.Usegments);
     w->tree = t;
     isPushBezier = false;
+    loader = CADLoader(w);
 }
 
 MainWindow::~MainWindow()
@@ -568,3 +569,13 @@ void MainWindow::on_spinBoxV_valueChanged(int arg1)
             bp->V = arg1;
         }
  * */
+
+void MainWindow::on_pushButton_Save_clicked()
+{
+    loader.SaveFile();
+}
+
+void MainWindow::on_pushButton_Open_clicked()
+{
+    loader.LoadFile();
+}

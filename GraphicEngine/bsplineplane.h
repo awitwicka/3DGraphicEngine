@@ -17,7 +17,7 @@ class BSplinePlane : public CADObject, public CADSplinePatch
     void Clear();
 public:
     //true for plane, false for cyllinder
-    bool isPlane;
+    //bool isPlane;
     //cylinder
     int R;
     int H;

@@ -7,14 +7,14 @@ int BSInterpolation::id = 0;
 
 BSInterpolation::BSInterpolation()
 {
-    name = QString("BS interpolation %1").arg(id);
+    name = QString("BSinterpolation%1").arg(id);
     idname = QString("s%1").arg(id);
     id++;
 }
 
 BSInterpolation::BSInterpolation(const QList<Marker *> &m, QMatrix4x4 matrix)
 {
-    name = QString("BS interpolation %1").arg(id);
+    name = QString("BSinterpolation%1").arg(id);
     idname = QString("s%1").arg(id);
     id++;
 
