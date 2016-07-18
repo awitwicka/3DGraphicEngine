@@ -276,13 +276,13 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
             //w->markers.removeAt(i);
             //function to select marker etc (refactor from switch)
     }
-    for (int i = 0; i < w->SplinePatches.length(); i++) {
+    /*for (int i = 0; i < w->SplinePatches.length(); i++) {
         for (int j=0; j < w->SplinePatches[i]->markers.length(); j++) {
             if (w->SplinePatches[i]->markers[j]->idname == idname) {
                 w->HandlePointSelection(w->SplinePatches[i]->markers[j], w->IsMultipleSelect);
             }
         }
-    }
+    }*/
 
     //add new points
     QString parentidname = item->text(1);

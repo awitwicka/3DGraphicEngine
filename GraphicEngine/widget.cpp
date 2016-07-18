@@ -74,7 +74,7 @@ void Widget::paintEvent(QPaintEvent *)
         obj->Draw(painter, worldMatrix, isStereo);
 
         for (int j = 0; j<SplinePatches[i]->markers.length(); j++)
-            SplinePatches[i]->markers[j].Draw(painter, worldMatrix, isStereo);
+            SplinePatches[i]->markers[j]->Draw(painter, worldMatrix, isStereo);
         if (showCurve)
             SplinePatches[i]->DrawPolygon(painter, worldMatrix, isStereo);
     }
@@ -195,8 +195,8 @@ void Widget::mousePressEvent(QMouseEvent *event)
         case 1: //Edit Points
             if(event->buttons() & Qt::LeftButton) {
                 SelectIfInRange(markers, false);
-                for (int i = 0; i<SplinePatches.length(); i++)
-                    SelectIfInRange(SplinePatches[i]->markers, false); //TODO Handle deleting points, if points common with Spline Curves
+                //for (int i = 0; i<SplinePatches.length(); i++)
+                //    SelectIfInRange(SplinePatches[i]->markers, false); //TODO Handle deleting points, if points common with Spline Curves
                 if (showCurve) {
                     for (int i = 0; i< Splines.length(); i++) {
                         if (dynamic_cast<CurveC2*>(Splines[i])) {
