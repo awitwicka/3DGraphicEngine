@@ -9,7 +9,7 @@ BezierPlane::BezierPlane()
 
 }
 
-BezierPlane::BezierPlane(QMatrix4x4 matrix) : Width(500), Height(400), X(7), Y(7), H(400), R(100)
+BezierPlane::BezierPlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers) : Width(500), Height(400), X(7), Y(7), H(400), R(100)
 {
     U = 5;
     V = 5;
@@ -17,12 +17,12 @@ BezierPlane::BezierPlane(QMatrix4x4 matrix) : Width(500), Height(400), X(7), Y(7
     name = QString("BezierPlane%1").arg(id);
     idname = QString("g%1").arg(id);
     id++;
-    InitializeMarkers();
+    InitializeMarkers(MainMarkers);
     //TODO: change name to update
     InitializeSpline(matrix);
 }
 
-BezierPlane::BezierPlane(QMatrix4x4 matrix, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane)
+BezierPlane::BezierPlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane)
 {
     this->isPlane = isPlane;
     this->U = U;
@@ -44,12 +44,12 @@ BezierPlane::BezierPlane(QMatrix4x4 matrix, float U, float V, float X, float Y, 
     name = QString("BezierPlane%1").arg(id);
     idname = QString("g%1").arg(id);
     id++;
-    InitializeMarkers();
+    InitializeMarkers(MainMarkers);
     //TODO: change name to update
     InitializeSpline(matrix);
 }
 
-void BezierPlane::InitializeMarkers()
+void BezierPlane::InitializeMarkers(QList<Marker> *MainMarkers)
 {
     BezierSegMarkers.clear();
     if (isPlane) {
@@ -74,8 +74,9 @@ void BezierPlane::InitializeMarkers()
                     } else {
                         int lol = 3;
                         lol++;
-                        markers.append(Marker((unitX*j)+(bicubicWidth*x)+offset.x(), (unitY*i)+(bicubicHeight*y)+offset.y(), offset.z(), false));
-                        BezierSegMarkers[y*(X) + x].append(&markers[count]);
+                        MainMarkers->append(Marker((unitX*j)+(bicubicWidth*x)+offset.x(), (unitY*i)+(bicubicHeight*y)+offset.y(), offset.z(), false));
+                        markers.append(&MainMarkers->last());
+                        BezierSegMarkers[y*(X) + x].append(markers[count]);
                         count++;
                 }
             }
@@ -104,8 +105,9 @@ void BezierPlane::InitializeMarkers()
                         BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*X].at(i*ORDER));
                     } else {
                         float rad = alpha*j+alphaSegment*x;
-                        markers.append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z(), false));
-                        BezierSegMarkers[y*(X) + x].append(&markers[count]);
+                        MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z(), false));
+                        markers.append(&MainMarkers->last());
+                        BezierSegMarkers[y*(X) + x].append(markers[count]);
                         count++;
                 }
             }
@@ -159,7 +161,7 @@ void BezierPlane::setPoints(const QVector<QVector4D> &value)
     points = value;
 }
 
-QList<Marker> BezierPlane::getMarkers()
+QList<Marker*> BezierPlane::getMarkers()
 {
     /*QList<Marker*> m;
     for (int i = 0; i<markers.length(); i++)

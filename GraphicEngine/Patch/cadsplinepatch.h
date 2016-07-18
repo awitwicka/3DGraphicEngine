@@ -9,7 +9,7 @@ class CADSplinePatch
 public:
     QString name;
     QString idname;
-    QList<Marker> markers;
+    QList<Marker*> markers;
 
     CADSplinePatch();
     virtual ~CADSplinePatch()=0;

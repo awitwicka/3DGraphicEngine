@@ -278,8 +278,8 @@ void MainWindow::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
     }
     for (int i = 0; i < w->SplinePatches.length(); i++) {
         for (int j=0; j < w->SplinePatches[i]->markers.length(); j++) {
-            if (w->SplinePatches[i]->markers[j].idname == idname) {
-                w->HandlePointSelection(&w->SplinePatches[i]->markers[j], w->IsMultipleSelect);
+            if (w->SplinePatches[i]->markers[j]->idname == idname) {
+                w->HandlePointSelection(w->SplinePatches[i]->markers[j], w->IsMultipleSelect);
             }
         }
     }
@@ -489,16 +489,16 @@ void MainWindow::on_pushButton_addPatch_clicked()
     CADSplinePatch* s;
     if (ui->checkBox_cylinder->isChecked()) {
         if (ui->comboBox_Patch->currentIndex() == 0)
-        s = new BezierPlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxR->value(), (float)ui->spinBoxL->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), false);
+        s = new BezierPlane(w->worldMatrix, &w->markers,(float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxR->value(), (float)ui->spinBoxL->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), false);
         if (ui->comboBox_Patch->currentIndex() == 1)
-        s = new BSplinePlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxR->value(), (float)ui->spinBoxL->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), false);
+        s = new BSplinePlane(w->worldMatrix, &w->markers, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxR->value(), (float)ui->spinBoxL->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), false);
     }
     else
     {
         if (ui->comboBox_Patch->currentIndex() == 0)
-        s = new BezierPlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxW->value(), (float)ui->spinBoxH->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), true);
+        s = new BezierPlane(w->worldMatrix, &w->markers, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxW->value(), (float)ui->spinBoxH->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), true);
         if (ui->comboBox_Patch->currentIndex() == 1)
-        s = new BSplinePlane(w->worldMatrix, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxW->value(), (float)ui->spinBoxH->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), true);
+        s = new BSplinePlane(w->worldMatrix, &w->markers, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), (float)ui->spinBoxN->value(), (float)ui->spinBoxM->value(), (float)ui->spinBoxW->value(), (float)ui->spinBoxH->value(), w->cursor.center.x(),  w->cursor.center.y(),  w->cursor.center.z(), true);
     }
     w->SplinePatches.append(s);
 
@@ -509,7 +509,7 @@ void MainWindow::on_pushButton_addPatch_clicked()
 
     //add points to bezier
     for (int i = 0; i<s->markers.length(); i++) {
-        columns = {s->markers[i].name, s->markers[i].idname};
+        columns = {s->markers[i]->name, s->markers[i]->idname};
         QTreeWidgetItem *pkt = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
         pkt->setFlags(pkt->flags() | Qt::ItemIsEditable);
         item->addChild(pkt);

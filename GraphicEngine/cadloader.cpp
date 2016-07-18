@@ -101,9 +101,9 @@ void CADLoader::LoadFile()
                         xm = (nMark-4)/3+1+1;
                         ym = (mMark-4)/3+1;
                     }
-                    CADSplinePatch* b = new BezierPlane(context->worldMatrix, 4, 4, xm, ym, 100, 100, 0, 0, 0, isPlane);
+                    CADSplinePatch* b = new BezierPlane(context->worldMatrix, &context->markers, 4, 4, xm, ym, 100, 100, 0, 0, 0, isPlane);
                     for (int r = 0; r<b->markers.length(); r++)
-                        b->markers[r].point = markers[r].point;
+                        b->markers[r]->point = markers[r].point;
                     context->SplinePatches.append(b);
                 } else if (l[0] == "BSPLINESURF") {
                     bool isPlane = (type.at(0) == 'R')? true : false;
@@ -131,9 +131,9 @@ void CADLoader::LoadFile()
                         markersReorder.append(markers[]);
                     }
                     */
-                    CADSplinePatch* b = new BSplinePlane(context->worldMatrix, 4, 4, xm, ym, 100, 100, 0, 0, 0, isPlane);
+                    CADSplinePatch* b = new BSplinePlane(context->worldMatrix, &context->markers, 4, 4, xm, ym, 100, 100, 0, 0, 0, isPlane);
                     for (int r = 0; r<b->markers.length(); r++)
-                        b->markers[r].point = markers[r].point;
+                        b->markers[r]->point = markers[r].point;
                     context->SplinePatches.append(b);
                 }
             }
@@ -167,8 +167,8 @@ void CADLoader::SaveFile()
         }
         for (int i = 0; i<context->SplinePatches.length(); i++) {
             for (int j = 0; j<context->SplinePatches[i]->markers.length(); j++) {
-                stream << context->SplinePatches[i]->markers[j].point.x()/100 << " " << context->SplinePatches[i]->markers[j].point.y()/100 << " " << context->SplinePatches[i]->markers[j].point.z()/100 << endl;
-                m.append(context->SplinePatches[i]->markers[j]);
+                stream << context->SplinePatches[i]->markers[j]->point.x()/100 << " " << context->SplinePatches[i]->markers[j]->point.y()/100 << " " << context->SplinePatches[i]->markers[j]->point.z()/100 << endl;
+                m.append(*context->SplinePatches[i]->markers[j]);
             }
         }
         //#OBJECTS
@@ -219,7 +219,7 @@ void CADLoader::SaveFile()
                 stream << context->SplinePatches[i]->MarkerN << " " << context->SplinePatches[i]->MarkerM << " " << t << " " << "H" << endl;
                 for(int k = 0; k<context->SplinePatches[i]->markers.length(); k++) {
                     for (int l=0; l<m.length(); l++) {
-                        if(m[l].idname==context->SplinePatches[i]->markers[k].idname)
+                        if(m[l].idname==context->SplinePatches[i]->markers[k]->idname)
                         stream << l << " ";
                     }
                 }
@@ -230,7 +230,7 @@ void CADLoader::SaveFile()
                 stream << context->SplinePatches[i]->MarkerN << " " << context->SplinePatches[i]->MarkerM << " " << t << " " << "H" << endl;
                 for(int k = 0; k<context->SplinePatches[i]->markers.length(); k++) {
                     for (int l=0; l<m.length(); l++) {
-                        if(m[l].idname==context->SplinePatches[i]->markers[k].idname)
+                        if(m[l].idname==context->SplinePatches[i]->markers[k]->idname)
                         stream << l << " ";
                     }
                 }

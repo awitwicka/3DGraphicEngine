@@ -13,7 +13,7 @@ class BSplinePlane : public CADObject, public CADSplinePatch
     //QVector<QVector4D> pointsCurve;
     //QVector<QPoint> indicesCurve;
 
-    void InitializeMarkers();
+    void InitializeMarkers(QList<Marker> *MainMarkers);
     void Clear();
 public:
     //true for plane, false for cyllinder
@@ -32,8 +32,8 @@ public:
     QVector4D offset;
 
     BSplinePlane();
-    BSplinePlane(QMatrix4x4 matrix);
-    BSplinePlane(QMatrix4x4 matrix, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane);
+    BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers);
+    BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane);
     QList<BicubicSegment> BezierSegments;
     QVector<QList<Marker*>> BezierSegMarkers;
     //QList<Marker*[]> BezierSegMarkers;
@@ -49,7 +49,7 @@ public:
     virtual void setPoints(const QVector<QVector4D> &value);
     virtual QVector<QPoint> getIndices() const;
     virtual void setIndices(const QVector<QPoint> &value);
-    QList<Marker> getMarkers();
+    QList<Marker*> getMarkers();
 };
 
 #endif // BSPLINEPLANE_H
