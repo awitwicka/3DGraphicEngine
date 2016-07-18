@@ -1,5 +1,5 @@
 #include "marker.h"
-#include "curveC2.h"
+#include "Spline/curveC2.h"
 
 QColor Marker::getColor() const
 {

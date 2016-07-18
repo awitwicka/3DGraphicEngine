@@ -22,15 +22,15 @@ SOURCES += main.cpp\
     marker.cpp \
     cursor.cpp \
     constants.cpp \
-    bezier.cpp \
-    segment.cpp \
-    curveC2.cpp \ 
-    cadmarkerobject.cpp \
-    bsinterpolation.cpp \
-    bezierplane.cpp \
-    bicubicsegment.cpp \
-    cadsplinepatch.cpp \
-    bsplineplane.cpp \
+    Spline/bezier.cpp \
+    Spline/segment.cpp \
+    Spline/curveC2.cpp \
+    Spline/cadmarkerobject.cpp \
+    Spline/bsinterpolation.cpp \
+    Patch/bezierplane.cpp \
+    Patch/bicubicsegment.cpp \
+    Patch/cadsplinepatch.cpp \
+    Patch/bsplineplane.cpp \
     cadloader.cpp
 
 HEADERS  += mainwindow.h \
@@ -40,15 +40,15 @@ HEADERS  += mainwindow.h \
     marker.h \
     cursor.h \
     constants.h \
-    bezier.h \
-    segment.h \
-    curveC2.h \ 
-    cadmarkerobject.h \
-    bsinterpolation.h \
-    bezierplane.h \
-    bicubicsegment.h \
-    cadsplinepatch.h \
-    bsplineplane.h \
+    Spline/bezier.h \
+    Spline/segment.h \
+    Spline/curveC2.h \
+    Spline/cadmarkerobject.h \
+    Spline/bsinterpolation.h \
+    Patch/bezierplane.h \
+    Patch/bicubicsegment.h \
+    Patch/cadsplinepatch.h \
+    Patch/bsplineplane.h \
     cadloader.h
 
 FORMS    += mainwindow.ui

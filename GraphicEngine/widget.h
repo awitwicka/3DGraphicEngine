@@ -9,11 +9,11 @@
 #include "torus.h"
 #include "marker.h"
 #include "cursor.h"
-#include "bezier.h"
-#include "curveC2.h"
-#include "bsinterpolation.h"
-#include "bezierplane.h"
-#include "bsplineplane.h"
+#include "Spline/bezier.h"
+#include "Spline/curveC2.h"
+#include "Spline/bsinterpolation.h"
+#include "Patch/bezierplane.h"
+#include "Patch/bsplineplane.h"
 //#include "virtualmarker.h"
 
 class Widget : public QWidget

@@ -1,5 +1,5 @@
-#include "bsinterpolation.h"
-#include "bsplineplane.h"
+#include "Spline/bsinterpolation.h"
+#include "Patch/bsplineplane.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
