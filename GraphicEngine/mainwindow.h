@@ -77,12 +77,18 @@ private slots:
 
     void on_pushButton_Clear_clicked();
 
+    void on_pushButton_Merge_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;
     QListWidget* l;
     QTreeWidget* t;
     bool isPushBezier;
+
+    Marker* FindMarkerByID(QString id);
+    int FindIndexByRef(Marker* marker);
+    int FindSurfaceIndexByRef(Marker* marker, QList<Marker*> list);
 };
 
 #endif // MAINWINDOW_H

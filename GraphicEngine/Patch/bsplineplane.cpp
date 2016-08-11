@@ -53,91 +53,38 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers, float 
 
 void BSplinePlane::InitializeMarkers(QList<Marker> *MainMarkers)
 {
-    BezierSegMarkers.clear();
     if (isPlane) {
         float bicubicWidth = Width/X;
         float bicubicHeight = Height/Y;
 
         float unitX = bicubicWidth/(ORDER-1);
         float unitY = bicubicHeight/(ORDER-1);
-        int count = 0;
-        for (int y = 0; y<Y; y++) {
-        for (int x = 0; x<X; x++) {
-            BezierSegMarkers.append(QList<Marker*>());
-            for (int i = 0; i<ORDER; i++)
-                for (int j = 0; j<ORDER; j++) {
-                    //weź z komórki po lewej
-                    if (j<ORDER-1 && y==0 && x!=0) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*(X) + (x-1)].at(i*ORDER + j+1));
-                    //weź z góry
-                    } else if (i<ORDER-1 && y>0) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[(y-1)*(X) + x].at((i+1)*ORDER + j));
-                    } else if (i==ORDER-1 && x>0 && y>0 && j<ORDER-1) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*(X) + (x-1)].at(i*ORDER + j+1));
-                    } else {
-                        if (x==0 && y==0) {
-                            MainMarkers->append(Marker((unitX*j)+(bicubicWidth*x)+offset.x(), (unitY*i)+(bicubicHeight*y)+offset.y(), offset.z(), false));
-                            markers.append(&MainMarkers->last());
-                        } else if (y==0) {
-                            MainMarkers->append(Marker((unitX*x)+(bicubicWidth)+offset.x(), (unitY*i)+(bicubicHeight*0)+offset.y(), offset.z(), false));
-                            markers.append(&MainMarkers->last());
-                        } else if (x==0) {
-                            MainMarkers->append(Marker((unitX*j)+(bicubicWidth*0)+offset.x(), (unitY*y)+(bicubicHeight)+offset.y(), offset.z(), false));
-                            markers.append(&MainMarkers->last());
-                        } else {
-                            MainMarkers->append(Marker((unitX*x)+(bicubicWidth)+offset.x(), (unitY*y)+(bicubicHeight)+offset.y(), offset.z(), false));
-                            markers.append(&MainMarkers->last());
-                        } BezierSegMarkers[y*(X) + x].append(markers[count]);
-                        count++;
-                }
-            }
+
+        //create markers
+        for (int y = 0; y<Y+(ORDER-1); y++) {
+        for (int x = 0; x<X+(ORDER-1); x++) {
+            MainMarkers->append(Marker((unitX*x)+offset.x(), (unitY*y)+offset.y(), offset.z(), false));
+            markers.append(&MainMarkers->last());
         }
         }
     } else {
         const float pi = asin(1.0)*2.0;
-        float alphaSegment = 2*pi/X;
-        float alpha = alphaSegment/(ORDER-1);
+        //float alphaSegment = 2*pi/X;
+        //float alpha = alphaSegment/(ORDER-1);
         float bicubicHeight = H/Y;
         float unitY = bicubicHeight/(ORDER-1);
 
-        int count = 0;
-        for (int y = 0; y<Y; y++) {
-        for (int x = 0; x<X; x++) {
-            BezierSegMarkers.append(QList<Marker*>());
-            for (int i = 0; i<ORDER; i++)
-                for (int j = 0; j<ORDER; j++) {
-                    //weź z komórki po lewej
-                    if (j<ORDER-1 && y==0 && x!=0) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*(X) + (x-1)].at(i*ORDER + j+1));
-                    //weź z góry
-                    } else if (i<ORDER-1 && y>0) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[(y-1)*(X) + x].at((i+1)*ORDER + j));
-                    } else if (i==ORDER-1 && x>0 && y>0 && j<ORDER-1) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*(X) + (x-1)].at(i*ORDER + j+1));
-                    //connect front with back
-                    } else if (j==(ORDER-1) && x==(X-3)) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*X].at(i*ORDER));
-                    } else if (j==(ORDER-1) && x==(X-2)) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*X + 1].at(i*ORDER));
-                    } else if (j==(ORDER-1) && x==(X-1)) {
-                        BezierSegMarkers[y*(X) + x].append(BezierSegMarkers[y*X + 2].at(i*ORDER));
-                    } else {
-                        float rad = ((2*pi/X)*(ORDER-1)) + (2*pi/X)*x;
-                        if (x==0 && y==0) {
-                            rad = (2*pi/X)*j;
-                        } else if (x ==0) {
-                            rad = (2*pi/X)*j;
-                        }
-                        if (y==0) {
-                            MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*i)+(bicubicHeight*y)+offset.z(), false));
-                            markers.append(&MainMarkers->last());
-                        }else {
-                            MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*y)+(bicubicHeight)+offset.z(), false));
-                            markers.append(&MainMarkers->last());
-                        }BezierSegMarkers[y*(X) + x].append(markers[count]);
-                        count++;
-                }
-            }
+        //create markers
+        for (int y = 0; y<Y+(ORDER-1); y++) {
+        for (int x = 0; x<X+(ORDER-1)-3; x++) {
+            float rad = ((2*pi/X)*(ORDER-1)) + (2*pi/X)*x;;
+            //if (x==0 && y==0) {
+            //    rad = (2*pi/X)*j;
+            //} else if (x ==0) {
+            //   rad = (2*pi/X)*j;
+            //}
+            MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*y)+offset.z(), false));
+            markers.append(&MainMarkers->last());
         }
         }
     }
@@ -146,12 +93,49 @@ void BSplinePlane::InitializeMarkers(QList<Marker> *MainMarkers)
 void BSplinePlane::Clear()
 {
     BezierSegments.clear();
+     BezierSegMarkers.clear();
 }
 
 
 void BSplinePlane::InitializeSpline(QMatrix4x4 matrix)
 {
-    Clear();
+    Clear();    
+    //TODO: refresh beziersegmarkers only on merge points
+    int count = 0;
+    int line_length = 0;
+    if (isPlane) {
+        line_length = X+(ORDER-1);
+        for (int j = 0; j<Y; j++) {
+        for (int i = 0; i<X; i++) {
+            count = i + (j*line_length);
+            BezierSegMarkers.append(QList<Marker*>());
+            for (int row = 0; row<ORDER; row++) {
+                for (int col = 0; col<ORDER; col++) {
+                    BezierSegMarkers.last().append(markers[count+col]);
+                }
+                count+=line_length;//next line
+            }
+        }
+        }
+    } else {
+        line_length = X+(ORDER-1)-3;
+        for (int j = 0; j<Y; j++) {
+        for (int i = 0; i<X; i++) {
+            count = i + (j*line_length);
+            BezierSegMarkers.append(QList<Marker*>());
+            for (int row = 0; row<ORDER; row++) {
+                for (int col = 0; col<ORDER; col++) {
+                    if (col+i >= X+(ORDER-1)-3)
+                        BezierSegMarkers.last().append(markers[count+col-line_length]); //warp
+                    else
+                        BezierSegMarkers.last().append(markers[count+col]);
+                }
+                count+=line_length;//next line
+            }
+        }
+        }
+    }
+    
     for (int i = 0; i<BezierSegMarkers.length(); i++)
          BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix, false));
 }
@@ -166,6 +150,15 @@ void BSplinePlane::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isSter
 {
     for (int i = 0; i<BezierSegments.length(); i++)
         BezierSegments[i].DrawPolygon(painter, matrix, isStereo);
+}
+
+void BSplinePlane::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
+{
+    for (int i = 0; i< markers.length(); i++) {
+        if (*markers[i] == *toReplace) {
+            markers.replace(i, replaceWith);
+        }
+    }
 }
 
 QVector<QPoint> BSplinePlane::getIndices() const

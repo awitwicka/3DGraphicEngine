@@ -14,7 +14,6 @@ class BezierPlane : public CADObject, public CADSplinePatch
     //QVector<QPoint> indicesCurve;
 
     void InitializeMarkers(QList<Marker> *MainMarkers);
-    void Clear();
 public:
     //true for plane, false for cyllinder
     //bool isPlane;
@@ -41,7 +40,8 @@ public:
     void InitializeSpline(QMatrix4x4 matrix);
     void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
-
+    void Clear();
+    void ReplaceMarker(Marker *toReplace, Marker *replaceWith);
 
     //void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 

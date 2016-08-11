@@ -15,6 +15,9 @@ public:
     virtual ~CADSplinePatch()=0;
     virtual void InitializeSpline(QMatrix4x4 matrix)=0;
     virtual void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+    //If found in the list, replaces old reference to marker with a new one
+    virtual void ReplaceMarker(Marker *toReplace, Marker *replaceWith);
+    virtual void Clear();
 
     virtual int getU() const;
     virtual void setU(int value);

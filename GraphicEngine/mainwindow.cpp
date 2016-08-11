@@ -589,3 +589,75 @@ void MainWindow::on_pushButton_Clear_clicked()
     w->UpdateSceneElements();
     w->update();
 }
+
+//****************TOOLS********************
+void MainWindow::on_pushButton_Merge_clicked()
+{
+    QList<Marker*> toMerge = QList<Marker*>(w->selectedMarkers);
+    //TODO: CLEAR SELECTION ON UI
+    w->selectedMarkers.clear();
+    if (toMerge.length() <= 1)
+        return;
+
+    //get new marker position and add it
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    for (int i = 0; i<toMerge.length(); i++) {
+        x+=toMerge[i]->point.x();
+        y+=toMerge[i]->point.y();
+        z+=toMerge[i]->point.z();
+    }
+    x/=toMerge.length();
+    y/=toMerge.length();
+    z/=toMerge.length();
+    Marker m = Marker(x,y,z);
+    w->markers.append(m);
+    //w->markers.append(Marker(x,y,z));
+    //QString id = w->markers.last().idname;
+
+    //TODO: UPDATE THE interface ui list
+
+    //update markers in splines
+    for (int i = 0; i<toMerge.length(); i++) {
+        
+        for (int k = 0; k<w->SplinePatches.length(); k++) {
+
+            w->SplinePatches[k]->ReplaceMarker(toMerge[i], &w->markers[FindIndexByRef(&m)]); //CHECK: try just &m
+        }
+        //remove marker from the list
+        //w->markers.removeAt(FindIndexByRef(toMerge[i])); //TODO make method in widget
+        w->markers.removeAll(*toMerge[i]);
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+int MainWindow::FindIndexByRef(Marker *marker)
+{
+    QString idname = marker->idname;
+    for (int i = 0; i<w->markers.length(); i++) {
+        if (w->markers[i].idname == idname)
+            return i;
+    }
+    return -1;
+}
+
+int MainWindow::FindSurfaceIndexByRef(Marker *marker, QList<Marker *> list)
+{
+    QString idname = marker->idname;
+    for (int i = 0; i<list.length(); i++) {
+        if (list[i]->idname == idname)
+            return i;
+    }
+    return -1;
+}
+
+Marker *MainWindow::FindMarkerByID(QString id)
+{
+    for (int i = 0; i<w->markers.length(); i++) {
+        if (w->markers[i].idname == id)
+            return &w->markers[i];
+    }
+    return nullptr;
+}

@@ -10,6 +10,15 @@ void CADSplinePatch::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isSt
 
 }
 
+void CADSplinePatch::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
+{
+//TODO: try to make a common method
+}
+
+void CADSplinePatch::Clear() {
+
+}
+
 int CADSplinePatch::getV() const
 {
     return V;

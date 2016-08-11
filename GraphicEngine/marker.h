@@ -41,6 +41,12 @@ public:
     void setSize(float value);
     QColor getColor() const;
     void setColor(const QColor &value);
+
+    //return true if the messages are equal, false otherwise
+    inline bool operator == (const Marker& rhs) const
+    {
+        return (this->idname == rhs.idname);
+    }
 };
 
 #endif // MARKER_H
