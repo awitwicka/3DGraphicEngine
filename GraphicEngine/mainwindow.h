@@ -86,6 +86,7 @@ private:
     QTreeWidget* t;
     bool isPushBezier;
 
+    void RefreshList();
     Marker* FindMarkerByID(QString id);
     int FindIndexByRef(Marker* marker);
     int FindSurfaceIndexByRef(Marker* marker, QList<Marker*> list);

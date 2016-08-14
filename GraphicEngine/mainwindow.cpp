@@ -590,12 +590,76 @@ void MainWindow::on_pushButton_Clear_clicked()
     w->update();
 }
 
+void MainWindow::RefreshList()
+{
+    t->clear();
+    if (w->markers.isEmpty())
+        return;
+
+    //table that shows how many times given markers was used
+    int n = w->markers.length();
+    int markerCount[n];
+    for (int i = 0; i<n; i++)
+        markerCount[i] = 0;
+
+    for (int i = 0; i<w->Splines.length(); i++) {
+        //create and add item to list
+        QList<QString> columns = {w->Splines[i]->name, w->Splines[i]->idname};
+        QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+        t->addTopLevelItem(item);
+
+        //add sub markers
+        for (int m = 0; m<w->Splines[i]->markers.length(); m++) {
+            QList<QString> columns = {w->Splines[i]->markers[m]->name, w->Splines[i]->markers[m]->idname};
+            QTreeWidgetItem *mark = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+            mark->setFlags(mark->flags() | Qt::ItemIsEditable);
+            item->addChild(mark);
+
+            markerCount[w->markers.indexOf(*w->Splines[i]->markers[m])] += 1;
+        }
+    }
+    for (int i = 0; i<w->SplinePatches.length(); i++) {
+        //create and add item to list
+        QList<QString> columns = {w->SplinePatches[i]->name, w->SplinePatches[i]->idname};
+        QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+        item->setFlags(item->flags() | Qt::ItemIsEditable);
+        t->addTopLevelItem(item);
+
+        //add sub markers
+        for (int m = 0; m<w->SplinePatches[i]->markers.length(); m++) {
+            QList<QString> columns = {w->SplinePatches[i]->markers[m]->name, w->SplinePatches[i]->markers[m]->idname};
+            QTreeWidgetItem *mark = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+            mark->setFlags(mark->flags() | Qt::ItemIsEditable);
+            item->addChild(mark);
+
+            markerCount[w->markers.indexOf(*w->SplinePatches[i]->markers[m])] += 1;
+        }
+    }
+    for (int i =0; i<w->markers.length(); i++) {
+        if (markerCount[i] < 1) {
+        //create item
+            QList<QString> columns = {w->markers[i].name, w->markers[i].idname};
+            QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidget*)0, QStringList(columns)); //parent, columns names...
+            item->setFlags(item->flags() | Qt::ItemIsEditable);
+            t->addTopLevelItem(item);
+        }
+    }
+
+    //TODO: select selected markers - test if its working
+    for (int i = 0; i<w->selectedMarkers.length(); i++) {
+        QList<QTreeWidgetItem*> result = visitTree(tree, w->selectedMarkers[i].idname);
+        for(int j = 0; j < result.length(); j++)
+            tree->setCurrentItem(result[j]);
+    }
+}
 //****************TOOLS********************
 void MainWindow::on_pushButton_Merge_clicked()
 {
     QList<Marker*> toMerge = QList<Marker*>(w->selectedMarkers);
     //TODO: CLEAR SELECTION ON UI
     w->selectedMarkers.clear();
+    //TODO: unselect all selected markers !!!!!!
     if (toMerge.length() <= 1)
         return;
 
@@ -631,6 +695,7 @@ void MainWindow::on_pushButton_Merge_clicked()
     }
     w->UpdateSceneElements();
     w->update();
+    RefreshList();
 }
 
 int MainWindow::FindIndexByRef(Marker *marker)

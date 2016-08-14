@@ -24,14 +24,15 @@ public:
     QVector4D point; //setter getter virtual
     QVector4D pointWorld;
     Marker* boorParent;
-    bool canDelete;
+    //bool canDelete;
+    bool isFree = true; //if belongs to any object
 
     Marker();
     //~Marker() {};
     Marker(QVector4D position);
     Marker(QVector4D position, QColor color);
     Marker(float x, float y, float z);
-    Marker(float x, float y, float z, bool canDelete);
+    Marker(float x, float y, float z, bool isFree);
     Marker(float x, float y, float z, QColor color);
     Marker(QVector4D position, QColor color, Marker* parent, Marker* partner, CurveC2* parentCurve);
 

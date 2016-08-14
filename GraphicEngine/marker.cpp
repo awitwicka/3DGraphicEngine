@@ -13,7 +13,7 @@ Marker::Marker()
     name = QString("point %1").arg(id);
     idname = QString("p%1").arg(id);
     IsSelected= false;
-    canDelete = true;
+    //canDelete = true;
     id++;
 }
 
@@ -23,7 +23,7 @@ Marker::Marker(QVector4D position) : size(10)
     name = QString("point %1").arg(id);
     idname = QString("p%1").arg(id);
     IsSelected= false;
-    canDelete = true;
+    //canDelete = true;
     id++;
 }
 
@@ -34,7 +34,7 @@ Marker::Marker(QVector4D position, QColor color) : size(10)
     name = QString("point %1").arg(id);
     idname = QString("p%1").arg(id);
     IsSelected= false;
-    canDelete = true;
+    //canDelete = true;
     id++;
 }
 
@@ -44,11 +44,22 @@ Marker::Marker(float x, float y, float z) : size(10)
     idname = QString("p%1").arg(id);
     point = QVector4D(x, y, z, 1);
     IsSelected= false;
-    canDelete = true;
+    //canDelete = true;
     id++;
 }
 
-Marker::Marker(float x, float y, float z, bool canDelete) : size(10)
+Marker::Marker(float x, float y, float z, bool isFree) : size(10)
+{
+    name = QString("point %1").arg(id);// + "1");
+    idname = QString("p%1").arg(id);
+    point = QVector4D(x, y, z, 1);
+    IsSelected= false;
+    //canDelete = true;
+    this->isFree = isFree;
+    id++;
+}
+
+/*Marker::Marker(float x, float y, float z, bool canDelete) : size(10)
 {
     name = QString("point %1").arg(id);// + "1");
     idname = QString("p%1").arg(id);
@@ -56,7 +67,7 @@ Marker::Marker(float x, float y, float z, bool canDelete) : size(10)
     IsSelected= false;
     this->canDelete = canDelete;
     id++;
-}
+}*/
 
 Marker::Marker(float x, float y, float z, QColor color) : size(10)
 {
@@ -64,7 +75,7 @@ Marker::Marker(float x, float y, float z, QColor color) : size(10)
     idname = QString("p%1").arg(id);
     point = QVector4D(x, y, z, 1);
     IsSelected= false;
-    canDelete = true;
+    //canDelete = true;
     Color = color;
 }
 
@@ -74,7 +85,7 @@ Marker::Marker(QVector4D position, QColor color, Marker *parent, Marker *partner
     name = QString("point %1").arg(id);// + "1");
     idname = QString("p%1").arg(id);
     IsSelected= false;
-    canDelete = true;
+    //canDelete = true;
     Color = color;
     Parent = parentCurve;
     boorParent = parent;
