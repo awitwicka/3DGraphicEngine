@@ -144,6 +144,40 @@ void GapFilling::GetFirst2Lines(Marker* a, Marker* c, CADSplinePatch* patch, QVe
     }
 }
 
+QVector4D GapFilling::ComputeBorderControlPoints(Marker *a, Marker *c, CADSplinePatch *patch)
+{
+    //find first 2 lines of markers (facing gap to the top)
+    QVector4D line1[ORDER];
+    QVector4D line2[ORDER];
+    GetFirst2Lines(a, c, patch, line1, line2); //TODO: check if not pass through reference
+
+    //control points at border of a patch
+    QList<QVector4D> cast1 = DeCasteljau(line1);
+    //control points inside of a patch
+    QList<QVector4D> cast2 = DeCasteljau(line2);
+    //control points inside of a gap
+    QList<QVector4D> cast3;
+
+    int count = indicesVectors.length()*2;
+    for (int i = 0; i<cast1.length(); i++) {
+        pointsVectors.append(cast1[i]);
+        QVector4D dir = cast1[i] - cast2[i];
+        cast3.append(cast1[i] +  dir);
+        pointsVectors.append(cast3[i]); //normalize??
+        indicesVectors.append(QPoint(count, count+1));
+        count +=2;
+    }
+    QVector4D p1 = cast1[3];
+    QVector4D d1 = cast3[3];
+    QVector4D p2 = p1 + (3.0f/2.0f)*(d1 - p1);
+    //tmp
+    pointsVectors.append(p1);
+    pointsVectors.append(p2);
+    indicesVectors.append(QPoint(count, count+1));
+    //
+    return p2;
+}
+
 void GapFilling::InitializeSpline(QMatrix4x4 matrix)
 {
     //TODO: if not becubic quit
@@ -155,49 +189,37 @@ void GapFilling::InitializeSpline(QMatrix4x4 matrix)
 
     if (a == nullptr || b == nullptr || c == nullptr)
         return;
-
-    //find first 2 lines of markers (facing gap to the top)
-    QVector4D line1[ORDER];
-    QVector4D line2[ORDER];
-
     // c ------0------ a
-    GetFirst2Lines(c, a, patches[0], line1, line2); //TODO: check if not pass through reference
-    QList<QVector4D> cast1 = DeCasteljau(line1);
-    QList<QVector4D> cast2 = DeCasteljau(line2); //check if not have to individually for each point
-    int count = 0;
-    for (int i = 0; i<cast1.length(); i++) {
-        pointsVectors.append(cast1[i]);
-        QVector4D dir = cast1[i] - cast2[i];
-        pointsVectors.append(cast1[i] +  dir); //move point along dir
-        indicesVectors.append(QPoint(count, count+1));
-        count +=2;
-    }
+    QVector4D p2a = ComputeBorderControlPoints(c, a, patches[0]);
     // a ------1------ b
-    GetFirst2Lines(a, b, patches[1], line1, line2);
-    cast1.clear();
-    cast2.clear();
-    cast1 = DeCasteljau(line1);
-    cast2 = DeCasteljau(line2); //check if not have to individually for each point
-    for (int i = 0; i<cast1.length(); i++) {
-        pointsVectors.append(cast1[i]);
-        QVector4D dir = cast1[i] - cast2[i];
-        pointsVectors.append(cast1[i] +  dir); //move point along dir
-        indicesVectors.append(QPoint(count, count+1));
-        count +=2;
-    }
+    QVector4D p2b = ComputeBorderControlPoints(a, b, patches[1]);
     // b ------2------ c
-    cast1.clear();
-    cast2.clear();
-    GetFirst2Lines(b, c, patches[2], line1, line2);
-    cast1 = DeCasteljau(line1);
-    cast2 = DeCasteljau(line2); //check if not have to individually for each point
-    for (int i = 0; i<cast1.length(); i++) {
-        pointsVectors.append(cast1[i]);
-        QVector4D dir = cast1[i] - cast2[i];
-        pointsVectors.append(cast1[i] +  dir); //move point along dir
-        indicesVectors.append(QPoint(count, count+1));
-        count +=2;
-    }
+    QVector4D p2c = ComputeBorderControlPoints(b, c, patches[2]);
+
+    QVector4D midP = (p2a + p2b + p2c)/3.0f;
+
+    //tmp
+    int count = indicesVectors.length()*2;
+    pointsVectors.append(p2a);
+    pointsVectors.append(midP);
+    indicesVectors.append(QPoint(count, count+1));
+    count+=2;
+    pointsVectors.append(p2b);
+    pointsVectors.append(midP);
+    indicesVectors.append(QPoint(count, count+1));
+    count+=2;
+    pointsVectors.append(p2c);
+    pointsVectors.append(midP);
+    indicesVectors.append(QPoint(count, count+1));
+    count+=2;
+    //
+
+    //new f get g  returns
+    /****************************/
+    //CALCULATE CONTROL POINTS IN THE MIDDLE OF A GAP
+
+
+    //QVector4D d2 = q + (2.0f/3.0f)*(p2 - q);
 }
 
 void GapFilling::DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
