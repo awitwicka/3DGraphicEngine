@@ -33,7 +33,7 @@ public:
     BSplinePlane();
     BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers);
     BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane);
-    QList<BicubicSegment> BezierSegments;
+    //QList<BicubicSegment> BezierSegments;
     QVector<QList<Marker*>> BezierSegMarkers;
     //QList<Marker*[]> BezierSegMarkers;
 

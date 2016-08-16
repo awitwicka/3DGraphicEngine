@@ -10,6 +10,11 @@ void CADSplinePatch::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isSt
 
 }
 
+void CADSplinePatch::DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+{
+
+}
+
 void CADSplinePatch::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
 {
 //TODO: try to make a common method

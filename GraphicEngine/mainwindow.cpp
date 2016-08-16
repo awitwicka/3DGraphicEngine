@@ -648,11 +648,36 @@ void MainWindow::RefreshList()
 
     //TODO: select selected markers - test if its working
     for (int i = 0; i<w->selectedMarkers.length(); i++) {
-        QList<QTreeWidgetItem*> result = visitTree(tree, w->selectedMarkers[i].idname);
+        QList<QTreeWidgetItem*> result = visitTree(t, w->selectedMarkers[i]->idname);
         for(int j = 0; j < result.length(); j++)
-            tree->setCurrentItem(result[j]);
+            t->setCurrentItem(result[j]);
     }
 }
+
+void MainWindow::on_pushButton_fillGap_clicked()
+{
+    //TODO: prevent error when incorrectly selected things for filing
+    QList<CADSplinePatch*> patches;
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    //TODO: SELECT ONLY BEZIER (without bspline)
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        for (int i = 0; i<w->SplinePatches.length(); i++) {
+            if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
+                patches.append(w->SplinePatches[i]);
+            }
+        }
+    }
+    w->UpdateSceneElements();
+    w->update();
+    CADSplinePatch* s = new GapFilling(w->worldMatrix, patches[0], patches[1], patches[2]);
+    w->SplinePatches.append(s);
+    //TODO: create new element on ui?? or just refresh
+    RefreshList();
+    //GapFilling(patches);
+}
+
 //****************TOOLS********************
 void MainWindow::on_pushButton_Merge_clicked()
 {

@@ -93,7 +93,7 @@ void BSplinePlane::InitializeMarkers(QList<Marker> *MainMarkers)
 void BSplinePlane::Clear()
 {
     BezierSegments.clear();
-     BezierSegMarkers.clear();
+    BezierSegMarkers.clear();
 }
 
 

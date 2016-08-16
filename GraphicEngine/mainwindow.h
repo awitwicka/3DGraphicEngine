@@ -79,6 +79,8 @@ private slots:
 
     void on_pushButton_Merge_clicked();
 
+    void on_pushButton_fillGap_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

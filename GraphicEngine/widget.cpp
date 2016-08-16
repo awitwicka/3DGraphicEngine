@@ -18,6 +18,7 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     normalColor = Qt::white;
     IsMultipleSelect = false;
     showCurve = false;
+    showVectors = true;
     setFocusPolicy(Qt::StrongFocus);
     selectedVirtualMarker = nullptr;
     //setMouseTracking(true);
@@ -77,6 +78,8 @@ void Widget::paintEvent(QPaintEvent *)
             SplinePatches[i]->markers[j]->Draw(painter, worldMatrix, isStereo);
         if (showCurve)
             SplinePatches[i]->DrawPolygon(painter, worldMatrix, isStereo);
+        if (showVectors)
+            SplinePatches[i]->DrawVectors(painter, worldMatrix, isStereo);
     }
 }
 
@@ -176,6 +179,7 @@ void Widget::SelectIfInRange(QList<Marker> &mark, bool isVirtualMarker)
         if (x >= worldX-offset && x <= worldX+offset && y >= worldY-offset && y <= worldY+offset) {
             if (!isVirtualMarker) {
                 HandlePointSelection(&mark[i], IsMultipleSelect);
+                //TODO: when unmarking, unmark all instances in ui list
                 QList<QTreeWidgetItem*> result = visitTree(tree, mark[i].idname);
                 for(int i = 0; i < result.length(); i++)
                     tree->setCurrentItem(result[i]);

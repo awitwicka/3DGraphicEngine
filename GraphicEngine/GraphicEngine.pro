@@ -31,7 +31,9 @@ SOURCES += main.cpp\
     Patch/bicubicsegment.cpp \
     Patch/cadsplinepatch.cpp \
     Patch/bsplineplane.cpp \
-    cadloader.cpp
+    cadloader.cpp \
+    Patch/gapfilling.cpp \
+    Patch/gregorypatch.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -49,6 +51,8 @@ HEADERS  += mainwindow.h \
     Patch/bicubicsegment.h \
     Patch/cadsplinepatch.h \
     Patch/bsplineplane.h \
-    cadloader.h
+    cadloader.h \
+    Patch/gapfilling.h \
+    Patch/gregorypatch.h
 
 FORMS    += mainwindow.ui

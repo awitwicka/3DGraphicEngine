@@ -14,6 +14,7 @@
 #include "Spline/bsinterpolation.h"
 #include "Patch/bezierplane.h"
 #include "Patch/bsplineplane.h"
+#include "Patch/gapfilling.h"
 //#include "virtualmarker.h"
 
 class Widget : public QWidget
@@ -41,6 +42,7 @@ public:
     //KeyPress(QWidget *parent = 0);
     bool isStereo;
     bool showCurve;
+    bool showVectors;
     bool IsMultipleSelect;
     QMatrix4x4 worldMatrix, viewMatrix;
     QList<CADMarkerObject*> Splines;

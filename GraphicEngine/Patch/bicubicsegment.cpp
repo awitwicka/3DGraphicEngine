@@ -190,7 +190,7 @@ QVector4D BicubicSegment::getBezierPointCol(int index, float t)
 {
     QVector4D data[ORDER];
     for (int i = 0; i<ORDER; i++) {
-        data[i] = bezierMarkers[i][index].point;
+        data[i] = bezierMarkers[index][i].point;
     }
     return getBezierPoint(data, t);
 }
@@ -199,7 +199,7 @@ QVector4D BicubicSegment::getBezierPointRow(int index, float t)
 {
     QVector4D data[ORDER];
     for (int i = 0; i<ORDER; i++) {
-        data[i] = bezierMarkers[index][i].point;
+        data[i] = bezierMarkers[i][index].point; //x y
     }
     return getBezierPoint(data, t);
 }
@@ -221,6 +221,8 @@ void BicubicSegment::Clear()
 {
     indices.clear();
     points.clear();
+    indicesCurve.clear();
+    pointsCurve.clear();
 }
 
 QVector<QPoint> BicubicSegment::getIndices() const

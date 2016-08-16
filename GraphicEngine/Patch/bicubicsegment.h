@@ -1,21 +1,18 @@
 #ifndef BICUBICSEGMENT_H
 #define BICUBICSEGMENT_H
 
-#include "cadsplinepatch.h"
+//#include "cadsplinepatch.h"
 #include "marker.h"
 #define DEGREE 3
 #define ORDER 4
 
-class BicubicSegment : public CADObject, public CADSplinePatch
+class BicubicSegment : public CADObject//, public CADSplinePatch
 {
     bool isBezier;
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
 
     void InitializeBezierMarkers();
-    QVector4D getBezierPoint(QVector4D points[ORDER], float t);
-    QVector4D getBezierPointCol(int index, float t);
-    QVector4D getBezierPointRow(int index, float t);
     void Clear();
 
     struct VirtualMarkInfo {
@@ -23,7 +20,13 @@ class BicubicSegment : public CADObject, public CADSplinePatch
         Marker* parent;
         Marker* partner;
     };
-public:
+
+    int U;
+    int V;
+public: 
+    QVector4D getBezierPoint(QVector4D points[ORDER], float t);
+    QVector4D getBezierPointCol(int index, float t);
+    QVector4D getBezierPointRow(int index, float t);
     //int U;
     //int V;
     //float segLengthX;
