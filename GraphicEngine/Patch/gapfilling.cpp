@@ -198,6 +198,21 @@ QVector4D GapFilling::ComputeBorderControlPoints(Marker *a, Marker *c, CADSpline
     return p2;
 }
 
+QList<QVector4D> GapFilling::ComputeMiddleControlPoints(QVector4D b0, QVector4D a3, QVector4D b3, QVector4D Bezier[ORDER])
+{
+    QVector4D c0 = Bezier[1] - Bezier[0];
+    QVector4D c1 = Bezier[2] - Bezier[1];
+
+    QVector4D b1 = (c0 + 4*b0 + b3 + a3)/6.0f;
+    QVector4D b2 = (c1 + b0 + b3 + a3)/3.0f;
+
+    QList<QVector4D> result;
+    result.append(b1);
+    result.append(b2);
+
+    return result;
+}
+
 void GapFilling::InitializeSpline(QMatrix4x4 matrix)
 {
     //TODO: if not becubic quit
@@ -224,15 +239,30 @@ void GapFilling::InitializeSpline(QMatrix4x4 matrix)
     QList<QVector4D> cp1c;
     QVector4D p2c = ComputeBorderControlPoints(b, c, patches[2], cp0c, cp1c);
 
-    QVector4D midP = (p2a + p2b + p2c)/3.0f;
+    // Middle points preview:
+    // |cp0[3](p1)---cp1[3](d1)---p2---d2---midP
+    // |P0-----------P1-----------x----P2---P3
 
+    QVector4D midP = (p2a + p2b + p2c)/3.0f;
     QVector4D d2a = midP + (2.0f/3.0f)*(p2a - midP);
     QVector4D d2b = midP + (2.0f/3.0f)*(p2b - midP);
     QVector4D d2c = midP + (2.0f/3.0f)*(p2c - midP);
 
-    // Middle points preview:
-    // |cp0[3](p1)---cp1[3](d1)---p2---d2---midP
-    // |P0-----------P1-----------x----P2---P3
+    QVector4D B1[ORDER];
+    B1[0] = cp0a[3];
+    B1[1] = cp1a[3];
+    B1[2] = d2a;
+    B1[3] = midP;
+    QVector4D B2[ORDER];
+    B2[0] = cp0b[3];
+    B2[1] = cp1b[3];
+    B2[2] = d2b;
+    B2[3] = midP;
+    QVector4D B3[ORDER];
+    B3[0] = cp0c[3];
+    B3[1] = cp1c[3];
+    B3[2] = d2c;
+    B3[3] = midP;
 
     //tmp
     int count = indicesVectors.length()*2;
@@ -250,6 +280,9 @@ void GapFilling::InitializeSpline(QMatrix4x4 matrix)
     count+=2;
     //
 
+    QList<QVector4D> middleA = ComputeMiddleControlPoints(cp0a[4]-cp0a[3], midP-B3[2], B2[2]-midP, B1);
+    QList<QVector4D> middleB = ComputeMiddleControlPoints(cp0b[4]-cp0b[3], midP-B1[2], B3[2]-midP, B2);
+    QList<QVector4D> middleC = ComputeMiddleControlPoints(cp0c[4]-cp0c[3], midP-B2[2], B1[2]-midP, B3);
 }
 
 void GapFilling::DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
