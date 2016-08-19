@@ -14,7 +14,10 @@ class GapFilling : public CADObject, public CADSplinePatch
     QVector<QPoint> indicesVectors;
 
     Marker *FindFirstCommonMarker(CADSplinePatch* patch1, CADSplinePatch* patch2);
+    //returns 7 points after performing algorithm on each of this point
     QList<QVector4D> DeCasteljau(QVector4D pkt[ORDER]);
+    //returns points on the edges of a tree
+    QList<QVector4D> DeCasteljauTree(QVector4D pkt[ORDER], float t);
     //QList<GregoryPatch> gregPatches;
 public:
     GapFilling();
@@ -26,7 +29,7 @@ public:
     void DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 private:
     //get border control points that can be calculated based on the 'patch'
-    QVector4D ComputeBorderControlPoints(Marker* a, Marker* c, CADSplinePatch* patch);
+    QVector4D ComputeBorderControlPoints(Marker* a, Marker* c, CADSplinePatch* patch, QList<QVector4D> &cp0, QList<QVector4D> &cp1);
     void GetFirst2Lines(Marker* a, Marker* c, CADSplinePatch* patch, QVector4D *line1, QVector4D *line2);
 };
 
