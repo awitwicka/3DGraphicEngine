@@ -671,7 +671,7 @@ void MainWindow::on_pushButton_fillGap_clicked()
     }
     w->UpdateSceneElements();
     w->update();
-    CADSplinePatch* s = new GapFilling(w->worldMatrix, patches[0], patches[1], patches[2]);
+    CADSplinePatch* s = new GapFilling(w->worldMatrix, &w->markers, (float)ui->spinBoxU->value(), (float)ui->spinBoxV->value(), patches[0], patches[1], patches[2]);
     w->SplinePatches.append(s);
     //TODO: create new element on ui?? or just refresh
     RefreshList();

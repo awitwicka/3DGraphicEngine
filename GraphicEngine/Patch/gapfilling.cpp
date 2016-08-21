@@ -7,16 +7,19 @@ GapFilling::GapFilling()
 
 }
 
-GapFilling::GapFilling(QMatrix4x4 matrix, QList<CADSplinePatch *> patches)
+GapFilling::GapFilling(QMatrix4x4 matrix, QList<Marker> *MainMarkers, float U, float V, QList<CADSplinePatch *> patches)
 {
     name = QString("GapFilling%1").arg(id);
     idname = QString("z%1").arg(id);
     id++;
     this->patches = patches;
+    this->U = U;
+    this->V = V;
+    InitGregory(matrix);
     InitializeSpline(matrix);
 }
 
-GapFilling::GapFilling(QMatrix4x4 matrix, CADSplinePatch *patch1, CADSplinePatch *patch2, CADSplinePatch *patch3)
+GapFilling::GapFilling(QMatrix4x4 matrix, QList<Marker> *MainMarkers, float U, float V, CADSplinePatch *patch1, CADSplinePatch *patch2, CADSplinePatch *patch3)
 {
     name = QString("GapFilling%1").arg(id);
     idname = QString("z%1").arg(id);
@@ -24,8 +27,76 @@ GapFilling::GapFilling(QMatrix4x4 matrix, CADSplinePatch *patch1, CADSplinePatch
     patches.append(patch1);
     patches.append(patch2);
     patches.append(patch3);
+    this->U = U;
+    this->V = V;
+    //InitializeMarkers(MainMarkers);
+    InitGregory(matrix);
     InitializeSpline(matrix);
 
+}
+
+/*void GapFilling::InitializeMarkers(QList<Marker> *MainMarkers)
+{
+    //add markers belonging to patches
+
+    //add new markers (ones inside the gap)
+    int markersToAdd = 31;
+    for (int i = 0; i<markersToAdd; i++) {
+        MainMarkers->append(Marker((0.0f, 0.0f, 0.0f, false)));
+        markers.append(&MainMarkers->last());
+    }
+}*/
+
+void GapFilling::InitGregory(QMatrix4x4 matrix)
+{
+    for (int i = 0; i<3; i++) {
+        CPline0.append(QList<Marker>());
+        CPline1.append(QList<Marker>());
+        for (int j = 0; j<7; j++) {
+            CPline0[i].append(Marker(0,0,0,false));
+            CPline1[i].append(Marker(0,0,0,false));
+        }
+        Bezier.append(QList<Marker>());
+        CPmiddle.append(QList<Marker>());
+        for (int j = 0; j<4; j++) {
+            Bezier[i].append(Marker(0,0,0,false));
+            CPmiddle[i].append(Marker(0,0,0,false));
+        }
+    }
+
+    QList<Marker*> m1;
+    m1.append(&Bezier[1][3]);
+    m1.append(&Bezier[1][2]);
+    m1.append(&Bezier[1][1]);
+    m1.append(&Bezier[1][0]);
+
+    m1.append(&Bezier[0][2]);
+    m1.append(&CPmiddle[0][1]);
+    m1.append(&CPmiddle[1][3]);
+    m1.append(&CPmiddle[1][2]);
+    m1.append(&CPline1[1][2]);
+    m1.append(&CPline0[1][2]);
+
+    m1.append(&Bezier[0][1]);
+    m1.append(&CPmiddle[0][0]);
+    m1.append(&CPline1[0][4]);
+    m1.append(&CPline1[0][5]);
+    m1.append(&CPline1[1][1]);
+    m1.append(&CPline0[1][1]);
+
+    m1.append(&CPline0[1][3]);
+    m1.append(&CPline0[1][4]);
+    m1.append(&CPline0[1][5]);
+    m1.append(&CPline0[1][6]);
+    //QList<Marker*> m2;
+    //QList<Marker*> m3;
+
+    GregoryPatch G1 = GregoryPatch(m1, U, V, matrix);
+    //GregoryPatch G2 = GregoryPatch() (U, V);
+    //GregoryPatch G3 = GregoryPatch() (U, V);
+    gregPatches.append(G1);
+    //gregPatches.append(G2);
+    //gregPatches.append(G3);
 }
 
 Marker *GapFilling::FindFirstCommonMarker(CADSplinePatch *patch1, CADSplinePatch *patch2)
@@ -146,7 +217,7 @@ void GapFilling::GetFirst2Lines(Marker* a, Marker* c, CADSplinePatch* patch, QVe
             }
         else if (indexOfC == 12)
             for (int i = ORDER-1; i>=0; i--) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[i][3].point;
+                line1[i] = patch->BezierSegments[0].bezierMarkers[i][3].point; //---------/\\ -
                 line2[i] = patch->BezierSegments[0].bezierMarkers[i][2].point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointCol(i, (1.0f/6.0f)*5.0f);
             }
@@ -180,7 +251,7 @@ QVector4D GapFilling::ComputeBorderControlPoints(Marker *a, Marker *c, CADSpline
     for (int i = 0; i<tree1.length(); i++) {
         QVector4D dir = (tree1[i] - tree2[i])/2.0f;
         tree3.append(tree1[i] +  dir);
-
+        //vectors
         QVector4D vectDir = decast1[i] - decast2[i];
         pointsVectors.append(decast1[i]);
         pointsVectors.append(decast1[i] + vectDir/2.0f/*vectDir.normalized()*10*/); //normalize??
@@ -206,16 +277,31 @@ QList<QVector4D> GapFilling::ComputeMiddleControlPoints(QVector4D b0, QVector4D 
     QVector4D b1 = (c0 + 4*b0 + b3 + a3)/6.0f;
     QVector4D b2 = (c1 + b0 + b3 + a3)/3.0f;
 
+    QVector4D a1 = (c0 + 4*b0 + a3 + b3)/6.0f;
+    QVector4D a2 = (c1 + b0 + a3 + b3)/3.0f;
+
+    //
+    //_a3_b3_
+    //   |
+    // a2|b2
+    //   |
+    // a1|b1
+    //___|___
+    // a0 b0
+    //
+
     QList<QVector4D> result;
     result.append(b1);
     result.append(b2);
-
+    result.append(a1);
+    result.append(a2);
     return result;
 }
 
 void GapFilling::InitializeSpline(QMatrix4x4 matrix)
 {
     //TODO: if not becubic quit
+    //TODO: get rid of additional Lists with QVecttor4D info: cp0a, B1 etc..
     Clear();
     //find common markers in 3 patches
     Marker* a = FindFirstCommonMarker(patches[0], patches[1]);
@@ -238,6 +324,18 @@ void GapFilling::InitializeSpline(QMatrix4x4 matrix)
     QList<QVector4D> cp0c;
     QList<QVector4D> cp1c;
     QVector4D p2c = ComputeBorderControlPoints(b, c, patches[2], cp0c, cp1c);
+
+    //for(int i = 0; i<CPline0.length(); i++)
+    for(int j = 0; j<CPline0[0].length(); j++){
+        CPline0[0][j].point = cp0a[j];//TODO: check if not setX insteaad
+        CPline1[0][j].point = cp1a[j];
+
+        CPline0[1][j].point = cp0b[j];
+        CPline1[1][j].point = cp1b[j];
+
+        CPline0[2][j].point = cp0c[j];
+        CPline1[2][j].point = cp1c[j];
+    }
 
     // Middle points preview:
     // |cp0[3](p1)---cp1[3](d1)---p2---d2---midP
@@ -280,9 +378,19 @@ void GapFilling::InitializeSpline(QMatrix4x4 matrix)
     count+=2;
     //
 
+    //TODO: check if they are vectors or points
     QList<QVector4D> middleA = ComputeMiddleControlPoints(cp0a[4]-cp0a[3], midP-B3[2], B2[2]-midP, B1);
     QList<QVector4D> middleB = ComputeMiddleControlPoints(cp0b[4]-cp0b[3], midP-B1[2], B3[2]-midP, B2);
     QList<QVector4D> middleC = ComputeMiddleControlPoints(cp0c[4]-cp0c[3], midP-B2[2], B1[2]-midP, B3);
+
+    for(int j = 0; j<Bezier[0].length(); j++){
+        Bezier[0][j].point = B1[j];
+        Bezier[1][j].point = B2[j];
+        Bezier[2][j].point = B3[j];
+        CPmiddle[0][j].point = middleA[j];
+        CPmiddle[1][j].point = middleB[j];
+        CPmiddle[2][j].point = middleC[j];
+    }
 }
 
 void GapFilling::DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
