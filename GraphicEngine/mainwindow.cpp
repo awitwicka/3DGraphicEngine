@@ -524,18 +524,18 @@ void MainWindow::on_spinBoxU_valueChanged(int arg1)
     QList<QTreeWidgetItem*> selected = t->selectedItems();
     QString idname;
     foreach (QTreeWidgetItem* it, selected) {
-        idname = it->text(1);
-        if (idname.at(0) == 'g' || idname.at(0) == 'k') {
+        //idname = it->text(1);
+        //if (idname.at(0) == 'g' || idname.at(0) == 'k' || idname.at(0) == 'z' || idname.at(0) == 'y') {
             idname = it->text(1);
             //int id = idname.mid(1,1).toInt();
             for (int i = 0; i<w->SplinePatches.length(); i++) {
-                if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
+                if (w->SplinePatches[i]->idname == idname) {
                     //BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
                     //bp->setU(arg1);
                     w->SplinePatches[i]->setU(arg1);
                 }
             }
-        }
+
     }
     w->UpdateSceneElements();
     w->update();
@@ -550,7 +550,7 @@ void MainWindow::on_spinBoxV_valueChanged(int arg1)
         idname = it->text(1);
         //int id = idname.mid(1,1).toInt();
         for (int i = 0; i<w->SplinePatches.length(); i++) {
-            if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
+            if (w->SplinePatches[i]->idname == idname) {
                // BezierPlane* bp = dynamic_cast<BezierPlane*>(w->SplinePatches[i]);
                 //bp->setV(arg1);
                 w->SplinePatches[i]->setV(arg1);

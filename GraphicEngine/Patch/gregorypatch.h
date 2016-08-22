@@ -7,6 +7,8 @@
 
 class GregoryPatch : public CADObject, public CADSplinePatch
 {
+    static int id;
+
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
 

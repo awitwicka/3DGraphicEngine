@@ -473,6 +473,20 @@ void GapFilling::DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo
     Color = Qt::white;
 }
 
+void GapFilling::setU(int value)
+{
+    U = value;
+    for (int i = 0; i<gregPatches.length(); i++)
+        gregPatches[i].setU(value);
+}
+
+void GapFilling::setV(int value)
+{
+    V = value;
+    for (int i = 0; i<gregPatches.length(); i++)
+        gregPatches[i].setV(value);
+}
+
 void GapFilling::Clear()
 {
     //indices.clear();

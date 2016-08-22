@@ -52,6 +52,9 @@ public:
     void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+
+    void setU(int value);
+    void setV(int value);
 private:
     //get border control points that can be calculated based on the 'patch'
     QVector4D ComputeBorderControlPoints(Marker* a, Marker* c, CADSplinePatch* patch, QList<QVector4D> &cp0, QList<QVector4D> &cp1);

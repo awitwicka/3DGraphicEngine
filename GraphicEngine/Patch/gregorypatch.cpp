@@ -1,5 +1,7 @@
 #include "gregorypatch.h"
 
+int GregoryPatch::id = 0;
+
 GregoryPatch::GregoryPatch()
 {
 
@@ -8,6 +10,8 @@ GregoryPatch::GregoryPatch()
 GregoryPatch::GregoryPatch(QList<Marker> *m, int u, int v, QMatrix4x4 matrix)
 {
     //TODO: create markers and construct default gregory paych
+    name = QString("GregoryPatch%1").arg(id);
+    idname = QString("y%1").arg(id);
     U = u;
     V = v;
     InitializeSpline(matrix);
