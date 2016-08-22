@@ -88,15 +88,63 @@ void GapFilling::InitGregory(QMatrix4x4 matrix)
     m1.append(&CPline0[0][4]);
     m1.append(&CPline0[0][5]);
     m1.append(&CPline0[0][6]);
-    //QList<Marker*> m2;
-    //QList<Marker*> m3;
+
+    QList<Marker*> m2;
+    m2.append(&Bezier[2][3]);
+    m2.append(&Bezier[2][2]);
+    m2.append(&Bezier[2][1]);
+    m2.append(&Bezier[2][0]);
+
+    m2.append(&Bezier[1][2]);
+    m2.append(&CPmiddle[1][1]);
+    m2.append(&CPmiddle[2][3]);
+    m2.append(&CPmiddle[2][2]);
+    m2.append(&CPline1[2][2]);
+    m2.append(&CPline0[2][2]);
+
+    m2.append(&Bezier[1][1]);
+    m2.append(&CPmiddle[1][0]);
+    m2.append(&CPline1[1][4]);
+    m2.append(&CPline1[1][5]);
+    m2.append(&CPline1[2][1]);
+    m2.append(&CPline0[2][1]);
+
+    m2.append(&CPline0[1][3]);
+    m2.append(&CPline0[1][4]);
+    m2.append(&CPline0[1][5]);
+    m2.append(&CPline0[1][6]);
+
+    QList<Marker*> m3;
+    m3.append(&Bezier[0][3]);
+    m3.append(&Bezier[0][2]);
+    m3.append(&Bezier[0][1]);
+    m3.append(&Bezier[0][0]);
+
+    m3.append(&Bezier[2][2]);
+    m3.append(&CPmiddle[2][1]);
+    m3.append(&CPmiddle[0][3]);
+    m3.append(&CPmiddle[0][2]);
+    m3.append(&CPline1[0][2]);
+    m3.append(&CPline0[0][2]);
+
+    m3.append(&Bezier[2][1]);
+    m3.append(&CPmiddle[2][0]);
+    m3.append(&CPline1[2][4]);
+    m3.append(&CPline1[2][5]);
+    m3.append(&CPline1[0][1]);
+    m3.append(&CPline0[0][1]);
+
+    m3.append(&CPline0[2][3]);
+    m3.append(&CPline0[2][4]);
+    m3.append(&CPline0[2][5]);
+    m3.append(&CPline0[2][6]);
 
     GregoryPatch G1 = GregoryPatch(m1, U, V, matrix);
-    //GregoryPatch G2 = GregoryPatch() (U, V);
-    //GregoryPatch G3 = GregoryPatch() (U, V);
+    GregoryPatch G2 = GregoryPatch(m2, U, V, matrix);
+    GregoryPatch G3 = GregoryPatch(m3, U, V, matrix);
     gregPatches.append(G1);
-    //gregPatches.append(G2);
-    //gregPatches.append(G3);
+    gregPatches.append(G2);
+    gregPatches.append(G3);
 }
 
 Marker *GapFilling::FindFirstCommonMarker(CADSplinePatch *patch1, CADSplinePatch *patch2)
@@ -202,8 +250,8 @@ void GapFilling::GetFirst2Lines(Marker* a, Marker* c, CADSplinePatch* patch, QVe
         if (indexOfC == 0) {
             count = 0;
             for (int i = ORDER-1; i>=0; i--) {
-                line1[i] = patch->BezierSegments[0].markers[0][i]->point;
-                line2[i] = patch->BezierSegments[0].markers[1][i]->point;
+                line1[count] = patch->BezierSegments[0].markers[0][i]->point;
+                line2[count] = patch->BezierSegments[0].markers[1][i]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointRow(i, 1.0f/6.0f);
                 count++;
             }
@@ -219,8 +267,8 @@ void GapFilling::GetFirst2Lines(Marker* a, Marker* c, CADSplinePatch* patch, QVe
         if (indexOfC == 3) {
             count = 0;
             for (int i = ORDER-1; i>=0; i--) {
-                line1[i] = patch->BezierSegments[0].markers[3][i]->point;
-                line2[i] = patch->BezierSegments[0].markers[2][i]->point;
+                line1[count] = patch->BezierSegments[0].markers[3][i]->point;
+                line2[count] = patch->BezierSegments[0].markers[2][i]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointRow(i, (1.0f/6.0f)*5.0f);
                 count++;
             }

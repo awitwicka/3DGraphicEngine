@@ -174,7 +174,7 @@ void GregoryPatch::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isSter
     Color = Qt::white;
 }
 
-QVector4D GregoryPatch::getBezierPointCol(int index, float u, float v)
+QVector4D GregoryPatch::getBezierPointCol(int index, float u, float v) //v od dolu czy od gory idzie??
 {   // 0___1___2___3
     // |   |   |   |
     // |   6   7   |
@@ -184,6 +184,11 @@ QVector4D GregoryPatch::getBezierPointCol(int index, float u, float v)
     // |   12 13   |
     // |___|___|___|
     // 16  17  18  19
+    QVector4D v00 = (u*markers[12]->point + v*markers[11]->point)/(u+v); // 11/12
+    QVector4D v01 = ((1-u)*markers[13]->point + v*markers[14]->point)/((1-u)+v); // 13/14
+    QVector4D v10 = (u*markers[6]->point + (1-v)*markers[5]->point)/(u+(1-v)); // 6/5
+    QVector4D v11 = ((1-u)*markers[7]->point + (1-v)*markers[8]->point)/((1-u)+(1-v)); // 7/8
+
     QVector4D data[ORDER];
     if (index == 0) {
         data[0] = markers[0]->point;
@@ -192,15 +197,15 @@ QVector4D GregoryPatch::getBezierPointCol(int index, float u, float v)
         data[3] = markers[16]->point;
     } else if (index == 1) {
         data[0] = markers[1]->point;
-        data[1] = markers[6]->point;
-        data[2] = markers[12]->point;
+        data[1] = v10;
+        data[2] = v00;
         data[3] = markers[17]->point;
-    } else if (index == 1) {
+    } else if (index == 2) {
         data[0] = markers[2]->point;
-        data[1] = markers[7]->point;
-        data[2] = markers[13]->point;
+        data[1] = v11;
+        data[2] = v01;
         data[3] = markers[18]->point;
-    } else if (index == 1) {
+    } else if (index == 3) {
         data[0] = markers[3]->point;
         data[1] = markers[9]->point;
         data[2] = markers[15]->point;
@@ -220,6 +225,12 @@ QVector4D GregoryPatch::getBezierPointRow(int index, float u, float v)
    // |   12 13   |
    // |___|___|___|
    // 16  17  18  19
+
+   QVector4D v00 = (u*markers[12]->point + v*markers[11]->point)/(u+v); // 11/12
+   QVector4D v01 = ((1-u)*markers[13]->point + v*markers[14]->point)/((1-u)+v); // 13/14
+   QVector4D v10 = (u*markers[6]->point + (1-v)*markers[5]->point)/(u+(1-v)); // 6/5
+   QVector4D v11 = ((1-u)*markers[7]->point + (1-v)*markers[8]->point)/((1-u)+(1-v)); // 7/8
+
    QVector4D data[ORDER];
    if (index == 0) {
        data[0] = markers[0]->point;
@@ -228,15 +239,15 @@ QVector4D GregoryPatch::getBezierPointRow(int index, float u, float v)
        data[3] = markers[3]->point;
    } else if (index == 1) {
        data[0] = markers[4]->point;
-       data[1] = markers[5]->point;
-       data[2] = markers[8]->point;
+       data[1] = v10;
+       data[2] = v11;
        data[3] = markers[9]->point;
-   } else if (index == 1) {
+   } else if (index == 2) {
        data[0] = markers[10]->point;
-       data[1] = markers[11]->point;
-       data[2] = markers[14]->point;
+       data[1] = v00;
+       data[2] = v01;
        data[3] = markers[15]->point;
-   } else if (index == 1) {
+   } else if (index == 3) {
        data[0] = markers[16]->point;
        data[1] = markers[17]->point;
        data[2] = markers[18]->point;
