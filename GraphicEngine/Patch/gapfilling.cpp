@@ -84,10 +84,10 @@ void GapFilling::InitGregory(QMatrix4x4 matrix)
     m1.append(&CPline1[1][1]);
     m1.append(&CPline0[1][1]);
 
-    m1.append(&CPline0[1][3]);
-    m1.append(&CPline0[1][4]);
-    m1.append(&CPline0[1][5]);
-    m1.append(&CPline0[1][6]);
+    m1.append(&CPline0[0][3]);
+    m1.append(&CPline0[0][4]);
+    m1.append(&CPline0[0][5]);
+    m1.append(&CPline0[0][6]);
     //QList<Marker*> m2;
     //QList<Marker*> m3;
 
@@ -150,7 +150,7 @@ QList<QVector4D> GapFilling::DeCasteljauTree(QVector4D pkt[ORDER], float t)
         int listMid = result.length()/2;
         if (degree>1) {
             result.insert(listMid,pkt[0]);
-            result.insert(listMid+1,pkt[k]);
+            result.insert(listMid+1,pkt[k-1]);
         }
         degree--;
     }
@@ -164,61 +164,71 @@ void GapFilling::GetFirst2Lines(Marker* a, Marker* c, CADSplinePatch* patch, QVe
     //TODO: check if getBezierPointRow is not switched with getBezierPointCol
     int indexOfA = patch->markers.indexOf(a);
     int indexOfC = patch->markers.indexOf(c);
+    int count = 0;
     switch(indexOfA) {
     case 0:
         if (indexOfC == 3)
             for (int i = 0; i<ORDER; i++) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[i][0].point;
-                line2[i] = patch->BezierSegments[0].bezierMarkers[i][1].point;
+                line1[i] = patch->BezierSegments[0].markers[i][0]->point;
+                line2[i] = patch->BezierSegments[0].markers[i][1]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointCol(i, 1.0f/6.0f);//w ktora strone biegnie u i v?
             //todo: did i confused col with row?
             }
         else if (indexOfC == 12)
             for (int i = 0; i<ORDER; i++) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[0][i].point;
-                line2[i] = patch->BezierSegments[0].bezierMarkers[1][i].point;
+                line1[i] = patch->BezierSegments[0].markers[0][i]->point;
+                line2[i] = patch->BezierSegments[0].markers[1][i]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointRow(i, 1.0f/6.0f);
             }
         break;
     case 3:
-        if (indexOfC == 0)
+        if (indexOfC == 0) {
+            count = 0;
             for (int i = ORDER-1; i>=0; i--) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[i][0].point;
-                line2[i] = patch->BezierSegments[0].bezierMarkers[i][1].point;
+                line1[count] = patch->BezierSegments[0].markers[i][0]->point;
+                line2[count] = patch->BezierSegments[0].markers[i][1]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointCol(i, 1.0f/6.0f);
+                count++;
             }
+        }
         else if (indexOfC == 15)
             for (int i = 0; i<ORDER; i++) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[3][i].point;
-                line2[i] = patch->BezierSegments[0].bezierMarkers[2][i].point;
+                line1[i] = patch->BezierSegments[0].markers[3][i]->point;
+                line2[i] = patch->BezierSegments[0].markers[2][i]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointRow(i, (1.0f/6.0f)*5.0f);
             }
         break;
     case 12:
-        if (indexOfC == 0)
+        if (indexOfC == 0) {
+            count = 0;
             for (int i = ORDER-1; i>=0; i--) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[0][i].point;
-                line2[i] = patch->BezierSegments[0].bezierMarkers[1][i].point;
+                line1[i] = patch->BezierSegments[0].markers[0][i]->point;
+                line2[i] = patch->BezierSegments[0].markers[1][i]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointRow(i, 1.0f/6.0f);
+                count++;
             }
+        }
         else if (indexOfC == 15)
             for (int i = 0; i<ORDER; i++) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[i][3].point;
-                line2[i] = patch->BezierSegments[0].bezierMarkers[i][2].point;
+                line1[i] = patch->BezierSegments[0].markers[i][3]->point;
+                line2[i] = patch->BezierSegments[0].markers[i][2]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointCol(i, (1.0f/6.0f)*5.0f);
             }
          break;
     case 15:
-        if (indexOfC == 3)
+        if (indexOfC == 3) {
+            count = 0;
             for (int i = ORDER-1; i>=0; i--) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[3][i].point;
-                line2[i] = patch->BezierSegments[0].bezierMarkers[2][i].point;
+                line1[i] = patch->BezierSegments[0].markers[3][i]->point;
+                line2[i] = patch->BezierSegments[0].markers[2][i]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointRow(i, (1.0f/6.0f)*5.0f);
+                count++;
             }
+        }
         else if (indexOfC == 12)
             for (int i = ORDER-1; i>=0; i--) {
-                line1[i] = patch->BezierSegments[0].bezierMarkers[i][3].point; //---------/\\ -
-                line2[i] = patch->BezierSegments[0].bezierMarkers[i][2].point;
+                line1[i] = patch->BezierSegments[0].markers[i][3]->point;
+                line2[i] = patch->BezierSegments[0].markers[i][2]->point;
                 //line2[i] = patch->BezierSegments[0].getBezierPointCol(i, (1.0f/6.0f)*5.0f);
             }
         break;
@@ -291,10 +301,11 @@ QList<QVector4D> GapFilling::ComputeMiddleControlPoints(QVector4D b0, QVector4D 
     //
 
     QList<QVector4D> result;
-    result.append(b1);
-    result.append(b2);
-    result.append(a1);
-    result.append(a2);
+    //vector to points
+    result.append(Bezier[1]+b1);
+    result.append(Bezier[2]+b2);
+    result.append(Bezier[1]-a1);
+    result.append(Bezier[2]-a2);
     return result;
 }
 
@@ -391,12 +402,26 @@ void GapFilling::InitializeSpline(QMatrix4x4 matrix)
         CPmiddle[1][j].point = middleB[j];
         CPmiddle[2][j].point = middleC[j];
     }
+    for (int i = 0; i<gregPatches.length(); i++)
+        gregPatches[i].InitializeSpline(matrix);
+}
+
+void GapFilling::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+{
+    for (int i = 0; i<gregPatches.length(); i++)
+        gregPatches[i].Draw(painter, matrix, isStereo);
+}
+
+void GapFilling::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
+{
+    for (int i = 0; i<gregPatches.length(); i++)
+        gregPatches[i].DrawPolygon(painter, matrix, isStereo);
 }
 
 void GapFilling::DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
 {
     Color = Qt::red;
-    Draw(painter, matrix, isStereo, pointsVectors, indicesVectors);
+    //Draw(painter, matrix, isStereo, pointsVectors, indicesVectors);
     Color = Qt::white;
 }
 

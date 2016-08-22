@@ -49,6 +49,8 @@ public:
 
     void InitializeSpline(QMatrix4x4 matrix);
     void Clear();
+    void Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+    void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 private:
     //get border control points that can be calculated based on the 'patch'
