@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     Patch/bsplineplane.cpp \
     cadloader.cpp \
     Patch/gapfilling.cpp \
-    Patch/gregorypatch.cpp
+    Patch/gregorypatch.cpp \
+    Spline/intersection.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -53,6 +54,7 @@ HEADERS  += mainwindow.h \
     Patch/bsplineplane.h \
     cadloader.h \
     Patch/gapfilling.h \
-    Patch/gregorypatch.h
+    Patch/gregorypatch.h \
+    Spline/intersection.h
 
 FORMS    += mainwindow.ui

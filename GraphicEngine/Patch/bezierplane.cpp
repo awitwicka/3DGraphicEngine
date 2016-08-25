@@ -9,8 +9,10 @@ BezierPlane::BezierPlane()
 
 }
 
-BezierPlane::BezierPlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers) : Width(500), Height(400), X(7), Y(7), H(400), R(100)
+BezierPlane::BezierPlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers) : X(7), Y(7), H(400), R(100)
 {
+    Width = 500;
+    Height = 400;
     U = 5;
     V = 5;
     isPlane = true;
@@ -160,6 +162,42 @@ void BezierPlane::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
     }
     //InitializeSpline();
     //return -1; if nothing
+}
+
+QVector4D BezierPlane::ComputePos(float u, float v)
+{
+    if(u < 0) u = 0;
+    else if(v < 0) v = 0;
+    else if(u >= 1.0) u = 0.999f;
+    else if(v >= 1.0) v = 0.999f;
+
+    //get indexes of the bezier patch that contains given u,v    0|---b0---|---b1---|-- .... --|---bn---|1
+    int j = u * X;
+    int i = v * Y;
+
+    //get u v parameters of the beggining and end of the patch
+    float minJ = (float)j / (float)X; //poczadek i kniec param platka w 0-1
+    float maxJ = (float)(j+1) / (float)X;
+    float minI = (float)i / (float)Y;
+    float maxI = (float)(i+1) / (float)Y;
+
+    //get height/width of the patch (should actually always be equal to 1/X 1/Y)
+    float rJ = maxJ - minJ;
+    float rI = maxI - minI;
+
+    //get u/v coordinates on the patch (conversion to 0-1 on the patch)
+    u = (u - minJ) / rJ;
+    v = (v - minI) / rI;
+
+    //TODO: write get point at u,v function in bicubicsegment
+    return BezierSegments[j+(i*X)].getBezierPoint(u, v);
+    //   u
+    // v  _j0___j1___j2_
+    //   |    |    |    |
+    // i0|____|____|____|
+    //   |    |    |    |
+    // i1|    |    |    |
+    //
 }
 
 QVector<QPoint> BezierPlane::getIndices() const

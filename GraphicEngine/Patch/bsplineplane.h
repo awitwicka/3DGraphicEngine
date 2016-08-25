@@ -20,9 +20,6 @@ public:
     //cylinder
     int R;
     int H;
-    //plane
-    float Width;
-    float Height;
     //common
     int X;
     int Y;

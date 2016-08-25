@@ -24,6 +24,8 @@ class BicubicSegment : public CADObject//, public CADSplinePatch
     int U;
     int V;
 public: 
+    //v and u are between 0-1
+    QVector4D getBezierPoint(float u, float v);
     QVector4D getBezierPoint(QVector4D points[ORDER], float t);
     QVector4D getBezierPointCol(int index, float t);
     QVector4D getBezierPointRow(int index, float t);

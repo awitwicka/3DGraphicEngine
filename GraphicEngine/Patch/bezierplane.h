@@ -20,9 +20,6 @@ public:
     //cylinder
     int R;
     int H;
-    //plane
-    float Width;
-    float Height;
     //common
     int X;
     int Y;
@@ -42,6 +39,7 @@ public:
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void Clear();
     void ReplaceMarker(Marker *toReplace, Marker *replaceWith);
+    QVector4D ComputePos(float U, float V);
 
     //void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 

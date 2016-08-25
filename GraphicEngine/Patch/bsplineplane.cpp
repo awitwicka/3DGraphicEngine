@@ -9,8 +9,10 @@ BSplinePlane::BSplinePlane()
 
 }
 
-BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers) : Width(500), Height(400), X(7), Y(7), H(400), R(100)
+BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers) : X(7), Y(7), H(400), R(100)
 {
+    Width = 500;
+    Height = 400;
     U = 5;
     V = 5;
     isPlane = true;

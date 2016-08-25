@@ -32,7 +32,7 @@ private slots:
 
     void on_spinBox_V_valueChanged(int arg1);
 
-    void on_checkBox_stereo_toggled(bool checked);    
+    void on_checkBox_stereo_toggled(bool checked);
 
     void on_pushButton_addMarker_clicked();
 
@@ -80,6 +80,8 @@ private slots:
     void on_pushButton_Merge_clicked();
 
     void on_pushButton_fillGap_clicked();
+
+    void on_pushButton_Intersection_clicked();
 
 private:
     Ui::MainWindow *ui;

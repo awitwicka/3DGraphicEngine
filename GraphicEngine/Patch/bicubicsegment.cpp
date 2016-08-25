@@ -225,6 +225,16 @@ void BicubicSegment::Clear()
     pointsCurve.clear();
 }
 
+QVector4D BicubicSegment::getBezierPoint(float u, float v)
+{
+    //TODO check if column shouldn't be taken in reverse order so v goes up
+    QVector4D data[ORDER];
+    for (int i = 0; i<ORDER; i++)
+       data[i] = getBezierPointCol(i, v);
+    QVector4D p = getBezierPoint(data, u);
+    return p;
+}
+
 QVector<QPoint> BicubicSegment::getIndices() const
 {
     return indices;

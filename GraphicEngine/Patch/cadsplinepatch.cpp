@@ -17,7 +17,12 @@ void CADSplinePatch::DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isSt
 
 void CADSplinePatch::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
 {
-//TODO: try to make a common method
+    //TODO: try to make a common method
+}
+
+QVector4D CADSplinePatch::ComputePos(float u, float v)
+{
+    return QVector4D(-1,-1,-1,-1);
 }
 
 void CADSplinePatch::Clear() {
@@ -46,11 +51,11 @@ void CADSplinePatch::setU(int value)
 
 void CADSplinePatch::InitializeSpline(QMatrix4x4 matrix)
 {
-    
+
 }
 
 CADSplinePatch::~CADSplinePatch()
 {
-    
+
 }
 

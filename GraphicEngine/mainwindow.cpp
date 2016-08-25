@@ -3,6 +3,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <Spline/intersection.h>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -661,10 +663,11 @@ void MainWindow::on_pushButton_fillGap_clicked()
     QList<QTreeWidgetItem*> selected = t->selectedItems();
     QString idname;
     //TODO: SELECT ONLY BEZIER (without bspline)
+    //TODO: make a proper id check
     foreach (QTreeWidgetItem* it, selected) {
         idname = it->text(1);
         for (int i = 0; i<w->SplinePatches.length(); i++) {
-            if (w->SplinePatches[i]->idname.at(1) == idname.at(1)) {
+            if (w->SplinePatches[i]->idname == idname) {
                 patches.append(w->SplinePatches[i]);
             }
         }
@@ -676,6 +679,30 @@ void MainWindow::on_pushButton_fillGap_clicked()
     //TODO: create new element on ui?? or just refresh
     RefreshList();
     //GapFilling(patches);
+}
+
+void MainWindow::on_pushButton_Intersection_clicked()
+{
+    Marker* m;
+    QList<CADSplinePatch*> patches;
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    //TODO optimize search make enum for curves types
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        for (int i = 0; i<w->SplinePatches.length(); i++) {
+            if (w->SplinePatches[i]->idname == idname) {
+                patches.append(w->SplinePatches[i]);
+            }
+        }
+        for (int i = 0; i<w->markers.length(); i++) {
+            if (w->markers[i].idname == idname) {
+                m = &w->markers[i];
+            }
+        }
+    }
+    CADMarkerObject* c = new Intersection(w->worldMatrix, m, patches[0], patches[1]);
+    w->Splines.append(c);
 }
 
 //****************TOOLS********************
@@ -709,7 +736,7 @@ void MainWindow::on_pushButton_Merge_clicked()
 
     //update markers in splines
     for (int i = 0; i<toMerge.length(); i++) {
-        
+
         for (int k = 0; k<w->SplinePatches.length(); k++) {
 
             w->SplinePatches[k]->ReplaceMarker(toMerge[i], &w->markers[FindIndexByRef(&m)]); //CHECK: try just &m

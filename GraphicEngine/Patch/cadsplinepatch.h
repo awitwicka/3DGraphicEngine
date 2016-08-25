@@ -13,6 +13,9 @@ public:
     QList<Marker*> markers;
     QList<BicubicSegment> BezierSegments;
 
+    float Width;
+    float Height;
+
     CADSplinePatch();
     virtual ~CADSplinePatch()=0;
     virtual void InitializeSpline(QMatrix4x4 matrix)=0;
@@ -20,6 +23,8 @@ public:
     virtual void DrawVectors(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     //If found in the list, replaces old reference to marker with a new one
     virtual void ReplaceMarker(Marker *toReplace, Marker *replaceWith);
+    //u, v between 0-1
+    virtual QVector4D ComputePos(float U, float V);
     virtual void Clear();
 
     virtual int getU() const;
