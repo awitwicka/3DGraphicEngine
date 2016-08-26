@@ -13,6 +13,9 @@ class BezierPlane : public CADObject, public CADSplinePatch
     //QVector<QVector4D> pointsCurve;
     //QVector<QPoint> indicesCurve;
 
+    //return indexes of corresponding bezier segment
+    QList<int> ConvertUVtoLocal(float &u, float &v);
+
     void InitializeMarkers(QList<Marker> *MainMarkers);
 public:
     //true for plane, false for cyllinder
@@ -39,7 +42,13 @@ public:
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void Clear();
     void ReplaceMarker(Marker *toReplace, Marker *replaceWith);
-    QVector4D ComputePos(float U, float V);
+    QVector4D ComputePos(float u, float v);
+    QVector4D ComputeDu(float u, float v);
+    QVector4D ComputeDv(float u, float v);
+    QVector4D ComputeDuv(float u, float v);
+    QVector4D ComputeDvu(float u, float v);
+    QVector4D ComputeDuu(float u, float v);
+    QVector4D ComputeDvv(float u, float v);
 
     //void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
 

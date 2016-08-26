@@ -164,7 +164,8 @@ void BezierPlane::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
     //return -1; if nothing
 }
 
-QVector4D BezierPlane::ComputePos(float u, float v)
+
+QList<int> BezierPlane::ConvertUVtoLocal(float &u, float &v)
 {
     if(u < 0) u = 0;
     else if(v < 0) v = 0;
@@ -189,8 +190,6 @@ QVector4D BezierPlane::ComputePos(float u, float v)
     u = (u - minJ) / rJ;
     v = (v - minI) / rI;
 
-    //TODO: write get point at u,v function in bicubicsegment
-    return BezierSegments[j+(i*X)].getBezierPoint(u, v);
     //   u
     // v  _j0___j1___j2_
     //   |    |    |    |
@@ -198,6 +197,53 @@ QVector4D BezierPlane::ComputePos(float u, float v)
     //   |    |    |    |
     // i1|    |    |    |
     //
+    QList<int> xy;
+    xy.append(j);
+    xy.append(i);
+    return xy;
+}
+
+
+QVector4D BezierPlane::ComputePos(float u, float v)
+{
+   QList<int> indexXY = ConvertUVtoLocal(u, v);
+   return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierPoint(u, v);
+}
+
+QVector4D BezierPlane::ComputeDu(float u, float v)
+{
+    QList<int> indexXY = ConvertUVtoLocal(u, v);
+    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuPoint(u, v);
+}
+
+QVector4D BezierPlane::ComputeDv(float u, float v)
+{
+    QList<int> indexXY = ConvertUVtoLocal(u, v);
+    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvPoint(u, v);
+}
+
+QVector4D BezierPlane::ComputeDuv(float u, float v)
+{
+    QList<int> indexXY = ConvertUVtoLocal(u, v);
+    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuvPoint(u, v);
+}
+
+QVector4D BezierPlane::ComputeDvu(float u, float v)
+{
+    QList<int> indexXY = ConvertUVtoLocal(u, v);
+    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvuPoint(u, v);
+}
+
+QVector4D BezierPlane::ComputeDuu(float u, float v)
+{
+    QList<int> indexXY = ConvertUVtoLocal(u, v);
+    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuuPoint(u, v);
+}
+
+QVector4D BezierPlane::ComputeDvv(float u, float v)
+{
+    QList<int> indexXY = ConvertUVtoLocal(u, v);
+    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvvPoint(u, v);
 }
 
 QVector<QPoint> BezierPlane::getIndices() const

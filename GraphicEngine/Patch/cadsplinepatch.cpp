@@ -25,6 +25,36 @@ QVector4D CADSplinePatch::ComputePos(float u, float v)
     return QVector4D(-1,-1,-1,-1);
 }
 
+QVector4D CADSplinePatch::ComputeDu(float u, float v)
+{
+    return QVector4D(-1,-1,-1,-1);
+}
+
+QVector4D CADSplinePatch::ComputeDv(float u, float v)
+{
+    return QVector4D(-1,-1,-1,-1);
+}
+
+QVector4D CADSplinePatch::ComputeDuv(float u, float v)
+{
+    return QVector4D(-1,-1,-1,-1);
+}
+
+QVector4D CADSplinePatch::ComputeDvu(float u, float v)
+{
+    return QVector4D(-1,-1,-1,-1);
+}
+
+QVector4D CADSplinePatch::ComputeDuu(float u, float v)
+{
+    return QVector4D(-1,-1,-1,-1);
+}
+
+QVector4D CADSplinePatch::ComputeDvv(float u, float v)
+{
+    return QVector4D(-1,-1,-1,-1);
+}
+
 void CADSplinePatch::Clear() {
 
 }

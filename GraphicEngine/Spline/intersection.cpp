@@ -20,6 +20,13 @@ Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *pat
     indicesCurve.append(QPoint(0, 1));
     indicesCurve.append(QPoint(2, 3));
 
+    //Conjugate gradient method - finding first intersection point
+    /*float r0 = fabs((point1.position - point2.position).length()); //dist we want to minimize
+    float p0 = r0;
+    int k =0;
+    while(r0 < e) {
+        int alpha =
+    }*/
 
     //for (int i = 0; i<patch1->)
     //kliknij na powierzchni 1
@@ -38,7 +45,8 @@ Intersection::UVPointData Intersection::FindClosesPointOnSurface(QVector4D Point
     //TODO: optimize
     float tmpDist;
     QVector4D tmpPos;
-    dist = fabs((PointPos - patch->ComputePos(0, 0)).length());
+    pos = patch->ComputePos(0, 0);
+    dist = fabs((PointPos - pos).length());
     for (float u = 0; u <= 1; u+=accuracy) {
         for (float v = 0; v <= 1; v+=accuracy) {
             tmpPos = patch->ComputePos(u, v);

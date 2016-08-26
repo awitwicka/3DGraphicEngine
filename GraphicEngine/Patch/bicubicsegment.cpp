@@ -204,6 +204,100 @@ QVector4D BicubicSegment::getBezierPointRow(int index, float t)
     return getBezierPoint(data, t);
 }
 
+QVector4D BicubicSegment::getBezierPoint(float u, float v)
+{
+    //TODO check if column shouldn't be taken in reverse order so v goes up
+    QVector4D data[ORDER];
+    for (int i = 0; i<ORDER; i++)
+       data[i] = getBezierPointCol(i, v);
+    QVector4D p = getBezierPoint(data, u);
+    return p;
+}
+
+QVector4D BicubicSegment::getBezierDuPoint(float u, float v) //U
+{
+    QVector4D data[ORDER];
+    QVector4D tmp[ORDER];
+    for (int index = 0; index<ORDER; index++) {
+        for (int i = 0; i<ORDER; i++) {
+            tmp[i] = bezierMarkers[i][index].point; //pochodna z każdego wiersza -> u
+        }
+        data[index] = getBezierDerivativePoint(tmp, u);
+    }
+    QVector4D p = getBezierPoint(data, v);  //punkt z kolumny -> v
+    return p;
+}
+
+QVector4D BicubicSegment::getBezierDvPoint(float u, float v)
+{
+    QVector4D data[ORDER];
+    QVector4D tmp[ORDER];
+    for (int index = 0; index<ORDER; index++) {
+        for (int i = 0; i<ORDER; i++) {
+            tmp[i] = bezierMarkers[index][i].point; //pochodna z każdej kolumny -> v
+        }
+        data[index] = getBezierDerivativePoint(tmp, v);
+    }
+    QVector4D p = getBezierPoint(data, u);  //punkt z wiersza -> u
+    return p;
+}
+
+QVector4D BicubicSegment::getBezierDuvPoint(float u, float v)
+{
+    QVector4D data[ORDER];
+    QVector4D tmp[ORDER];
+    for (int index = 0; index<ORDER; index++) {
+        for (int i = 0; i<ORDER; i++) {
+            tmp[i] = bezierMarkers[i][index].point; //pochodna z każdego wiersza -> u
+        }
+        data[index] = getBezierDerivativePoint(tmp, u);
+    }
+    QVector4D p = getBezierDerivativePoint(data, v);  //pochodna z kolumny -> v
+    return p;
+}
+
+QVector4D BicubicSegment::getBezierDvuPoint(float u, float v)
+{
+    QVector4D data[ORDER];
+    QVector4D tmp[ORDER];
+    for (int index = 0; index<ORDER; index++) {
+        for (int i = 0; i<ORDER; i++) {
+            tmp[i] = bezierMarkers[i][index].point; //pochodna z każdego wiersza -> u
+        }
+        data[index] = getBezierDerivativePoint(tmp, u);
+    }
+    QVector4D p = getBezierDerivativePoint(data, v);  //pochodna z kolumny -> v
+    return p;
+}
+
+QVector4D BicubicSegment::getBezierDuuPoint(float u, float v)
+{
+    QVector4D data[ORDER];
+    QVector4D tmp[ORDER];
+    for (int index = 0; index<ORDER; index++) {
+        for (int i = 0; i<ORDER; i++) {
+            tmp[i] = bezierMarkers[i][index].point; //2 pochodna z każdego wiersza -> u
+        }
+        data[index] = getBezierSecondDerivativePoint(tmp, u);
+    }
+    QVector4D p = getBezierPoint(data, v);  //punkt z kolumny -> v
+    return p;
+}
+
+QVector4D BicubicSegment::getBezierDvvPoint(float u, float v)
+{
+    QVector4D data[ORDER];
+    QVector4D tmp[ORDER];
+    for (int index = 0; index<ORDER; index++) {
+        for (int i = 0; i<ORDER; i++) {
+            tmp[i] = bezierMarkers[i][index].point; //punkt z każdego wiersza -> u
+        }
+        data[index] = getBezierPoint(tmp, u);
+    }
+    QVector4D p = getBezierSecondDerivativePoint(data, v);  //2 pochodna z kolumny -> v
+    return p;
+}
+
 QVector4D BicubicSegment::getBezierPoint(QVector4D pkt[ORDER], float t)
 {
     int degree = ORDER-1;
@@ -217,22 +311,49 @@ QVector4D BicubicSegment::getBezierPoint(QVector4D pkt[ORDER], float t)
     return p;
 }
 
+QVector4D BicubicSegment::getBezierDerivativePoint(QVector4D pkt[], float t)
+{
+    int degree = ORDER-1;
+    for (int k = 0; k < degree; k++)
+        pkt[k] =  degree * (pkt[k+1] - pkt[k]);
+    degree--;
+
+    while (degree > 0) {
+        for (int k = 0; k < degree; k++)
+            pkt[k] = pkt[k] + t * ( pkt[k+1] - pkt[k] );
+        degree--;
+    }
+
+    QVector4D p = pkt[0];
+    return p;
+}
+
+QVector4D BicubicSegment::getBezierSecondDerivativePoint(QVector4D pkt[], float t)
+{
+    int degree = ORDER-1;
+    for (int k = 0; k < degree; k++)
+        pkt[k] =  degree * (pkt[k+1] - pkt[k]); //1st derivative
+    degree--;
+    for (int k = 0; k < degree; k++)
+        pkt[k] =  degree * (pkt[k+1] - pkt[k]); //2nd derivative
+    degree--;
+
+    //while (degree > 0) {
+        for (int k = 0; k < degree; k++) //calculate point
+            pkt[k] = pkt[k] + t * ( pkt[k+1] - pkt[k] );
+        //degree--;
+    //}
+
+    QVector4D p = pkt[0];
+    return p;
+}
+
 void BicubicSegment::Clear()
 {
     indices.clear();
     points.clear();
     indicesCurve.clear();
     pointsCurve.clear();
-}
-
-QVector4D BicubicSegment::getBezierPoint(float u, float v)
-{
-    //TODO check if column shouldn't be taken in reverse order so v goes up
-    QVector4D data[ORDER];
-    for (int i = 0; i<ORDER; i++)
-       data[i] = getBezierPointCol(i, v);
-    QVector4D p = getBezierPoint(data, u);
-    return p;
 }
 
 QVector<QPoint> BicubicSegment::getIndices() const

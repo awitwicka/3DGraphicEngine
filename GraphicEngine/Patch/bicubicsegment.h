@@ -27,8 +27,17 @@ public:
     //v and u are between 0-1
     QVector4D getBezierPoint(float u, float v);
     QVector4D getBezierPoint(QVector4D points[ORDER], float t);
+    QVector4D getBezierDerivativePoint(QVector4D points[ORDER], float t);
+    QVector4D getBezierSecondDerivativePoint(QVector4D points[ORDER], float t);
     QVector4D getBezierPointCol(int index, float t);
     QVector4D getBezierPointRow(int index, float t);
+
+    QVector4D getBezierDuPoint(float u, float v);
+    QVector4D getBezierDvPoint(float u, float v);
+    QVector4D getBezierDuvPoint(float u, float v);
+    QVector4D getBezierDvuPoint(float u, float v);
+    QVector4D getBezierDuuPoint(float u, float v);
+    QVector4D getBezierDvvPoint(float u, float v);
     //int U;
     //int V;
     //float segLengthX;

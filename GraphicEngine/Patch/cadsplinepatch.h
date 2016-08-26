@@ -24,7 +24,13 @@ public:
     //If found in the list, replaces old reference to marker with a new one
     virtual void ReplaceMarker(Marker *toReplace, Marker *replaceWith);
     //u, v between 0-1
-    virtual QVector4D ComputePos(float U, float V);
+    virtual QVector4D ComputePos(float u, float v);
+    virtual QVector4D ComputeDu(float u, float v);
+    virtual QVector4D ComputeDv(float u, float v);
+    virtual QVector4D ComputeDuv(float u, float v);
+    virtual QVector4D ComputeDvu(float u, float v);
+    virtual QVector4D ComputeDuu(float u, float v);
+    virtual QVector4D ComputeDvv(float u, float v);
     virtual void Clear();
 
     virtual int getU() const;
