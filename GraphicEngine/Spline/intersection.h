@@ -7,9 +7,14 @@
 
 class Intersection : public CADObject, public CADMarkerObject
 {
+    static int id;
+
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
+    QVector<QVector4D> UVparameters;
 
+    //forward (1)/backward (-1) direction of finding the next point
+    int turn = 1;
     struct UVPointData {
         QVector4D position;
         float u;
@@ -28,8 +33,10 @@ public:
     Intersection();
     Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2);
 
+
     void InitializeSpline(QMatrix4x4 matrix);
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
+    void CalculateIntersection(CADSplinePatch *patch2, Marker* start, CADSplinePatch *patch1);
 };
 
 #endif // INTERSECTION_H

@@ -703,6 +703,7 @@ void MainWindow::on_pushButton_Intersection_clicked()
     }
     CADMarkerObject* c = new Intersection(w->worldMatrix, m, patches[0], patches[1]);
     w->Splines.append(c);
+    RefreshList();
 }
 
 //****************TOOLS********************

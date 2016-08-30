@@ -1,11 +1,13 @@
 #include "intersection.h"
 
+int Intersection::id = 0;
+
 Intersection::Intersection()
 {
 
 }
 
-Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2)
+void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, CADSplinePatch *patch1)
 {
     //step accuracy
     float e = 0.01f;
@@ -13,13 +15,13 @@ Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *pat
     UVPointData point2 = FindClosesPointOnSurface(start->point, patch2, e);
 
     //tmp
-    /*pointsCurve.append(start->point);
+    pointsCurve.append(start->point);
     pointsCurve.append(point1.position);
     pointsCurve.append(start->point);
     pointsCurve.append(point2.position);
     indicesCurve.append(QPoint(0, 1));
     indicesCurve.append(QPoint(2, 3));
-    */
+
 
     //Gradient descend method - finding first intersection point
     float a = 0.01f; //step
@@ -29,18 +31,53 @@ Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *pat
     //QVector4D g_point = patch1->ComputePos(x_optimal.x(), x_optimal.y());
     //QVector4D h_point = patch2->ComputePos(x_optimal.z(), x_optimal.w());
 
-    int count = 0;
+    int iter = 0;
+    const int MAX_ITER = 3000;
     QVector4D point = x_optimal;
-    for (int i=0; i<200; i++) {
-        //QVector4D nextStep = GradientStep(e, a, point, patch1, patch2);
-        //point = GradientDistanceMinimalization(e, a, nextStep, patch1, patch2);
+    QVector4D nextStep;
+    do{
+        nextStep = GradientStep(e, a, point, patch1, patch2);
+        point = GradientDistanceMinimalization(e, a, nextStep, patch1, patch2);
 
-        point = NewtonNextPoint(point, patch1, patch2);
-        pointsCurve.append(patch1->ComputePos(point.x(), point.y()));
-        indicesCurve.append(QPoint(count, count+1));
-        count +=1;
+        if (turn == 1) {
+            UVparameters.push_back(point);
+        } else if(turn == -1)
+            UVparameters.push_front(point);
+
+        //change turn status
+        if((point.x() < 0 || point.y() < 0 || point.z() < 0 || point.w() < 0)
+                || (point.x() > 1.0f || point.y() > 1.0f || point.z() > 1.0f || point.w() > 1.0f)
+                /*|| (isnan(point.x()) || isnan(point.y()) || isnan(point.z()) ||isnan(point.w()))*/) {
+
+            //TODO: if cone then check also on both sides of its 0 point
+            if (turn == 1) {
+                turn = -1;
+                point = UVparameters.first(); //TODO correct first dist minimalisation
+            }
+            else if (turn == -1) turn = 0; // end loop
+        }
+        iter++;
+   }while(turn != 0 || iter < MAX_ITER);
+
+    //draw intersection
+    int count = 0;
+    for (int i = 0; i<UVparameters.length(); i++) {
+        points.append((patch1->ComputePos(UVparameters[i].x(), UVparameters[i].y())
+                       + patch2->ComputePos(UVparameters[i].z(), UVparameters[i].w()))/2);
+        indices.append(QPoint(count, count+1));
+        count++;
     }
-    pointsCurve.append(patch1->ComputePos(point.x(), point.y()));
+    indices.removeLast();
+}
+
+Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2)
+{
+    name = QString("Intersection%1").arg(id);
+    idname = QString("x%1").arg(id);
+    id++;
+
+    CalculateIntersection(patch2, start, patch1);
+    //point = NewtonNextPoint(point, patch1, patch2);
 }
 
 QVector4D Intersection::GradientDistanceMinimalization(float e, float a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2)
@@ -98,7 +135,6 @@ QVector4D Intersection::GradientStep(float e, float a, QVector4D startPoint, CAD
     float new_f;
     float stopCond;
     float step = 1.0f;
-    int turn = 1;
 
     QVector3D g0 = QVector3D(patch1->ComputePos(startPoint.x(), startPoint.y())); //u1 v1
     QVector3D h0 = QVector3D(patch2->ComputePos(startPoint.z(), startPoint.w())); //u2 v2
