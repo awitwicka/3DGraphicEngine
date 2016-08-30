@@ -23,6 +23,7 @@ class Intersection : public CADObject, public CADMarkerObject
     UVPointData FindClosesPointOnSurface(QVector4D PointPos, CADSplinePatch *patch, float accuracy);
     QVector4D NewtonNextPoint(QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2);
     QVector4D GradientDistanceMinimalization(float e, float a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);
+    QVector4D GradientStep(float e, float a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);
 public:
     Intersection();
     Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2);

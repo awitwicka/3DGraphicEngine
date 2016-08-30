@@ -168,8 +168,8 @@ void BezierPlane::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
 QList<int> BezierPlane::ConvertUVtoLocal(float &u, float &v)
 {
     if(u < 0) u = 0;
-    else if(v < 0) v = 0;
     else if(u >= 1.0) u = 0.999f;
+    if(v < 0) v = 0;
     else if(v >= 1.0) v = 0.999f;
 
     //get indexes of the bezier patch that contains given u,v    0|---b0---|---b1---|-- .... --|---bn---|1
