@@ -3,11 +3,23 @@
 
 #include "cadmarkerobject.h"
 #include <Patch/cadsplinepatch.h>
+#include <QLineSeries>
+#include <QChartView>
+#include <QMainWindow>
 
+using namespace QtCharts;
 
 class Intersection : public CADObject, public CADMarkerObject
 {
     static int id;
+    QLineSeries *series1;
+    QLineSeries *series2;
+    QChart *chart1;
+    QChart *chart2;
+    QChartView *chartView1;
+    QChartView *chartView2;
+    QMainWindow window1;
+    QMainWindow window2;
 
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
@@ -32,7 +44,7 @@ class Intersection : public CADObject, public CADMarkerObject
 public:
     Intersection();
     Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2);
-
+    ~Intersection();
 
     void InitializeSpline(QMatrix4x4 matrix);
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);

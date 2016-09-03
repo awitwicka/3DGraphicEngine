@@ -7,6 +7,49 @@ Intersection::Intersection()
 
 }
 
+Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2)
+{
+    name = QString("Intersection%1").arg(id);
+    idname = QString("x%1").arg(id);
+    id++;
+
+    series1 = new QLineSeries();
+    series2 = new QLineSeries();
+
+    chart1 = new QChart();
+    chart1->legend()->hide();
+    chart1->addSeries(series1);
+    chart1->createDefaultAxes();
+    chart1->setTitle("UV patch1");
+    chart2 = new QChart();
+    chart2->legend()->hide();
+    chart2->addSeries(series2);
+    chart2->createDefaultAxes();
+    chart2->setTitle("UV patch2");
+
+    chartView1 = new QChartView(chart1);
+    chartView1->setRenderHint(QPainter::Antialiasing);
+    chartView2 = new QChartView(chart2);
+    chartView2->setRenderHint(QPainter::Antialiasing);
+
+    window1.setCentralWidget(chartView1);
+    window1.resize(400, 400);
+    window2.setCentralWidget(chartView2);
+    window2.resize(400, 400);
+
+    CalculateIntersection(patch2, start, patch1);
+}
+
+Intersection::~Intersection()
+{
+    delete series1;
+    delete series2;
+    delete chart1;
+    delete chart2;
+    delete chartView1;
+    delete chartView2;
+}
+
 void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, CADSplinePatch *patch1)
 {
     //step accuracy
@@ -65,19 +108,15 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
         points.append((patch1->ComputePos(UVparameters[i].x(), UVparameters[i].y())
                        + patch2->ComputePos(UVparameters[i].z(), UVparameters[i].w()))/2);
         indices.append(QPoint(count, count+1));
+        series1->append(UVparameters[i].x(), UVparameters[i].y());
+        series2->append(UVparameters[i].z(), UVparameters[i].w());
         count++;
     }
     indices.removeLast();
-}
+    //*series << QPointF(11, 1) << QPointF(13, 3) << QPointF(17, 6) << QPointF(18, 3) << QPointF(20, 2);
 
-Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2)
-{
-    name = QString("Intersection%1").arg(id);
-    idname = QString("x%1").arg(id);
-    id++;
-
-    CalculateIntersection(patch2, start, patch1);
-    //point = NewtonNextPoint(point, patch1, patch2);
+    window1.show();
+    window2.show();
 }
 
 QVector4D Intersection::GradientDistanceMinimalization(float e, float a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2)
