@@ -579,12 +579,16 @@ void MainWindow::on_pushButton_Save_clicked()
 
 void MainWindow::on_pushButton_Open_clicked()
 {
+    on_pushButton_Clear_clicked();
+
     loader.LoadFile();
+    RefreshList();
 }
 
 void MainWindow::on_pushButton_Clear_clicked()
 {
     t->clear();
+    w->selectedMarkers.clear();
     w->markers.clear();
     w->SplinePatches.clear();
     w->Splines.clear();
@@ -683,7 +687,7 @@ void MainWindow::on_pushButton_fillGap_clicked()
 
 void MainWindow::on_pushButton_Intersection_clicked()
 {
-    Marker* m;
+    Marker* m = nullptr;
     QList<CADSplinePatch*> patches;
     QList<QTreeWidgetItem*> selected = t->selectedItems();
     QString idname;
@@ -701,6 +705,8 @@ void MainWindow::on_pushButton_Intersection_clicked()
             }
         }
     }
+    if (patches.length()!=2 || m == nullptr)
+        return;
     CADMarkerObject* c = new Intersection(w->worldMatrix, m, patches[0], patches[1]);
     w->Splines.append(c);
     RefreshList();
