@@ -18,14 +18,13 @@ CADLoader::~CADLoader()
 }
 
 void CADLoader::LoadFile()
-{
+{   
     QString path = "E:\\Data.txt";
     QFile file( path );
     if ( file.open(QIODevice::ReadOnly) )
     {
         QTextStream stream( &file );
-        QList<Marker> m;
-
+        /*****MARKERS******/
         QString line = stream.readLine();
         int n = line.toInt();
         for (int i = 0; i<n; i++) {
@@ -36,34 +35,28 @@ void CADLoader::LoadFile()
             QString x = l[0];
             QString y = l[1];
             QString z = l[2];
-            m.append(Marker(x.toFloat()*100, y.toFloat()*100, z.toFloat()*100));
+            context->markers.append(Marker(x.toFloat()*100, y.toFloat()*100, z.toFloat()*100));
         }
+
+
+        /*****OBJECTS*****/
         int objNo = stream.readLine().toInt();
         for (int i = 0; i<objNo; i++) {
             line = stream.readLine();
             QStringList l = line.split(" ");
             QList<Marker*> ref;
+            //TODO: object name
+
+            /******CURVES*******/
             if (l[0] == "BEZIERCURVE" ||l[0] == "BSPLINECURVE" || l[0] == "INTERP") {
                 ref.clear();
                 int no = stream.readLine().toInt();
                 QStringList points = stream.readLine().split(" ");
                 for (int k = 0; k<no; k++) {
                     QString a = points[k];
-                    int count = 0;
-                    int index = 0;
-                    for (int p = 0; p<context->markers.length(); p++) {
-                        if (context->markers[p].idname == m[a.toInt()].idname) {
-                            count++;
-                            index = p;
-                        }
-                    }
-                    if (count == 0) {
-                        context->markers.append(m[a.toInt()]);
-                        ref.append(&context->markers.last());
-                    }else
-                        ref.append(&context->markers[index]);
+                    ref.append(&context->markers[a.toInt()]);
                 }
-                line = stream.readLine();
+                line = stream.readLine(); //END
                 if (l[0] == "BEZIERCURVE") {
                     CADMarkerObject* b = new Bezier(ref, context->worldMatrix);
                     context->Splines.append(b);
@@ -74,66 +67,78 @@ void CADLoader::LoadFile()
                     CADMarkerObject* b = new BSInterpolation(ref, context->worldMatrix);
                     context->Splines.append(b);
                 }
-                /******SURFACES*******/
+
+            /******SURFACES*******/
             } else if (l[0] == "BEZIERSURF" || l[0] == "BSPLINESURF") {
                 ref.clear();
                 QStringList params = stream.readLine().split(" ");
-                int nMark = params[0].toInt();
-                int mMark = params[1].toInt();
-                QString type = params[2];
-                QString joinType = params[3];
+                int nMark = params[1].toInt(); //N - oś X
+                int mMark = params[0].toInt(); //M - oś Z
+                QString type = params[2];  //X = {C, R} Cylinder/Rectangle
+                QString joinType = params[3];  //Y = {H, V} Horizontal/Vertical
 
                 QStringList points = stream.readLine().split(" ");
-                QList<Marker> markers;
+                /*QList<Marker*> markers;
                 for (int k = 0; k<nMark*mMark; k++) {
                     QString a = points[k];
-                    markers.append(m[a.toInt()]);
+                    markers.append(&context->markers[a.toInt()]);
+                }*/
+                //rearder markers
+                QList<Marker*> reordered;
+                for(int k = 0; k<mMark; k++) { //y axis
+                    for(int l = 0; l<nMark; l++) { //z axis
+                        int index = (mMark)*l+k;
+                        QString a = points[index];
+                        reordered.append(&context->markers[a.toInt()]);
+                        //reordered.append(markers[index]);
+                    }
                 }
+
                 line = stream.readLine();
+                QString a;
                 if (l[0] == "BEZIERSURF") {
                     bool isPlane = (type.at(0) == 'R')? true : false;
+                    bool isHoriz = (joinType.at(0) == 'H')? true : false;
+
                     int xm;
                     int ym;
                     if (isPlane) {
                         xm = (nMark-4)/3+1;
                         ym = (mMark-4)/3+1;
                     } else {
-                        xm = (nMark-4)/3+1+1;
+                        xm = (nMark-4+1)/3+1;
                         ym = (mMark-4)/3+1;
                     }
-                    CADSplinePatch* b = new BezierPlane(context->worldMatrix, &context->markers, 4, 4, xm, ym, 100, 100, 0, 0, 0, isPlane);
-                    for (int r = 0; r<b->markers.length(); r++)
-                        b->markers[r]->point = markers[r].point;
+                    CADSplinePatch* b = new BezierPlane(context->worldMatrix, reordered, xm, ym, isHoriz, isPlane);
                     context->SplinePatches.append(b);
                 } else if (l[0] == "BSPLINESURF") {
                     bool isPlane = (type.at(0) == 'R')? true : false;
+                    bool isHoriz = (joinType.at(0) == 'H')? true : false;
+
+                    /*if (isPlane == false) {
+                        markers.clear();
+                        for (int k = 0; k<mMark; k++) {
+                            for (int l=0; l<nMark; l++) {
+                                a = points[l+(k*nMark)];
+                                markers.append(&context->markers[a.toInt()]);
+                            }
+                            a = points[(k*nMark)];
+                            markers.append(&context->markers[a.toInt()]);
+                            markers.append(&context->markers[a.toInt()+1]);
+                            markers.append(&context->markers[a.toInt()+2]);
+                        }
+                    }*/
+
                     int xm;
                     int ym;
-                    if (isPlane) {
-                        xm = (nMark-4)+1;
-                        ym = (mMark-4)+1;
+                    if (isPlane == true) {
+                        xm = nMark+1-4;
+                        ym = mMark+1-4;
                     } else {
-                        xm = (nMark-4)+1+3;
-                        ym = (mMark-4)+1;
+                        xm = nMark+1-4+3;
+                        ym = mMark+1-4;
                     }
-
-                   /* QList<Marker> markersReorder;
-                    int count = 0;
-                    while (count<markers.length()) {
-                        for(int r = 0; r<4; r++){
-                        markersReorder.append(markers[count]);
-
-                    }
-
-                    for(int r = 0; r<; r++){
-                        markersReorder.append(markers[4]);
-                    for(int r = 0; r<nMark-1; r++){
-                        markersReorder.append(markers[]);
-                    }
-                    */
-                    CADSplinePatch* b = new BSplinePlane(context->worldMatrix, &context->markers, 4, 4, xm, ym, 100, 100, 0, 0, 0, isPlane);
-                    for (int r = 0; r<b->markers.length(); r++)
-                        b->markers[r]->point = markers[r].point;
+                    CADSplinePatch* b = new BSplinePlane(context->worldMatrix, reordered, xm, ym, isHoriz, isPlane);
                     context->SplinePatches.append(b);
                 }
             }
@@ -155,26 +160,19 @@ void CADLoader::SaveFile()
     {
         //#REFERENCE POINTS
         QTextStream stream( &file );
-        QList<Marker> m;
+        //QList<Marker> m;
         int n = context->markers.length();
-        for (int i = 0; i<context->SplinePatches.length(); i++)
-            n+=context->SplinePatches[i]->markers.length();
         stream << n << endl;
 
         for (int i = 0; i<context->markers.length(); i++) {
             stream << context->markers[i].point.x()/100 << " " << context->markers[i].point.y()/100 << " " << context->markers[i].point.z()/100 << endl;
-            m.append(context->markers[i]);
-        }
-        for (int i = 0; i<context->SplinePatches.length(); i++) {
-            for (int j = 0; j<context->SplinePatches[i]->markers.length(); j++) {
-                stream << context->SplinePatches[i]->markers[j]->point.x()/100 << " " << context->SplinePatches[i]->markers[j]->point.y()/100 << " " << context->SplinePatches[i]->markers[j]->point.z()/100 << endl;
-                m.append(*context->SplinePatches[i]->markers[j]);
-            }
+            //m.append(context->markers[i]);
         }
         //#OBJECTS
         n =context->Splines.length();
         n+=context->SplinePatches.length();
         stream << n << endl;
+
         //SPLINES
         for (int i = 0; i< context->Splines.length(); i++) {
             QString type = context->Splines[i]->idname.at(0);
@@ -182,60 +180,50 @@ void CADLoader::SaveFile()
                 stream << "BEZIERCURVE" << " " << context->Splines[i]->name << endl;
                 stream << context->Splines[i]->markers.length() << endl;
                 for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
-                    for (int l=0; l<m.length(); l++) {
-                        if(m[l].idname==context->Splines[i]->markers[k]->idname)
-                        stream << l << " ";
-                    }
+                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
                 }
                 stream << endl << "END" << endl;
             } else if(type.at(0) == 'c') { //bspline
                 stream << "BSPLINECURVE" << " " << context->Splines[i]->name << endl;
                 stream << context->Splines[i]->markers.length() << endl;
                 for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
-                    for (int l=0; l<m.length(); l++) {
-                        if(m[l].idname==context->Splines[i]->markers[k]->idname)
-                        stream << l << " ";
-                    }
+                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
                 }
                 stream << endl << "END" << endl;
             } else if (type.at(0) == 's') { //interpolation
                 stream << "INTERP" << " " << context->Splines[i]->name << endl;
                 stream << context->Splines[i]->markers.length() << endl;
                 for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
-                    for (int l=0; l<m.length(); l++) {
-                        if(m[l].idname==context->Splines[i]->markers[k]->idname)
-                        stream << l << " ";
-                    }
+                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
                 }
                 stream << endl << "END" << endl;
             }
         }
         //SURFACES
         for (int i = 0; i< context->SplinePatches.length(); i++) {
-            QString type = context->SplinePatches[i]->idname.at(0);
-            if(type.at(0) == 'g') { //bezier surf
-                stream << "BEZIERSURF" << " " << context->SplinePatches[i]->name << endl;
-                char t = (context->SplinePatches[i]->isPlane)? 'R' : 'C';
-                stream << context->SplinePatches[i]->MarkerN << " " << context->SplinePatches[i]->MarkerM << " " << t << " " << "H" << endl;
-                for(int k = 0; k<context->SplinePatches[i]->markers.length(); k++) {
-                    for (int l=0; l<m.length(); l++) {
-                        if(m[l].idname==context->SplinePatches[i]->markers[k]->idname)
-                        stream << l << " ";
-                    }
+            CADSplinePatch* patch = context->SplinePatches[i];
+            QString type = patch->idname.at(0);
+            char t = (patch->isPlane)? 'R' : 'C';
+            char o = (patch->isHorizontal)? 'H' : 'V';
+
+            if(type.at(0) == 'g')  //bezier surf
+                stream << "BEZIERSURF" << " " << patch->name << endl;
+            else if (type.at(0) == 'k')  //bspline surf
+                stream << "BSPLINESURF" << " " << patch->name << endl;
+
+            stream << patch->MarkerM << " " << patch->MarkerN << " " << t << " " << o << endl;
+            //for(int k = 0; k<context->SplinePatches[i]->markers.length(); k++)
+            //    stream << context->markers.indexOf(*context->SplinePatches[i]->markers[k]) << " ";
+
+            //reverse order to suit common format
+            for(int k = 0; k<patch->MarkerN; k++) { //y axis
+                for(int l = 0; l<patch->MarkerM; l++) { //z axis
+                    int index = (patch->MarkerN)*l+k;
+                    stream << context->markers.indexOf(*patch->markers[index]) << " ";
                 }
-                stream << endl << "END" << endl;
-            } else if (type.at(0) == 'k') { //bspline surf
-                stream << "BSPLINESURF" << " " << context->SplinePatches[i]->name << endl;
-                char t = (context->SplinePatches[i]->isPlane)? 'R' : 'C';
-                stream << context->SplinePatches[i]->MarkerN << " " << context->SplinePatches[i]->MarkerM << " " << t << " " << "H" << endl;
-                for(int k = 0; k<context->SplinePatches[i]->markers.length(); k++) {
-                    for (int l=0; l<m.length(); l++) {
-                        if(m[l].idname==context->SplinePatches[i]->markers[k]->idname)
-                        stream << l << " ";
-                    }
-                }
-                stream << endl << "END" << endl;
             }
+
+            stream << endl << "END" << endl;
         }
 
     } else {

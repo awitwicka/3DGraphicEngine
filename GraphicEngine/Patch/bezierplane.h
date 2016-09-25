@@ -32,6 +32,8 @@ public:
 
     BezierPlane();
     BezierPlane(QMatrix4x4 matrix, QList<Marker> *markers);
+    //Direction 0 - horizontal, 1 - vertical, N - no of markers at x axis, M - no of markers at Z axis
+    BezierPlane(QMatrix4x4 matrix, QList<Marker*> markers, float X, float Y, bool isHorizontal, bool isPlane/*, QString name*/);
     BezierPlane(QMatrix4x4 matrix, QList<Marker> *markers, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane);
     //QList<BicubicSegment> BezierSegments;
     QVector<QList<Marker*>> BezierSegMarkers;

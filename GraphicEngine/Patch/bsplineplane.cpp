@@ -16,6 +16,7 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers) : X(7)
     U = 5;
     V = 5;
     isPlane = true;
+    this->isHorizontal = true;
     name = QString("BSplinePlane%1").arg(id);
     idname = QString("k%1").arg(id);
     id++;
@@ -24,9 +25,51 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers) : X(7)
     InitializeSpline(matrix);
 }
 
+BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker*> markers, float X, float Y, bool isHorizontal, bool isPlane/*, QString name*/)
+{
+    this->isPlane = isPlane;
+    this->isHorizontal = isHorizontal;
+    this->U = 4;
+    this->V = 4;
+    this->X = X;
+    this->Y = Y;
+    if (isPlane == true) {
+        MarkerN = X-1+4;
+        MarkerM = Y-1+4;
+    } else {
+        MarkerN = X-1+4-3;
+        MarkerM = Y-1+4;
+    }
+    this->markers = markers;
+    //this->name = name;
+    name = QString("BezierPlane%1").arg(id);
+    idname = QString("k%1").arg(id);
+    id++;
+
+     // references for drawing from deboore points
+    /*if (isPlane) {
+        for (int i = 0; i<markers.length(); i++)
+            planeMarkers.append(markers[i]);
+    } else {
+        int count = 0;
+        for (int i = 0; i<MarkerM; i++) {
+            for (int j = 0; j<MarkerN; j++) {
+                planeMarkers.append(markers[count]);
+                count++;
+            }
+            planeMarkers.append(markers[i*MarkerN]);
+            planeMarkers.append(markers[i*MarkerN+1]);
+            planeMarkers.append(markers[i*MarkerN+2]);
+        }
+    }*/
+
+    InitializeSpline(matrix);
+}
+
 BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker> *MainMarkers, float U, float V, float X, float Y, float Param1, float Param2, float x, float y, float z, bool isPlane)
 {
     this->isPlane = isPlane;
+    this->isHorizontal = true;
     this->U = U;
     this->V = V;
     this->X = X;
