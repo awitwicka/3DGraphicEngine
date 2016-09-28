@@ -1,6 +1,7 @@
 #include "bsplineplane.h"
 
 #define ORDER 4
+#define DEGREE 3
 
 int BSplinePlane::id = 0;
 
@@ -133,6 +134,22 @@ void BSplinePlane::InitializeMarkers(QList<Marker> *MainMarkers)
         }
         }
     }
+    // references for drawing from deboore points
+    if (isPlane) {
+        for (int i = 0; i<markers.length(); i++)
+            planeMarkers.append(markers[i]);
+    } else {
+        int count = 0;
+        for (int i = 0; i<MarkerM; i++) {
+            for (int j = 0; j<MarkerN; j++) {
+                planeMarkers.append(markers[count]);
+                count++;
+            }
+            planeMarkers.append(markers[i*MarkerN]);
+            planeMarkers.append(markers[i*MarkerN+1]);
+            planeMarkers.append(markers[i*MarkerN+2]);
+        }
+    }
 }
 
 void BSplinePlane::Clear()
@@ -204,6 +221,263 @@ void BSplinePlane::ReplaceMarker(Marker *toReplace, Marker *replaceWith)
             markers.replace(i, replaceWith);
         }
     }
+    planeMarkers.clear();
+    if (isPlane) {
+        for (int i = 0; i<markers.length(); i++)
+            planeMarkers.append(markers[i]);
+    } else {
+        int count = 0;
+        for (int i = 0; i<MarkerM; i++) {
+            for (int j = 0; j<MarkerN; j++) {
+                planeMarkers.append(markers[count]);
+                count++;
+            }
+            planeMarkers.append(markers[i*MarkerN]);
+            planeMarkers.append(markers[i*MarkerN+1]);
+            planeMarkers.append(markers[i*MarkerN+2]);
+        }
+    }
+}
+
+void BSplinePlane::GetKnotVector(float &u, float &v, QVector<float> &knotVectorU, QVector<float> &knotVectorV)
+{
+    if(u < 0) u = 0;
+    else if(u >= 1.0) u = 0.999f;
+    if(v < 0) v = 0;
+    else if(v >= 1.0) v = 0.999f;
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    int knotCountU = n + DEGREE +1;
+    int knotCountV = m + DEGREE +1;
+
+    float du = 1.0f / (float)(knotCountU - 1);
+    float dv = 1.0f / (float)(knotCountV - 1);
+    float uknot = 0;
+    float vknot = 0;
+    for(int i = 0; i < knotCountU; i++){
+        knotVectorU.push_back(uknot);
+        uknot += du;
+    }
+    for(int i = 0; i < knotCountV; i++){
+        knotVectorV.push_back(vknot );
+        vknot += dv;
+    }
+    float umin = knotVectorU[3];
+    float umax = knotVectorU[knotCountU - 1 - 3];
+    float ru = umax - umin;
+    u = ru * u + umin;
+
+    float vmin = knotVectorV[3];
+    float vmax = knotVectorV[knotCountV - 1 - 3];
+    float rv = vmax - vmin;
+    v = rv * v + vmin;
+}
+
+float BSplinePlane::BsplineRecurive(float t, int n, int i, const QVector<float>& knotVector){
+    if(t == knotVector[0] && i == 0) return 1.0f;
+    if(t == knotVector[knotVector.size()-1] && i == knotVector.size() - n - 2) return 1.0f;
+
+    if (n == 0){
+        if(t >= knotVector[i] && t < knotVector[i+1])
+            return 1;
+        else
+            return 0;
+    }
+
+    float leftRecursion = (t - knotVector[i]);
+    float leftDenominator = (knotVector[i+n] - knotVector[i]);
+    if(leftRecursion == 0 || leftDenominator == 0)
+        leftRecursion = 0;
+    else
+        leftRecursion /= leftDenominator;
+
+    float rightRecursion = knotVector[i+1+n] - t;
+    float rightDenominator = (knotVector[i+1+n] - knotVector[i+1]);
+    if(rightRecursion == 0 || rightDenominator == 0)
+        rightRecursion = 0;
+    else
+        rightRecursion /= rightDenominator;
+
+    leftRecursion *= BsplineRecurive(t, n-1, i, knotVector);
+    rightRecursion *= BsplineRecurive(t, n-1, i+1, knotVector);
+
+    return leftRecursion + rightRecursion;
+}
+
+float BSplinePlane::BsplineDerivativeRecurive(float t, int n, int i, const QVector<float>& knotVector){
+    if(t == knotVector[0] && i == 0) return 1.0f;
+    if(t == knotVector[knotVector.size()-1] && i == knotVector.size() - n - 2) return 1.0f;
+
+    if (n == 0){
+        if(t >= knotVector[i] && t < knotVector[i+1])
+            return 1;
+        else
+            return 0;
+    }
+
+    float leftRecursion = n;
+    float leftDenominator = (knotVector[i+n] - knotVector[i]);
+    if(leftRecursion == 0 || leftDenominator == 0)
+        leftRecursion = 0;
+    else
+        leftRecursion /= leftDenominator;
+
+    float rightRecursion = n;
+    float rightDenominator = (knotVector[i+1+n] - knotVector[i+1]);
+    if(rightRecursion == 0 || rightDenominator == 0)
+        rightRecursion = 0;
+    else
+        rightRecursion /= rightDenominator;
+
+    leftRecursion *= BsplineRecurive(t, n-1, i, knotVector);
+    rightRecursion *= BsplineRecurive(t, n-1, i+1, knotVector);
+
+    return leftRecursion - rightRecursion;
+}
+
+QVector4D BSplinePlane::ComputePos(float u, float v)
+{
+    QVector<float> knotVectorU;
+    QVector<float> knotVectorV;
+    GetKnotVector(u,v,knotVectorU,knotVectorV);
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    QVector4D result = QVector4D(0,0,0,0);
+    for(int i = 0; i < n; i++){ //ROWCOUNT X/u
+        for(int j = 0; j < m; j++){ //COLCOUNT Y/v
+            float bsU = BsplineRecurive(u, DEGREE, i, knotVectorU);
+            float bsV = BsplineRecurive(v, DEGREE, j, knotVectorV);
+            QVector4D pos = planeMarkers[i+j*n]->point;
+            result += bsU * bsV * pos;
+        }
+    }
+    return result;
+}
+
+QVector4D BSplinePlane::ComputeDu(float u, float v){
+    QVector<float> knotVectorU;
+    QVector<float> knotVectorV;
+    GetKnotVector(u,v,knotVectorU,knotVectorV);
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    QVector4D result = QVector4D(0,0,0,0);
+    for(int i = 0; i < n; i++){ //ROWCOUNT X/u
+        for(int j = 0; j < m; j++){ //COLCOUNT Y/v
+            float bsU = BsplineDerivativeRecurive(u, DEGREE, i, knotVectorU);
+            float bsV = BsplineRecurive(v, DEGREE, j, knotVectorV);
+            QVector4D pos = planeMarkers[i+j*n]->point;
+            result += bsU * bsV * pos;
+        }
+    }
+    return result;
+}
+
+QVector4D BSplinePlane::ComputeDuu(float u, float v){
+    QVector<float> knotVectorU;
+    QVector<float> knotVectorV;
+    GetKnotVector(u,v,knotVectorU,knotVectorV);
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    QVector4D result = QVector4D(0,0,0,0);
+    for(int i = 0; i < n; i++){ //ROWCOUNT X/u
+        for(int j = 0; j < m; j++){ //COLCOUNT Y/v
+            float bsU = BsplineDerivativeRecurive(u, DEGREE, i, knotVectorU);
+            float bsUU = BsplineDerivativeRecurive(bsU, DEGREE, i, knotVectorU);
+            float bsV = BsplineRecurive(v, DEGREE, j, knotVectorV);
+            QVector4D pos = planeMarkers[i+j*n]->point;
+            result += bsUU * bsV * pos;
+        }
+    }
+    return result;
+}
+
+QVector4D BSplinePlane::ComputeDuv(float u, float v){
+    QVector<float> knotVectorU;
+    QVector<float> knotVectorV;
+    GetKnotVector(u,v,knotVectorU,knotVectorV);
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    QVector4D result = QVector4D(0,0,0,0);
+    for(int i = 0; i < n; i++){ //ROWCOUNT X/u
+        for(int j = 0; j < m; j++){ //COLCOUNT Y/v
+            float bsU = BsplineDerivativeRecurive(u, DEGREE, i, knotVectorU);
+            float bsV = BsplineDerivativeRecurive(v, DEGREE, j, knotVectorV);
+            QVector4D pos = planeMarkers[i+j*n]->point;
+            result += bsU * bsV * pos;
+        }
+    }
+    return result;
+}
+
+QVector4D BSplinePlane::ComputeDv(float u, float v){
+    QVector<float> knotVectorU;
+    QVector<float> knotVectorV;
+    GetKnotVector(u,v,knotVectorU,knotVectorV);
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    QVector4D result = QVector4D(0,0,0,0);
+    for(int i = 0; i < n; i++){ //ROWCOUNT X/u
+        for(int j = 0; j < m; j++){ //COLCOUNT Y/v
+            float bsU = BsplineRecurive(u, DEGREE, i, knotVectorU);
+            float bsV = BsplineDerivativeRecurive(v, DEGREE, j, knotVectorV);
+            QVector4D pos = planeMarkers[i+j*n]->point;
+            result += bsU * bsV * pos;
+        }
+    }
+    return result;
+}
+
+QVector4D BSplinePlane::ComputeDvv(float u, float v){
+    QVector<float> knotVectorU;
+    QVector<float> knotVectorV;
+    GetKnotVector(u,v,knotVectorU,knotVectorV);
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    QVector4D result = QVector4D(0,0,0,0);
+    for(int i = 0; i < n; i++){ //ROWCOUNT X/u
+        for(int j = 0; j < m; j++){ //COLCOUNT Y/v
+            float bsU = BsplineRecurive(u, DEGREE, i, knotVectorU);
+            float bsV = BsplineDerivativeRecurive(v, DEGREE, j, knotVectorV);
+            float bsVV = BsplineDerivativeRecurive(bsV, DEGREE, j, knotVectorV);
+            QVector4D pos = planeMarkers[i+j*n]->point;
+            result += bsU * bsVV * pos;
+        }
+    }
+    return result;
+}
+
+QVector4D BSplinePlane::ComputeDvu(float u, float v){
+    QVector<float> knotVectorU;
+    QVector<float> knotVectorV;
+    GetKnotVector(u,v,knotVectorU,knotVectorV);
+
+    int n = X-1+4;
+    int m = Y-1+4;
+
+    QVector4D result = QVector4D(0,0,0,0);
+    for(int i = 0; i < n; i++){ //ROWCOUNT X/u
+        for(int j = 0; j < m; j++){ //COLCOUNT Y/v
+            float bsU = BsplineDerivativeRecurive(u, DEGREE, i, knotVectorU);
+            float bsV = BsplineDerivativeRecurive(v, DEGREE, j, knotVectorV);
+            QVector4D pos = planeMarkers[i+j*n]->point;
+            result += bsU * bsV * pos;
+        }
+    }
+    return result;
 }
 
 QVector<QPoint> BSplinePlane::getIndices() const
