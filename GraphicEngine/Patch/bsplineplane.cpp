@@ -42,7 +42,7 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker*> markers, float X, f
     }
     this->markers = markers;
     //this->name = name;
-    name = QString("BezierPlane%1").arg(id);
+    name = QString("BSplinePlane%1").arg(id);
     idname = QString("k%1").arg(id);
     id++;
 
@@ -128,7 +128,7 @@ void BSplinePlane::InitializeMarkers(QList<Marker> *MainMarkers)
             //} else if (x ==0) {
             //   rad = (2*pi/X)*j;
             //}
-            MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*y)+offset.z(), false));
+            MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*y)+offset.z()-(H/4.0f), false));
             markers.append(&MainMarkers->last());
         }
         }

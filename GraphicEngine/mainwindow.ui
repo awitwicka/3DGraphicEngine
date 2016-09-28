@@ -25,13 +25,6 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QPushButton" name="pushButton_Merge">
-         <property name="text">
-          <string>Merge</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="pushButton_fillGap">
          <property name="text">
           <string>FillGap</string>
@@ -44,6 +37,98 @@
           <string>Intersection</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QPushButton" name="pushButton_Merge">
+           <property name="text">
+            <string>Merge</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_ScaleUP">
+           <property name="text">
+            <string>Scale+</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_ScaleDOWN">
+           <property name="text">
+            <string>Scale-</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_RotX">
+           <property name="text">
+            <string>RotX</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_RotY">
+           <property name="text">
+            <string>RotY</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_RotZ">
+           <property name="text">
+            <string>RotZ</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QPushButton" name="pushButton_Front">
+           <property name="text">
+            <string>Front</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QPushButton" name="pushButton_Down">
+           <property name="text">
+            <string>Down</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="pushButton_Back">
+           <property name="text">
+            <string>Back</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="pushButton_Up">
+           <property name="text">
+            <string>Up</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QPushButton" name="pushButton_Right">
+           <property name="text">
+            <string>Right</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="pushButton_Left">
+           <property name="text">
+            <string>Left</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -289,7 +374,7 @@
                 <number>1</number>
                </property>
                <property name="maximum">
-                <number>1000</number>
+                <number>10000</number>
                </property>
                <property name="value">
                 <number>400</number>
@@ -309,7 +394,7 @@
                 <number>1</number>
                </property>
                <property name="maximum">
-                <number>1000</number>
+                <number>10000</number>
                </property>
                <property name="value">
                 <number>400</number>
@@ -329,7 +414,7 @@
                 <number>1</number>
                </property>
                <property name="maximum">
-                <number>1000</number>
+                <number>10000</number>
                </property>
                <property name="value">
                 <number>400</number>
@@ -349,7 +434,7 @@
                 <number>1</number>
                </property>
                <property name="maximum">
-                <number>1000</number>
+                <number>10000</number>
                </property>
                <property name="value">
                 <number>400</number>
@@ -592,7 +677,7 @@
      <x>0</x>
      <y>0</y>
      <width>1464</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLoll">

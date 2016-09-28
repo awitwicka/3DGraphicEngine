@@ -1,6 +1,6 @@
 #include "constants.h"
 
-float Constants::Rpersp = 700;
+float Constants::Rpersp = 1500;//700;
 float Constants::eDistance = 50;
 QMatrix4x4 Constants::perspectiveMatrix = QMatrix4x4(1,0,0,0,
                                0,1,0,0,

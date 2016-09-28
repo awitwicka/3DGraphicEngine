@@ -39,6 +39,7 @@ class Widget : public QWidget
 
 public:
     Cursor cursor;
+    Cursor axis;
     //KeyPress(QWidget *parent = 0);
     bool isStereo;
     bool showCurve;

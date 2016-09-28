@@ -83,6 +83,28 @@ private slots:
 
     void on_pushButton_Intersection_clicked();
 
+    void on_pushButton_ScaleUP_clicked();
+
+    void on_pushButton_ScaleDOWN_clicked();
+
+    void on_pushButton_RotX_clicked();
+
+    void on_pushButton_RotY_clicked();
+
+    void on_pushButton_RotZ_clicked();
+
+    void on_pushButton_Front_clicked();
+
+    void on_pushButton_Back_clicked();
+
+    void on_pushButton_Up_clicked();
+
+    void on_pushButton_Down_clicked();
+
+    void on_pushButton_Right_clicked();
+
+    void on_pushButton_Left_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

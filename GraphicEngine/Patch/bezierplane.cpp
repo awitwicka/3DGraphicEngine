@@ -103,7 +103,7 @@ void BezierPlane::InitializeMarkers(QList<Marker> *MainMarkers)
         for (int y = 0; y<Y*(ORDER-1)+1; y++) {
         for (int x = 0; x<X*(ORDER-1); x++) {
             float rad = alpha*x;
-            MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*y)+offset.z(), false));
+            MainMarkers->append(Marker(R*cos(rad)+offset.x(), R*sin(rad)+offset.y(), (unitY*y)+offset.z()-(H/2.0f), false));
             markers.append(&MainMarkers->last());
         }
         }

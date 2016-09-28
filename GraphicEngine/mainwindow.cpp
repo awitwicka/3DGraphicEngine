@@ -757,6 +757,158 @@ void MainWindow::on_pushButton_Merge_clicked()
     RefreshList();
 }
 
+
+void MainWindow::on_pushButton_ScaleUP_clicked()
+{
+    QList<Marker*> selected = QList<Marker*>(w->selectedMarkers);
+    //fnd mid point
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    for (int i = 0; i<selected.length(); i++) {
+        x+=selected[i]->point.x();
+        y+=selected[i]->point.y();
+        z+=selected[i]->point.z();
+    }
+    x/=selected.length();
+    y/=selected.length();
+    z/=selected.length();
+    QVector4D mid = QVector4D(x, y, z, 1);
+    //get vector to each selected point
+    for (int i = 0; i<selected.length(); i++) {
+        QVector4D v = selected[i]->point - mid;
+        selected[i]->point += 10.0f * v.normalized();
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_pushButton_ScaleDOWN_clicked()
+{
+    QList<Marker*> selected = QList<Marker*>(w->selectedMarkers);
+    //fnd mid point
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    for (int i = 0; i<selected.length(); i++) {
+        x+=selected[i]->point.x();
+        y+=selected[i]->point.y();
+        z+=selected[i]->point.z();
+    }
+    x/=selected.length();
+    y/=selected.length();
+    z/=selected.length();
+    QVector4D mid = QVector4D(x, y, z, 1);
+    //get vector to each selected point
+    for (int i = 0; i<selected.length(); i++) {
+        QVector4D v = selected[i]->point - mid;
+        selected[i]->point -= 10.0f * v.normalized();
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_pushButton_RotX_clicked()
+{
+    QList<Marker*> selected = QList<Marker*>(w->selectedMarkers);
+    //fnd mid point
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    for (int i = 0; i<selected.length(); i++) {
+        x+=selected[i]->point.x();
+        y+=selected[i]->point.y();
+        z+=selected[i]->point.z();
+    }
+    x/=selected.length();
+    y/=selected.length();
+    z/=selected.length();
+    QVector4D mid = QVector4D(x, y, z, 1);
+    //get vector to each selected point
+    for (int i = 0; i<selected.length(); i++) {
+        QQuaternion rot = QQuaternion::fromAxisAndAngle(1, 0, 0, 5);
+
+        QVector4D trans = selected[i]->point - mid; //translate to origin
+        QVector3D rotated = rot.rotatedVector((QVector3D)trans);
+        QVector4D rotated4 = QVector4D(rotated.x(), rotated.y(), rotated.z(), 1);
+        rotated4 += mid; //translate back
+
+        selected[i]->point.setX(rotated4.x());
+        selected[i]->point.setY(rotated4.y());
+        selected[i]->point.setZ(rotated4.z());
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_pushButton_RotY_clicked()
+{
+    QList<Marker*> selected = QList<Marker*>(w->selectedMarkers);
+    //fnd mid point
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    for (int i = 0; i<selected.length(); i++) {
+        x+=selected[i]->point.x();
+        y+=selected[i]->point.y();
+        z+=selected[i]->point.z();
+    }
+    x/=selected.length();
+    y/=selected.length();
+    z/=selected.length();
+    QVector4D mid = QVector4D(x, y, z, 1);
+    //get vector to each selected point
+    for (int i = 0; i<selected.length(); i++) {
+        QQuaternion rot = QQuaternion::fromAxisAndAngle(0, 1, 0, 5);
+
+        QVector4D trans = selected[i]->point - mid; //translate to origin
+        QVector3D rotated = rot.rotatedVector((QVector3D)trans);
+        QVector4D rotated4 = QVector4D(rotated.x(), rotated.y(), rotated.z(), 1);
+        rotated4 += mid; //translate back
+
+        selected[i]->point.setX(rotated4.x());
+        selected[i]->point.setY(rotated4.y());
+        selected[i]->point.setZ(rotated4.z());
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_pushButton_RotZ_clicked()
+{
+    QList<Marker*> selected = QList<Marker*>(w->selectedMarkers);
+    //fnd mid point
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    for (int i = 0; i<selected.length(); i++) {
+        x+=selected[i]->point.x();
+        y+=selected[i]->point.y();
+        z+=selected[i]->point.z();
+    }
+    x/=selected.length();
+    y/=selected.length();
+    z/=selected.length();
+    QVector4D mid = QVector4D(x, y, z, 1);
+    //get vector to each selected point
+    for (int i = 0; i<selected.length(); i++) {
+        QQuaternion rot = QQuaternion::fromAxisAndAngle(0, 0, 1, 5);
+
+        QVector4D trans = selected[i]->point - mid; //translate to origin
+        QVector3D rotated = rot.rotatedVector((QVector3D)trans);
+        QVector4D rotated4 = QVector4D(rotated.x(), rotated.y(), rotated.z(), 1);
+        rotated4 += mid; //translate back
+
+        selected[i]->point.setX(rotated4.x());
+        selected[i]->point.setY(rotated4.y());
+        selected[i]->point.setZ(rotated4.z());
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+
+/********************/
 int MainWindow::FindIndexByRef(Marker *marker)
 {
     QString idname = marker->idname;
@@ -784,4 +936,67 @@ Marker *MainWindow::FindMarkerByID(QString id)
             return &w->markers[i];
     }
     return nullptr;
+}
+
+/********************VIEW************************/
+
+void MainWindow::on_pushButton_Front_clicked()
+{
+    w->worldMatrix = QMatrix4x4();
+    w->update();
+}
+
+void MainWindow::on_pushButton_Back_clicked()
+{
+    float dx = 3.14;
+    QMatrix4x4 rotY = QMatrix4x4(cos(dx),0,sin(dx),0,
+                                 0,1,0,0,
+                                 -sin(dx),0,cos(dx),0,
+                                 0,0,0,1);
+    w->worldMatrix = rotY;
+    w->update();
+}
+
+void MainWindow::on_pushButton_Up_clicked()
+{
+    float dy = 3.14/2;
+    QMatrix4x4 rotX = QMatrix4x4(1,0,0,0,
+                                 0,cos(dy),-sin(dy),0,
+                                 0,sin(dy),cos(dy),0,
+                                 0,0,0,1);
+    w->worldMatrix = rotX;
+    w->update();
+}
+
+void MainWindow::on_pushButton_Down_clicked()
+{
+    float dy = -3.14/2;
+    QMatrix4x4 rotX = QMatrix4x4(1,0,0,0,
+                                 0,cos(dy),-sin(dy),0,
+                                 0,sin(dy),cos(dy),0,
+                                 0,0,0,1);
+    w->worldMatrix = rotX;
+    w->update();
+}
+
+void MainWindow::on_pushButton_Right_clicked()
+{
+    float dx = 3.14/2;
+    QMatrix4x4 rotY = QMatrix4x4(cos(dx),0,sin(dx),0,
+                                 0,1,0,0,
+                                 -sin(dx),0,cos(dx),0,
+                                 0,0,0,1);
+    w->worldMatrix = rotY;
+    w->update();
+}
+
+void MainWindow::on_pushButton_Left_clicked()
+{
+    float dx = -3.14/2;
+    QMatrix4x4 rotY = QMatrix4x4(cos(dx),0,sin(dx),0,
+                                 0,1,0,0,
+                                 -sin(dx),0,cos(dx),0,
+                                 0,0,0,1);
+    w->worldMatrix = rotY;
+    w->update();
 }

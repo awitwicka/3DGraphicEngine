@@ -13,6 +13,8 @@ Widget::Widget(QWidget *parent) : QWidget(parent)
     curveMode = 0;
     t1 = Torus();
     cursor = Cursor();
+    axis = Cursor();
+    axis.setSize(1000);
     //TODO move to point class
     highlighColor = Qt::yellow;
     normalColor = Qt::white;
@@ -41,6 +43,7 @@ void Widget::paintEvent(QPaintEvent *)
     //TODO: draw axis in the middle of the scene
     //t1.Draw(painter, worldMatrix, isStereo);
     cursor.Draw(painter, worldMatrix, isStereo);
+    axis.Draw(painter, worldMatrix, isStereo);
     for (int i = 0; i< markers.length(); i++)
         markers[i].Draw(painter, worldMatrix, isStereo);
 
