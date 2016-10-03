@@ -48,7 +48,7 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker*> markers, float X, f
     id++;
 
      // references for drawing from deboore points
-    /*if (isPlane) {
+    if (isPlane) {
         for (int i = 0; i<markers.length(); i++)
             planeMarkers.append(markers[i]);
     } else {
@@ -62,7 +62,7 @@ BSplinePlane::BSplinePlane(QMatrix4x4 matrix, QList<Marker*> markers, float X, f
             planeMarkers.append(markers[i*MarkerN+1]);
             planeMarkers.append(markers[i*MarkerN+2]);
         }
-    }*/
+    }
 
     InitializeSpline(matrix);
 }

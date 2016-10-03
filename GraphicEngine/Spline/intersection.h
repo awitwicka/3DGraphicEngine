@@ -36,11 +36,13 @@ class Intersection : public CADObject, public CADMarkerObject
     };
 
     void Clear();
-    //find closest point on the surface on both patches
+
     double GoalFunction(QVector3D g, QVector3D h, double distDirG, double distDirH);
     void SetGoalFunctionDerivative(QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2, QVector4D &d, double DistDirG, double DistDirH, QVector3D dir);
+    QVector3D GetDirection(QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2);
+
     UVPointData FindClosesPointOnSurface(QVector4D PointPos, CADSplinePatch *patch, double accuracy);
-    QVector4D NewtonNextPoint(double e, double a, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2);
+    QVector4D NewtonNextPoint(double e, double step, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2);
     QVector4D GradientDistanceMinimalization(double e, double a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);
     QVector4D GradientStep(double e, double a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);
     QVector4D GradientNextIntersection(double e, double a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);

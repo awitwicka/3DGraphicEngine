@@ -56,16 +56,16 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     double e = 0.00000001;
     double a = 0.0005; //step
 
-    UVPointData point1 = FindClosesPointOnSurface(start->point, patch1, 0.1);
-    UVPointData point2 = FindClosesPointOnSurface(start->point, patch2, 0.1);
+    UVPointData point1 = FindClosesPointOnSurface(start->point, patch1, 0.01);
+    UVPointData point2 = FindClosesPointOnSurface(start->point, patch2, 0.01);
 
     //tmp
-    pointsCurve.append(start->point);
+    /*pointsCurve.append(start->point);
     pointsCurve.append(point1.position);
     pointsCurve.append(start->point);
     pointsCurve.append(point2.position);
     indicesCurve.append(QPoint(0, 1));
-    indicesCurve.append(QPoint(2, 3));
+    indicesCurve.append(QPoint(2, 3));*/
 
 
     //Gradient descend method - finding first intersection point
@@ -73,7 +73,7 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     QVector4D x_optimal = GradientDistanceMinimalization(e, a, x, patch1, patch2);
 
     int iter = 0;
-    const int MAX_ITER = 3000;
+    const int MAX_ITER = 1500;
     QVector4D point = x_optimal;
     QVector4D nextStep;
     do{
@@ -82,10 +82,29 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
         point = NewtonNextPoint(e, a, point, patch1, patch2);
         //point = GradientNextIntersection(e, a, point, patch1, patch2);
 
+
         if (turn == 1) {
             UVparameters.push_back(point);
         } else if(turn == -1)
             UVparameters.push_front(point);
+
+        //going around cylinder
+        if (!patch1->isPlane) {
+            if (point.x() < 0.0f) point.setX(point.x()+1.0f);
+            else if(point.x() > 1.0f) point.setX(point.x()-1.0f);
+            //check if made a full circle
+            double a = fabs(x_optimal.x()-point.x());
+            if (turn == 1 && fabs(x_optimal.x()-point.x())<e && fabs(x_optimal.y()-point.y())<e && iter>10) //add direction/gradient check
+                turn = 0;
+        }
+        else if (!patch2->isPlane) {
+            if (point.z() < 1.0f) point.setZ(point.z()+1.0f);
+            else if(point.z() > 1.0f) point.setZ(point.z()-1.0f);
+            //check if made a full circle
+            double a = fabs(x_optimal.z()-point.z());
+            if (turn == 1 && fabs(x_optimal.z()-point.z())<e && fabs(x_optimal.w()-point.w())<e && iter>10) //add direction/gradient check
+                turn = 0;
+        }
 
         //change turn status
         if((point.x() < 0 || point.y() < 0 || point.z() < 0 || point.w() < 0)
@@ -97,7 +116,8 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
                 turn = -1;
                 point = UVparameters.first(); //TODO correct first dist minimalisation
             }
-            else if (turn == -1) turn = 0; // end loop
+            else if (turn == -1)
+                turn = 0; // end loop
         }
         iter++;
    }while(turn != 0 && iter < MAX_ITER);
@@ -242,24 +262,11 @@ QVector4D Intersection::GradientNextIntersection(double e, double a, QVector4D s
     double new_f;
     double stopCond;
     double step = 1.0;
+    QVector4D d; //gradinet of the function
+    QVector3D dir = GetDirection(startPoint, patch1, patch2);
 
-    //to co niepowinno byc tu:
     QVector3D g0 = QVector3D(patch1->ComputePos(startPoint.x(), startPoint.y())); //u1 v1
     QVector3D h0 = QVector3D(patch2->ComputePos(startPoint.z(), startPoint.w())); //u2 v2
-    QVector3D gdu0 = QVector3D(patch1->ComputeDu(startPoint.x(), startPoint.y())); //u1' v1
-    QVector3D gdv0 = QVector3D(patch1->ComputeDv(startPoint.x(), startPoint.y())); //u1 v1'
-    QVector3D hdu0 = QVector3D(patch2->ComputeDu(startPoint.z(), startPoint.w())); //u2' v2
-    QVector3D hdv0 = QVector3D(patch2->ComputeDv(startPoint.z(), startPoint.w())); //u2 v2'
-    QVector4D d; //gradinet of the function
-    QVector3D Ng;
-    QVector3D Nh;
-    QVector3D dir;
-    //normal to the surface
-    Ng = QVector3D::crossProduct(gdu0, gdv0);
-    Nh = QVector3D::crossProduct(hdu0, hdv0);
-    //searching direction
-    dir = (QVector3D::crossProduct(Ng, Nh)).normalized();
-    dir *= turn;
 
     QVector4D x = startPoint;
     QVector4D best_x = x;
@@ -318,71 +325,56 @@ Intersection::UVPointData Intersection::FindClosesPointOnSurface(QVector4D Point
                 Vval = v;
                 pos = tmpPos;
            }
-           /*pointsCurve.append(tmpPos);
-           indicesCurve.append(QPoint(count, count+1));
-           count +=1;*/
+           //pointsCurve.append(tmpPos);
+           //indicesCurve.append(QPoint(count, count+1));
+           //count +=1;
         }
     }
     //pointsCurve.append(tmpPos);
     return UVPointData(pos, Uval, Vval);
 }
 
-QVector4D Intersection::NewtonNextPoint(double e, double a, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2) //u1v1u2v2 point
+QVector4D Intersection::NewtonNextPoint(double e, double step, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2) //u1v1u2v2 point
 {
     double stopCond;
-    double e = 0.01f;
-    double step = 1.0f;
+    step = 1.0f;
     int max_iter = 10;
     int i = 0;
-    int turn = 1;
-    // if backwards then
-    // turn = -1;
+
     QVector4D x_new;
     QMatrix4x4 H; //Hessian matrix
     QVector4D d; //gradinet of the function
-    QVector3D Ng;
-    QVector3D Nh;
-    QVector3D dir;
+    QVector3D dir = GetDirection(startPoint, patch1, patch2);
 
     //g0 start
     QVector3D g0 = QVector3D(patch1->ComputePos(startPoint.x(), startPoint.y())); //u1 v1
-    QVector3D gdu0 = QVector3D(patch1->ComputeDu(startPoint.x(), startPoint.y())); //u1' v1
-    QVector3D gdv0 = QVector3D(patch1->ComputeDv(startPoint.x(), startPoint.y())); //u1 v1'
-    QVector3D gdvu0 = QVector3D(patch1->ComputeDvu(startPoint.x(), startPoint.y())); //u1' v1'
+    QVector3D h0 = QVector3D(patch2->ComputePos(startPoint.z(), startPoint.w())); //u2 v2
+
+    /*QVector3D gdvu0 = QVector3D(patch1->ComputeDvu(startPoint.x(), startPoint.y())); //u1' v1'
     QVector3D gduv0 = QVector3D(patch1->ComputeDuv(startPoint.x(), startPoint.y())); //u1' v1'
     QVector3D gduu0 = QVector3D(patch1->ComputeDuu(startPoint.x(), startPoint.y())); //u1'' v1
     QVector3D gdvv0 = QVector3D(patch1->ComputeDvv(startPoint.x(), startPoint.y())); //u1 v1''
     //h0 start
-    QVector3D h0 = QVector3D(patch2->ComputePos(startPoint.z(), startPoint.w())); //u2 v2
-    QVector3D hdu0 = QVector3D(patch2->ComputeDu(startPoint.z(), startPoint.w())); //u2' v2
-    QVector3D hdv0 = QVector3D(patch2->ComputeDv(startPoint.z(), startPoint.w())); //u2 v2'
     QVector3D hdvu0 = QVector3D(patch2->ComputeDvu(startPoint.z(), startPoint.w())); //u2' v2'
     QVector3D hduv0 = QVector3D(patch2->ComputeDuv(startPoint.z(), startPoint.w())); //u2' v2'
     QVector3D hduu0 = QVector3D(patch2->ComputeDuu(startPoint.z(), startPoint.w())); //u2'' v2
-    QVector3D hdvv0 = QVector3D(patch2->ComputeDvv(startPoint.z(), startPoint.w())); //u2 v2''
-
-    //normal to the surface
-    Ng = QVector3D::crossProduct(gdu0, gdv0);
-    Nh = QVector3D::crossProduct(hdu0, hdv0);
-    //searching direction
-    dir = (QVector3D::crossProduct(Ng, Nh)).normalized();
-    dir *= turn;
+    QVector3D hdvv0 = QVector3D(patch2->ComputeDvv(startPoint.z(), startPoint.w())); //u2 v2''*/
 
     //derivative of dir
     //ng.y*nh.z - ng.z*nh.y -> -> cross(nh, cross(gu, gv)) -> cross(nh, cross(guu, gv) + cross(gu, gvu))
-    QVector3D dirU1 = QVector3D::crossProduct(Nh, (QVector3D::crossProduct(gduu0, gdv0) + QVector3D::crossProduct(gdu0,gdvu0)));
+    /*QVector3D dirU1 = QVector3D::crossProduct(Nh, (QVector3D::crossProduct(gduu0, gdv0) + QVector3D::crossProduct(gdu0,gdvu0)));
     QVector3D dirV1 = QVector3D::crossProduct(Nh, (QVector3D::crossProduct(gduv0, gdv0) + QVector3D::crossProduct(gdu0,gdvv0)));
     QVector3D dirU2 = QVector3D::crossProduct(Ng, (QVector3D::crossProduct(hduu0, hdv0) + QVector3D::crossProduct(hdu0,hdvu0)));
     QVector3D dirV2 = QVector3D::crossProduct(Ng, (QVector3D::crossProduct(hduv0, hdv0) + QVector3D::crossProduct(hdu0,hdvv0)));
     dirU1 *= turn;
     dirV1 *= turn;
     dirU2 *= turn;
-    dirV2 *= turn;
+    dirV2 *= turn;*/
 
-    dirU1 = QVector3D(0,0,0);
-    dirV1 = QVector3D(0,0,0);
-    dirU2 = QVector3D(0,0,0);
-    dirV2 = QVector3D(0,0,0);
+    QVector3D dirU1 = QVector3D(0,0,0);
+    QVector3D dirV1 = QVector3D(0,0,0);
+    QVector3D dirU2 = QVector3D(0,0,0);
+    QVector3D dirV2 = QVector3D(0,0,0);
 
     QVector4D x = startPoint;
     do{
@@ -395,7 +387,6 @@ QVector4D Intersection::NewtonNextPoint(double e, double a, QVector4D startPoint
         QVector3D hdv = QVector3D(patch2->ComputeDv(x.z(), x.w())); //u2 v2'
 
         QVector3D distG = g-g0;
-
         double DistDir = QVector3D::dotProduct(distG, dir) - step;
         double f = pow((g.x()-h.x()),2) + pow((g.y()-h.y()),2) + pow((g.z()-h.z()),2) + pow(DistDir,2); // u1 v1 u2 v2 - distance between 2 points
 
@@ -435,7 +426,7 @@ QVector4D Intersection::NewtonNextPoint(double e, double a, QVector4D startPoint
         H = H.inverted();
         x_new = x - H*d;
         x = x_new;
-        stopCond = d.length();//(x_new - x).length();
+        //stopCond = d.length();//(x_new - x).length();
     //} while (stopCond > e);
 
     }while(i++ < max_iter);
@@ -482,4 +473,21 @@ void Intersection::SetGoalFunctionDerivative(QVector4D best_x, CADSplinePatch *p
     d.setY( (2*(g.x()-h.x())*(gdv.x())  + 2*(g.y()-h.y())*(gdv.y())  + 2*(g.z()-h.z())*(gdv.z()))   + 2 * DistDirG * QVector3D::dotProduct(dir, gdv)); //dv1
     d.setZ( (2*(g.x()-h.x())*(-hdu.x()) + 2*(g.y()-h.y())*(-hdu.y()) + 2*(g.z()-h.z())*(-hdu.z()))  + 2 * DistDirH * QVector3D::dotProduct(dir, hdu)); //du2
     d.setW( (2*(g.x()-h.x())*(-hdv.x()) + 2*(g.y()-h.y())*(-hdv.y()) + 2*(g.z()-h.z())*(-hdv.z()))  + 2 * DistDirH * QVector3D::dotProduct(dir, hdv)); //dv2
+}
+
+QVector3D Intersection::GetDirection(QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2)
+{
+    QVector3D gdu0 = QVector3D(patch1->ComputeDu(startPoint.x(), startPoint.y())); //u1' v1
+    QVector3D gdv0 = QVector3D(patch1->ComputeDv(startPoint.x(), startPoint.y())); //u1 v1'
+
+    QVector3D hdu0 = QVector3D(patch2->ComputeDu(startPoint.z(), startPoint.w())); //u2' v2
+    QVector3D hdv0 = QVector3D(patch2->ComputeDv(startPoint.z(), startPoint.w())); //u2 v2'
+
+    //normal to the surface
+    QVector3D Ng = QVector3D::crossProduct(gdu0, gdv0);
+    QVector3D Nh = QVector3D::crossProduct(hdu0, hdv0);
+    //searching direction
+    QVector3D dir = (QVector3D::crossProduct(Ng, Nh)).normalized();
+    dir *= turn;
+    return dir;
 }
