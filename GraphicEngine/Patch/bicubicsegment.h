@@ -1,8 +1,8 @@
 #ifndef BICUBICSEGMENT_H
 #define BICUBICSEGMENT_H
 
-//#include "cadsplinepatch.h"
 #include "marker.h"
+
 #define DEGREE 3
 #define ORDER 4
 
@@ -23,7 +23,7 @@ class BicubicSegment : public CADObject//, public CADSplinePatch
 
     int U;
     int V;
-public: 
+public:
     //v and u are between 0-1
     QVector4D getBezierPoint(float u, float v);
     QVector4D getBezierPoint(QVector4D points[ORDER], float t);

@@ -16,6 +16,11 @@ public:
     float Width;
     float Height;
 
+    bool isTrimmed = false;
+    QVector<QVector4D> trimData;
+    bool side;
+    bool isPatch1;
+
     CADSplinePatch();
     virtual ~CADSplinePatch()=0;
     virtual void InitializeSpline(QMatrix4x4 matrix)=0;

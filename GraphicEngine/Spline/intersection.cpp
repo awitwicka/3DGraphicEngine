@@ -7,7 +7,7 @@ Intersection::Intersection()
 
 }
 
-Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2)
+Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2, float step)
 {
     name = QString("Intersection%1").arg(id);
     idname = QString("x%1").arg(id);
@@ -37,6 +37,10 @@ Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *pat
     window2.setCentralWidget(chartView2);
     window2.resize(400, 400);
 
+    this->patch1 = patch1;
+    this->patch2 = patch2;
+    this->step = step;
+
     CalculateIntersection(patch2, start, patch1);
 }
 
@@ -54,7 +58,10 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
 {
     //step accuracy
     double e = 0.00000001;
-    double a = 0.0005; //step
+    double a = 0.0005; //step'
+    double epsilon = 0.04f;
+    int count1 = 0;
+    int count2 = 0;
 
     UVPointData point1 = FindClosesPointOnSurface(start->point, patch1, 0.01);
     UVPointData point2 = FindClosesPointOnSurface(start->point, patch2, 0.01);
@@ -72,6 +79,7 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     QVector4D x = QVector4D(point1.u, point1.v, point2.u, point2.v); //start point u1v1u2v2
     QVector4D x_optimal = GradientDistanceMinimalization(e, a, x, patch1, patch2);
 
+
     int iter = 0;
     const int MAX_ITER = 1500;
     QVector4D point = x_optimal;
@@ -79,30 +87,44 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     do{
         //nextStep = GradientStep(e, a, point, patch1, patch2);
         //point = GradientDistanceMinimalization(e, a, nextStep, patch1, patch2);
-        point = NewtonNextPoint(e, a, point, patch1, patch2);
+        point = NewtonNextPoint(e, point, patch1, patch2);
         //point = GradientNextIntersection(e, a, point, patch1, patch2);
 
 
         if (turn == 1) {
             UVparameters.push_back(point);
-        } else if(turn == -1)
+        } else if(turn == -1) {
             UVparameters.push_front(point);
+        }
 
+        //TODO: distance instead of checking separately x and y (step instead of e)
+        //TODO: check whats wrong with patch kolejność
         //going around cylinder
+
         if (!patch1->isPlane) {
-            if (point.x() < 0.0f) point.setX(point.x()+1.0f);
-            else if(point.x() > 1.0f) point.setX(point.x()-1.0f);
+            if (point.x() < 0.0f) {
+                point.setX(point.x()+1.0f);
+                count1++;
+            }
+            else if(point.x() > 1.0f) {
+                point.setX(point.x()-1.0f);
+                count1++;
+            }
             //check if made a full circle
-            double a = fabs(x_optimal.x()-point.x());
-            if (turn == 1 && fabs(x_optimal.x()-point.x())<e && fabs(x_optimal.y()-point.y())<e && iter>10) //add direction/gradient check
+            if (turn == 1 && count1>0 && fabs(x_optimal.x()-point.x())<epsilon && fabs(x_optimal.y()-point.y())<epsilon && iter>10) //add direction/gradient check
                 turn = 0;
         }
         else if (!patch2->isPlane) {
-            if (point.z() < 1.0f) point.setZ(point.z()+1.0f);
-            else if(point.z() > 1.0f) point.setZ(point.z()-1.0f);
+            if (point.z() < 0.0f) {
+                point.setZ(point.z()+1.0f);
+                count2++;
+            }
+            else if(point.z() > 1.0f) {
+                point.setZ(point.z()-1.0f);
+                count2++;
+            }
             //check if made a full circle
-            double a = fabs(x_optimal.z()-point.z());
-            if (turn == 1 && fabs(x_optimal.z()-point.z())<e && fabs(x_optimal.w()-point.w())<e && iter>10) //add direction/gradient check
+            if (turn == 1 && count2>0 && fabs(x_optimal.z()-point.z())<e && fabs(x_optimal.w()-point.w())<e && iter>10) //add direction/gradient check
                 turn = 0;
         }
 
@@ -200,7 +222,6 @@ QVector4D Intersection::GradientStep(double e, double a, QVector4D startPoint, C
 {
     double new_f;
     double stopCond;
-    double step = 1.0f;
 
     QVector3D g0 = QVector3D(patch1->ComputePos(startPoint.x(), startPoint.y())); //u1 v1
     QVector3D h0 = QVector3D(patch2->ComputePos(startPoint.z(), startPoint.w())); //u2 v2
@@ -261,7 +282,6 @@ QVector4D Intersection::GradientNextIntersection(double e, double a, QVector4D s
 {
     double new_f;
     double stopCond;
-    double step = 1.0;
     QVector4D d; //gradinet of the function
     QVector3D dir = GetDirection(startPoint, patch1, patch2);
 
@@ -334,10 +354,9 @@ Intersection::UVPointData Intersection::FindClosesPointOnSurface(QVector4D Point
     return UVPointData(pos, Uval, Vval);
 }
 
-QVector4D Intersection::NewtonNextPoint(double e, double step, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2) //u1v1u2v2 point
+QVector4D Intersection::NewtonNextPoint(double e, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2) //u1v1u2v2 point
 {
     double stopCond;
-    step = 1.0f;
     int max_iter = 10;
     int i = 0;
 

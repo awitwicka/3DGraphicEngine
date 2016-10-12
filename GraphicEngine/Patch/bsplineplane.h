@@ -15,6 +15,10 @@ class BSplinePlane : public CADObject, public CADSplinePatch
 
     //markers to draw the surface from deboore points, references to all needed markers
     QList<Marker*> planeMarkers;
+
+    double GetAngle(QPointF pivot, QPointF source, QPointF dest);
+    bool IsEnclosed(float u, float v, QVector<QVector4D> polygon, bool isPatch1);
+
     void GetKnotVector(float &u, float &v, QVector<float> &knotVectorU, QVector<float> &knotVectorV);
     float BsplineRecurive(float t, int n, int i, const QVector<float>& knotVector);
     float BsplineDerivativeRecurive(float t, int n, int i, const QVector<float>& knotVector);

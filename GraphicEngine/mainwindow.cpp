@@ -707,7 +707,7 @@ void MainWindow::on_pushButton_Intersection_clicked()
     }
     if (patches.length()!=2 || m == nullptr)
         return;
-    CADMarkerObject* c = new Intersection(w->worldMatrix, m, patches[0], patches[1]);
+    CADMarkerObject* c = new Intersection(w->worldMatrix, m, patches[0], patches[1], (float)ui->spinBox_intersectionStep->value());
     w->Splines.append(c);
     RefreshList();
 }
@@ -998,5 +998,138 @@ void MainWindow::on_pushButton_Left_clicked()
                                  -sin(dx),0,cos(dx),0,
                                  0,0,0,1);
     w->worldMatrix = rotY;
+    w->update();
+}
+
+void MainWindow::on_pushButton_p1first_clicked()
+{
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    Intersection *intersection = nullptr;
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        if (idname.at(0) == 'x') {
+            for (int i = 0; i<w->Splines.length(); i++) {
+                if (w->Splines[i]->idname == idname) {
+                    intersection = dynamic_cast<Intersection*>(w->Splines[i]);//&w->Splines[i];
+                }
+            }
+        }
+        if (intersection != nullptr) {
+            intersection->patch2->isTrimmed = false;
+            intersection->patch1->isTrimmed = true;
+            intersection->patch1->side = true;
+            intersection->patch1->isPatch1 = true;
+            intersection->patch1->trimData = intersection->UVparameters;
+        }
+    }
+    w->UpdateSceneElements();
+    w->update();
+    //trim data x y - patch1 u v,   z w - patch2 u v
+}
+
+void MainWindow::on_spinBox_intersectionStep_valueChanged(int arg1)
+{
+
+}
+
+void MainWindow::on_pushButton_all_clicked()
+{
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    Intersection *intersection = nullptr;
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        if (idname.at(0) == 'x') {
+            for (int i = 0; i<w->Splines.length(); i++) {
+                if (w->Splines[i]->idname == idname) {
+                    intersection = dynamic_cast<Intersection*>(w->Splines[i]);//&w->Splines[i];
+                }
+            }
+        }
+        if (intersection != nullptr) {
+            intersection->patch1->isTrimmed = false;
+            intersection->patch2->isTrimmed = false;
+        }
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_pushButton_p1sec_clicked()
+{
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    Intersection *intersection = nullptr;
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        if (idname.at(0) == 'x') {
+            for (int i = 0; i<w->Splines.length(); i++) {
+                if (w->Splines[i]->idname == idname) {
+                    intersection = dynamic_cast<Intersection*>(w->Splines[i]);//&w->Splines[i];
+                }
+            }
+        }
+        if (intersection != nullptr) {
+            intersection->patch2->isTrimmed = false;
+            intersection->patch1->isTrimmed = true;
+            intersection->patch1->side = false;
+            intersection->patch1->isPatch1 = true;
+            intersection->patch1->trimData = intersection->UVparameters;
+        }
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_pushButton_p2first_clicked()
+{
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    Intersection *intersection = nullptr;
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        if (idname.at(0) == 'x') {
+            for (int i = 0; i<w->Splines.length(); i++) {
+                if (w->Splines[i]->idname == idname) {
+                    intersection = dynamic_cast<Intersection*>(w->Splines[i]);//&w->Splines[i];
+                }
+            }
+        }
+        if (intersection != nullptr) {
+            intersection->patch1->isTrimmed = false;
+            intersection->patch2->isTrimmed = true;
+            intersection->patch2->side = true;
+            intersection->patch2->isPatch1 = false;
+            intersection->patch2->trimData = intersection->UVparameters;
+        }
+    }
+    w->UpdateSceneElements();
+    w->update();
+}
+
+void MainWindow::on_pushButton_p2sec_clicked()
+{
+    QList<QTreeWidgetItem*> selected = t->selectedItems();
+    QString idname;
+    Intersection *intersection = nullptr;
+    foreach (QTreeWidgetItem* it, selected) {
+        idname = it->text(1);
+        if (idname.at(0) == 'x') {
+            for (int i = 0; i<w->Splines.length(); i++) {
+                if (w->Splines[i]->idname == idname) {
+                    intersection = dynamic_cast<Intersection*>(w->Splines[i]);//&w->Splines[i];
+                }
+            }
+        }
+        if (intersection != nullptr) {
+            intersection->patch1->isTrimmed = false;
+            intersection->patch2->isTrimmed = true;
+            intersection->patch2->side = false;
+            intersection->patch2->isPatch1 = false;
+            intersection->patch2->trimData = intersection->UVparameters;
+        }
+    }
+    w->UpdateSceneElements();
     w->update();
 }

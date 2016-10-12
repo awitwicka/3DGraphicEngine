@@ -105,6 +105,18 @@ private slots:
 
     void on_pushButton_Left_clicked();
 
+    void on_pushButton_p1first_clicked();
+
+    void on_spinBox_intersectionStep_valueChanged(int arg1);
+
+    void on_pushButton_all_clicked();
+
+    void on_pushButton_p1sec_clicked();
+
+    void on_pushButton_p2first_clicked();
+
+    void on_pushButton_p2sec_clicked();
+
 private:
     Ui::MainWindow *ui;
     Widget* w;

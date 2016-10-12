@@ -23,7 +23,6 @@ class Intersection : public CADObject, public CADMarkerObject
 
     QVector<QVector4D> pointsCurve;
     QVector<QPoint> indicesCurve;
-    QVector<QVector4D> UVparameters;
 
     //forward (1)/backward (-1) direction of finding the next point
     int turn = 1;
@@ -42,13 +41,20 @@ class Intersection : public CADObject, public CADMarkerObject
     QVector3D GetDirection(QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2);
 
     UVPointData FindClosesPointOnSurface(QVector4D PointPos, CADSplinePatch *patch, double accuracy);
-    QVector4D NewtonNextPoint(double e, double step, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2);
+    QVector4D NewtonNextPoint(double e, QVector4D startPoint, CADSplinePatch *patch1, CADSplinePatch *patch2);
     QVector4D GradientDistanceMinimalization(double e, double a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);
     QVector4D GradientStep(double e, double a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);
     QVector4D GradientNextIntersection(double e, double a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2);
 public:
+    float step;
+    CADSplinePatch *patch1;
+    CADSplinePatch *patch2;
+    QVector<QVector4D> UVparameters;
+    QVector<QVector2D> UVpatch1;
+    QVector<QVector2D> UVpatch2;
+
     Intersection();
-    Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2);
+    Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2, float step);
     ~Intersection();
 
     void InitializeSpline(QMatrix4x4 matrix);

@@ -159,7 +159,7 @@ void BezierPlane::InitializeSpline(QMatrix4x4 matrix)
     }
 
     for (int i = 0; i<BezierSegMarkers.length(); i++)
-         BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix));
+        BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix));
 }
 
 void BezierPlane::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)

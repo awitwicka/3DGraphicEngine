@@ -156,6 +156,8 @@ void BSplinePlane::Clear()
 {
     BezierSegments.clear();
     BezierSegMarkers.clear();
+    indices.clear();
+    points.clear();
 }
 
 
@@ -198,14 +200,94 @@ void BSplinePlane::InitializeSpline(QMatrix4x4 matrix)
         }
     }
     
-    for (int i = 0; i<BezierSegMarkers.length(); i++)
-         BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix, false));
+    for (int i = 0; i<BezierSegMarkers.length(); i++) {
+        if (!isTrimmed)
+            BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix, false));
+        else {
+            //BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix, false, trimData, side, isPatch1));
+
+            count = 0;
+            int linesNo=100;// = (int)length;
+            for (int u = 0; u < U+1; u++) {
+                for (int i = 0; i <= linesNo; i++) {
+                    if (IsEnclosed(u/(float)U, i/(float)linesNo, trimData, isPatch1)) {
+                        points.append(ComputePos(u/(float)U, i/(float)linesNo));
+                        indices.append(QPoint(count, count+1));
+                        count++;
+                    }
+                }
+                if (indices.count()>0)
+                    indices.removeLast();
+            }
+            linesNo = 100;
+            for (int v = 0; v < V+1; v++) {
+                for (int i = 0; i <= linesNo; i++) {
+                    if (IsEnclosed(i/(float)linesNo, v/(float)V, trimData, isPatch1)) {
+                        points.append(ComputePos(i/(float)linesNo, v/(float)V));
+                        indices.append(QPoint(count, count+1));
+                        count++;
+                    }
+                }
+                if (indices.count()>0)
+                    indices.removeLast();
+            }
+
+        }
+    }
 }
 
 void BSplinePlane::Draw(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
 {
-    for (int i = 0; i<BezierSegments.length(); i++)
-        BezierSegments[i].Draw(painter, matrix, isStereo);
+    if (!isTrimmed) {
+        for (int i = 0; i<BezierSegments.length(); i++)
+            BezierSegments[i].Draw(painter, matrix, isStereo);
+    } else {
+        QVector<QPoint> indices = getIndices();
+        QVector<QVector4D> points = getPoints();
+        for (int i = 0; i < indices.length(); i++) {
+            QVector4D q1 = points[indices[i].x()]; //TODO: refactoring -> to function
+            QVector4D q2 = points[indices[i].y()];
+            q1 = matrix*q1;
+            q2 = matrix*q2;
+            if (q1.z() <= -Constants::Rpersp && q2.z() <= -Constants::Rpersp) {
+               continue;
+            }
+            if (q1.z() <= -Constants::Rpersp && q2.z() > -Constants::Rpersp) {
+                QVector4D dir = q1-q2;
+                QVector4D newq = dir * (-Constants::Rpersp+1-q2.z())/dir.z();
+                q1 = q2 + newq; //watch not to change w parameter while adding newq
+            } else if (q1.z() > -Constants::Rpersp && q2.z() <= -Constants::Rpersp) {
+                QVector4D dir = q2-q1;
+                QVector4D newq = dir * (-Constants::Rpersp+1-q1.z())/dir.z();
+                q2 = q1 + newq;
+            }
+            if (q1.z() > -Constants::Rpersp && q2.z() > -Constants::Rpersp) {
+                if (isStereo) {
+                    QVector4D L1  = Constants::stereoLMatrix*q1;
+                    QVector4D L2  = Constants::stereoLMatrix*q2;
+                    QVector4D R1  = Constants::stereoRMatrix*q1;
+                    QVector4D R2  = Constants::stereoRMatrix*q2;
+                    L1 = L1/L1.w();
+                    L2 = L2/L2.w();
+                    R1 = R1/R1.w();
+                    R2 = R2/R2.w();
+                    painter.setCompositionMode(QPainter::CompositionMode_Plus);
+                    painter.setPen(LRedColor);
+                    painter.drawLine(L1.x(),L1.y(),L2.x(),L2.y());
+                    painter.setPen(RBlueColor);
+                    painter.drawLine(R1.x(),R1.y(),R2.x(),R2.y());
+                }
+                else {
+                    painter.setPen(Color);
+                    q1 = Constants::perspectiveMatrix*q1;
+                    q2 = Constants::perspectiveMatrix*q2;
+                    q1 = q1/q1.w();
+                    q2 = q2/q2.w();
+                    painter.drawLine(q1.x(),q1.y(),q2.x(),q2.y());
+                }
+            }
+        }
+    }
 }
 
 void BSplinePlane::DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo)
@@ -507,4 +589,64 @@ QList<Marker*> BSplinePlane::getMarkers()
         m.append(&markers[i]);
     return m;*/
     return markers;
+}
+
+double BSplinePlane::GetAngle(QPointF pivot, QPointF source, QPointF dest)
+{
+    QPointF s = QPointF(source.x() - pivot.x(), source.y() - pivot.y());
+    QPointF d = QPointF(dest.x() - pivot.x(), dest.y() - pivot.y());
+
+    float dotProduct = s.x() * d.x() + s.y() * d.y();
+    float crossProduct = s.x() * d.y() - s.y() * d.x();
+
+    return atan2(crossProduct, dotProduct);
+}
+
+bool BSplinePlane::IsEnclosed(float u, float v, QVector<QVector4D> polygon, bool isPatch1)
+{
+    double det = 0;
+    double totalAngle = 0;
+    float epsilon = 0.01f;
+    // If subject it's on polygon edge, it's inside of polygon.
+    for(int i = 0; i < polygon.count(); i++)
+    {
+        QVector4D from = polygon[i];
+        QVector4D to = polygon[(i + 1) % polygon.count()];
+
+        if(isPatch1) {
+            /*det = from.x() * to.y() + to.x() * v + u * from.y() - u * to.y() - from.x() * v - to.x() * from.y();
+            if(det == 0)
+            {
+                if ((fmin(from.x(), to.x()) <= u) && (u <= fmax(from.x(), to.x())) &&
+                    (fmin(from.y(), to.y()) <= v) && (v <= fmax(from.y(), to.y())))
+                    return (side)? true : false;
+            }*/
+            totalAngle = GetAngle(QPointF(u,v), QPointF(polygon[polygon.count() - 1].x(), polygon[polygon.count() - 1].y()), QPointF(polygon[0].x(), polygon[0].y()));
+            for (int i = 0; i < polygon.count() - 1; i++)
+                totalAngle += GetAngle(QPointF(u,v), QPointF(polygon[i].x(), polygon[i].y()), QPointF(polygon[i + 1].x(), polygon[i + 1].y()));
+        }
+        else {
+            /*det = from.z() * to.w() + to.z() * v + u * from.w() - u * to.w() - from.z() * v - to.z() * from.w();
+            if(det == 0)
+            {
+                if ((fmin(from.z(), to.z()) <= u) && (u <= fmax(from.z(), to.z())) &&
+                    (fmin(from.w(), to.w()) <= v) && (v <= fmax(from.w(), to.w())))
+                    return (side)? true : false;
+            }*/
+            totalAngle = GetAngle(QPointF(u,v), QPointF(polygon[polygon.count() - 1].z(), polygon[polygon.count() - 1].w()), QPointF(polygon[0].z(), polygon[0].w()));
+            for (int i = 0; i < polygon.count() - 1; i++)
+                totalAngle += GetAngle(QPointF(u,v), QPointF(polygon[i].z(), polygon[i].w()), QPointF(polygon[i + 1].z(), polygon[i + 1].w()));
+        }
+
+    }
+
+
+    bool condition;
+    side? condition = (fabs(totalAngle) < epsilon) : condition = (fabs(totalAngle) >= epsilon);
+
+    if (condition)
+        return false;
+    else
+        return true;
+    //return !totalAngle.EpsilonEquals(0);
 }
