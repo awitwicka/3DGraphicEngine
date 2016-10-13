@@ -41,6 +41,7 @@ Intersection::Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *pat
     this->patch2 = patch2;
     this->step = step;
 
+    Color = Qt::red;
     CalculateIntersection(patch2, start, patch1);
 }
 
@@ -66,13 +67,13 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     UVPointData point1 = FindClosesPointOnSurface(start->point, patch1, 0.01);
     UVPointData point2 = FindClosesPointOnSurface(start->point, patch2, 0.01);
 
-    //tmp
-    /*pointsCurve.append(start->point);
+    //show closest point on the surface
+    pointsCurve.append(start->point);
     pointsCurve.append(point1.position);
     pointsCurve.append(start->point);
     pointsCurve.append(point2.position);
     indicesCurve.append(QPoint(0, 1));
-    indicesCurve.append(QPoint(2, 3));*/
+    indicesCurve.append(QPoint(2, 3));
 
 
     //Gradient descend method - finding first intersection point
@@ -111,8 +112,8 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
                 count1++;
             }
             //check if made a full circle
-            if (turn == 1 && count1>0 && fabs(x_optimal.x()-point.x())<epsilon && fabs(x_optimal.y()-point.y())<epsilon && iter>10) //add direction/gradient check
-                turn = 0;
+            //if (turn == 1 && count1>0 && fabs(x_optimal.x()-point.x())<epsilon && fabs(x_optimal.y()-point.y())<epsilon && iter>10) //add direction/gradient check
+            //    turn = 0;
         }
         else if (!patch2->isPlane) {
             if (point.z() < 0.0f) {
@@ -124,8 +125,8 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
                 count2++;
             }
             //check if made a full circle
-            if (turn == 1 && count2>0 && fabs(x_optimal.z()-point.z())<e && fabs(x_optimal.w()-point.w())<e && iter>10) //add direction/gradient check
-                turn = 0;
+            //if (turn == 1 && count2>0 && fabs(x_optimal.z()-point.z())<e && fabs(x_optimal.w()-point.w())<e && iter>10) //add direction/gradient check
+            //    turn = 0;
         }
 
         //change turn status
@@ -369,27 +370,6 @@ QVector4D Intersection::NewtonNextPoint(double e, QVector4D startPoint, CADSplin
     QVector3D g0 = QVector3D(patch1->ComputePos(startPoint.x(), startPoint.y())); //u1 v1
     QVector3D h0 = QVector3D(patch2->ComputePos(startPoint.z(), startPoint.w())); //u2 v2
 
-    /*QVector3D gdvu0 = QVector3D(patch1->ComputeDvu(startPoint.x(), startPoint.y())); //u1' v1'
-    QVector3D gduv0 = QVector3D(patch1->ComputeDuv(startPoint.x(), startPoint.y())); //u1' v1'
-    QVector3D gduu0 = QVector3D(patch1->ComputeDuu(startPoint.x(), startPoint.y())); //u1'' v1
-    QVector3D gdvv0 = QVector3D(patch1->ComputeDvv(startPoint.x(), startPoint.y())); //u1 v1''
-    //h0 start
-    QVector3D hdvu0 = QVector3D(patch2->ComputeDvu(startPoint.z(), startPoint.w())); //u2' v2'
-    QVector3D hduv0 = QVector3D(patch2->ComputeDuv(startPoint.z(), startPoint.w())); //u2' v2'
-    QVector3D hduu0 = QVector3D(patch2->ComputeDuu(startPoint.z(), startPoint.w())); //u2'' v2
-    QVector3D hdvv0 = QVector3D(patch2->ComputeDvv(startPoint.z(), startPoint.w())); //u2 v2''*/
-
-    //derivative of dir
-    //ng.y*nh.z - ng.z*nh.y -> -> cross(nh, cross(gu, gv)) -> cross(nh, cross(guu, gv) + cross(gu, gvu))
-    /*QVector3D dirU1 = QVector3D::crossProduct(Nh, (QVector3D::crossProduct(gduu0, gdv0) + QVector3D::crossProduct(gdu0,gdvu0)));
-    QVector3D dirV1 = QVector3D::crossProduct(Nh, (QVector3D::crossProduct(gduv0, gdv0) + QVector3D::crossProduct(gdu0,gdvv0)));
-    QVector3D dirU2 = QVector3D::crossProduct(Ng, (QVector3D::crossProduct(hduu0, hdv0) + QVector3D::crossProduct(hdu0,hdvu0)));
-    QVector3D dirV2 = QVector3D::crossProduct(Ng, (QVector3D::crossProduct(hduv0, hdv0) + QVector3D::crossProduct(hdu0,hdvv0)));
-    dirU1 *= turn;
-    dirV1 *= turn;
-    dirU2 *= turn;
-    dirV2 *= turn;*/
-
     QVector3D dirU1 = QVector3D(0,0,0);
     QVector3D dirV1 = QVector3D(0,0,0);
     QVector3D dirU2 = QVector3D(0,0,0);
@@ -445,10 +425,9 @@ QVector4D Intersection::NewtonNextPoint(double e, QVector4D startPoint, CADSplin
         H = H.inverted();
         x_new = x - H*d;
         x = x_new;
-        //stopCond = d.length();//(x_new - x).length();
-    //} while (stopCond > e);
-
-    }while(i++ < max_iter);
+        stopCond = (x_new - x).length();
+    } while (stopCond > e);
+    //}while(i++ < max_iter);
     return x;
 }
 
