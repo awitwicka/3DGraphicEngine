@@ -44,6 +44,11 @@ public:
     void DrawPolygon(QPainter &painter, QMatrix4x4 matrix, bool isStereo);
     void Clear();
     void ReplaceMarker(Marker *toReplace, Marker *replaceWith);
+
+    QVector4D CubicBernsteinVector(float t);
+    QVector4D CubicBernsteinDerivative(float t);
+    QVector4D CubicBernsteinSecondDerivative(float t);
+
     QVector4D ComputePos(float u, float v);
     QVector4D ComputeDu(float u, float v);
     QVector4D ComputeDv(float u, float v);
@@ -59,6 +64,7 @@ public:
     virtual QVector<QPoint> getIndices() const;
     virtual void setIndices(const QVector<QPoint> &value);
     QList<Marker*> getMarkers();
+    void SetControlPoints(QMatrix4x4 &controlPointsY, QMatrix4x4 &controlPointsZ, QMatrix4x4 &controlPointsW, QMatrix4x4 &controlPointsX, const BicubicSegment* segment);
 };
 
 #endif // BEZIERPLANE_H

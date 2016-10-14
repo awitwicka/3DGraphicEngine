@@ -229,46 +229,226 @@ QList<int> BezierPlane::ConvertUVtoLocal(float &u, float &v)
 }
 
 
+void BezierPlane::SetControlPoints(QMatrix4x4 &controlPointsY, QMatrix4x4 &controlPointsZ, QMatrix4x4 &controlPointsW, QMatrix4x4 &controlPointsX, const BicubicSegment* segment)
+{
+    controlPointsX.setRow(0,QVector4D(segment->bezierMarkers[0][0].point.x(), segment->bezierMarkers[0][1].point.x(), segment->bezierMarkers[0][2].point.x(), segment->bezierMarkers[0][3].point.x()));
+    controlPointsX.setRow(1,QVector4D(segment->bezierMarkers[1][0].point.x(), segment->bezierMarkers[1][1].point.x(), segment->bezierMarkers[1][2].point.x(), segment->bezierMarkers[1][3].point.x()));
+    controlPointsX.setRow(2,QVector4D(segment->bezierMarkers[2][0].point.x(), segment->bezierMarkers[2][1].point.x(), segment->bezierMarkers[2][2].point.x(), segment->bezierMarkers[2][3].point.x()));
+    controlPointsX.setRow(3,QVector4D(segment->bezierMarkers[3][0].point.x(), segment->bezierMarkers[3][1].point.x(), segment->bezierMarkers[3][2].point.x(), segment->bezierMarkers[3][3].point.x()));
+
+    controlPointsY.setRow(0,QVector4D(segment->bezierMarkers[0][0].point.y(), segment->bezierMarkers[0][1].point.y(), segment->bezierMarkers[0][2].point.y(), segment->bezierMarkers[0][3].point.y()));
+    controlPointsY.setRow(1,QVector4D(segment->bezierMarkers[1][0].point.y(), segment->bezierMarkers[1][1].point.y(), segment->bezierMarkers[1][2].point.y(), segment->bezierMarkers[1][3].point.y()));
+    controlPointsY.setRow(2,QVector4D(segment->bezierMarkers[2][0].point.y(), segment->bezierMarkers[2][1].point.y(), segment->bezierMarkers[2][2].point.y(), segment->bezierMarkers[2][3].point.y()));
+    controlPointsY.setRow(3,QVector4D(segment->bezierMarkers[3][0].point.y(), segment->bezierMarkers[3][1].point.y(), segment->bezierMarkers[3][2].point.y(), segment->bezierMarkers[3][3].point.y()));
+
+
+    controlPointsZ.setRow(0,QVector4D(segment->bezierMarkers[0][0].point.z(), segment->bezierMarkers[0][1].point.z(), segment->bezierMarkers[0][2].point.z(), segment->bezierMarkers[0][3].point.z()));
+    controlPointsZ.setRow(1,QVector4D(segment->bezierMarkers[1][0].point.z(), segment->bezierMarkers[1][1].point.z(), segment->bezierMarkers[1][2].point.z(), segment->bezierMarkers[1][3].point.z()));
+    controlPointsZ.setRow(2,QVector4D(segment->bezierMarkers[2][0].point.z(), segment->bezierMarkers[2][1].point.z(), segment->bezierMarkers[2][2].point.z(), segment->bezierMarkers[2][3].point.z()));
+    controlPointsZ.setRow(3,QVector4D(segment->bezierMarkers[3][0].point.z(), segment->bezierMarkers[3][1].point.z(), segment->bezierMarkers[3][2].point.z(), segment->bezierMarkers[3][3].point.z()));
+
+
+    controlPointsW.setRow(0,QVector4D(segment->bezierMarkers[0][0].point.w(), segment->bezierMarkers[0][1].point.w(), segment->bezierMarkers[0][2].point.w(), segment->bezierMarkers[0][3].point.w()));
+    controlPointsW.setRow(1,QVector4D(segment->bezierMarkers[1][0].point.w(), segment->bezierMarkers[1][1].point.w(), segment->bezierMarkers[1][2].point.w(), segment->bezierMarkers[1][3].point.w()));
+    controlPointsW.setRow(2,QVector4D(segment->bezierMarkers[2][0].point.w(), segment->bezierMarkers[2][1].point.w(), segment->bezierMarkers[2][2].point.w(), segment->bezierMarkers[2][3].point.w()));
+    controlPointsW.setRow(3,QVector4D(segment->bezierMarkers[3][0].point.w(), segment->bezierMarkers[3][1].point.w(), segment->bezierMarkers[3][2].point.w(), segment->bezierMarkers[3][3].point.w()));
+}
+
 QVector4D BezierPlane::ComputePos(float u, float v)
 {
    QList<int> indexXY = ConvertUVtoLocal(u, v);
-   return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierPoint(u, v);
+   //return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierPoint(u, v);
+   QVector4D Bu = CubicBernsteinVector(u);
+   QVector4D Bv = CubicBernsteinVector(v);
+
+   const BicubicSegment* segment = &BezierSegments[indexXY[0]+(indexXY[1]*X)];
+
+   QMatrix4x4 controlPointsX;
+   QMatrix4x4 controlPointsY;
+   QMatrix4x4 controlPointsZ;
+   QMatrix4x4 controlPointsW;
+
+   SetControlPoints(controlPointsY, controlPointsZ, controlPointsW, controlPointsX, segment);
+
+   QVector4D resX = Bu * controlPointsX * Bv;
+   float xVal = resX.x() + resX.y() + resX.z() + resX.w();
+   QVector4D resY = Bu * controlPointsY * Bv;
+   float yVal = resY.x() + resY.y() + resY.z() + resY.w();
+   QVector4D resZ = Bu * controlPointsZ * Bv;
+   float zVal = resZ.x() + resZ.y() + resZ.z() + resZ.w();
+   QVector4D resW = Bu * controlPointsW * Bv;
+   float wVal = resW.x() + resW.y() + resW.z() + resW.w();
+
+   return QVector4D(xVal,yVal,zVal,wVal);
+
 }
 
 QVector4D BezierPlane::ComputeDu(float u, float v)
 {
     QList<int> indexXY = ConvertUVtoLocal(u, v);
-    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuPoint(u, v);
+    //return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuPoint(u, v);
+    QVector4D Bu = CubicBernsteinDerivative(u);
+    QVector4D Bv = CubicBernsteinVector(v);
+
+    const BicubicSegment* segment = &BezierSegments[indexXY[0]+(indexXY[1]*X)];
+
+    QMatrix4x4 controlPointsX;
+    QMatrix4x4 controlPointsY;
+    QMatrix4x4 controlPointsZ;
+    QMatrix4x4 controlPointsW;
+
+    SetControlPoints(controlPointsY, controlPointsZ, controlPointsW, controlPointsX, segment);
+
+    QVector4D resX = Bu * controlPointsX * Bv;
+    float xVal = resX.x() + resX.y() + resX.z() + resX.w();
+    QVector4D resY = Bu * controlPointsY * Bv;
+    float yVal = resY.x() + resY.y() + resY.z() + resY.w();
+    QVector4D resZ = Bu * controlPointsZ * Bv;
+    float zVal = resZ.x() + resZ.y() + resZ.z() + resZ.w();
+    QVector4D resW = Bu * controlPointsW * Bv;
+    float wVal = resW.x() + resW.y() + resW.z() + resW.w();
+
+    return QVector4D(xVal,yVal,zVal,wVal);
 }
 
 QVector4D BezierPlane::ComputeDv(float u, float v)
 {
     QList<int> indexXY = ConvertUVtoLocal(u, v);
-    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvPoint(u, v);
+    //return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvPoint(u, v);
+    QVector4D Bu = CubicBernsteinVector(u);
+    QVector4D Bv = CubicBernsteinDerivative(v);
+
+    const BicubicSegment* segment = &BezierSegments[indexXY[0]+(indexXY[1]*X)];
+
+    QMatrix4x4 controlPointsX;
+    QMatrix4x4 controlPointsY;
+    QMatrix4x4 controlPointsZ;
+    QMatrix4x4 controlPointsW;
+
+    SetControlPoints(controlPointsY, controlPointsZ, controlPointsW, controlPointsX, segment);
+
+    QVector4D resX = Bu * controlPointsX * Bv;
+    float xVal = resX.x() + resX.y() + resX.z() + resX.w();
+    QVector4D resY = Bu * controlPointsY * Bv;
+    float yVal = resY.x() + resY.y() + resY.z() + resY.w();
+    QVector4D resZ = Bu * controlPointsZ * Bv;
+    float zVal = resZ.x() + resZ.y() + resZ.z() + resZ.w();
+    QVector4D resW = Bu * controlPointsW * Bv;
+    float wVal = resW.x() + resW.y() + resW.z() + resW.w();
+
+    return QVector4D(xVal,yVal,zVal,wVal);
 }
 
 QVector4D BezierPlane::ComputeDuv(float u, float v)
 {
     QList<int> indexXY = ConvertUVtoLocal(u, v);
-    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuvPoint(u, v);
+    //return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuvPoint(u, v);
+    QVector4D Bu = CubicBernsteinDerivative(u);
+    QVector4D Bv = CubicBernsteinDerivative(v);
+
+    const BicubicSegment* segment = &BezierSegments[indexXY[0]+(indexXY[1]*X)];
+
+    QMatrix4x4 controlPointsX;
+    QMatrix4x4 controlPointsY;
+    QMatrix4x4 controlPointsZ;
+    QMatrix4x4 controlPointsW;
+
+    SetControlPoints(controlPointsY, controlPointsZ, controlPointsW, controlPointsX, segment);
+
+    QVector4D resX = Bu * controlPointsX * Bv;
+    float xVal = resX.x() + resX.y() + resX.z() + resX.w();
+    QVector4D resY = Bu * controlPointsY * Bv;
+    float yVal = resY.x() + resY.y() + resY.z() + resY.w();
+    QVector4D resZ = Bu * controlPointsZ * Bv;
+    float zVal = resZ.x() + resZ.y() + resZ.z() + resZ.w();
+    QVector4D resW = Bu * controlPointsW * Bv;
+    float wVal = resW.x() + resW.y() + resW.z() + resW.w();
+
+    return QVector4D(xVal,yVal,zVal,wVal);
 }
 
 QVector4D BezierPlane::ComputeDvu(float u, float v)
 {
     QList<int> indexXY = ConvertUVtoLocal(u, v);
-    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvuPoint(u, v);
+    //return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvuPoint(u, v);
+    QVector4D Bu = CubicBernsteinDerivative(u);
+    QVector4D Bv = CubicBernsteinDerivative(v);
+
+    const BicubicSegment* segment = &BezierSegments[indexXY[0]+(indexXY[1]*X)];
+
+    QMatrix4x4 controlPointsX;
+    QMatrix4x4 controlPointsY;
+    QMatrix4x4 controlPointsZ;
+    QMatrix4x4 controlPointsW;
+
+    SetControlPoints(controlPointsY, controlPointsZ, controlPointsW, controlPointsX, segment);
+
+    QVector4D resX = Bu * controlPointsX * Bv;
+    float xVal = resX.x() + resX.y() + resX.z() + resX.w();
+    QVector4D resY = Bu * controlPointsY * Bv;
+    float yVal = resY.x() + resY.y() + resY.z() + resY.w();
+    QVector4D resZ = Bu * controlPointsZ * Bv;
+    float zVal = resZ.x() + resZ.y() + resZ.z() + resZ.w();
+    QVector4D resW = Bu * controlPointsW * Bv;
+    float wVal = resW.x() + resW.y() + resW.z() + resW.w();
+
+    return QVector4D(xVal,yVal,zVal,wVal);
 }
 
 QVector4D BezierPlane::ComputeDuu(float u, float v)
 {
     QList<int> indexXY = ConvertUVtoLocal(u, v);
-    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuuPoint(u, v);
+    //return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDuuPoint(u, v);
+    QVector4D Bu = CubicBernsteinSecondDerivative(u);
+    QVector4D Bv = CubicBernsteinVector(v);
+
+    const BicubicSegment* segment = &BezierSegments[indexXY[0]+(indexXY[1]*X)];
+
+    QMatrix4x4 controlPointsX;
+    QMatrix4x4 controlPointsY;
+    QMatrix4x4 controlPointsZ;
+    QMatrix4x4 controlPointsW;
+
+    SetControlPoints(controlPointsY, controlPointsZ, controlPointsW, controlPointsX, segment);
+
+    QVector4D resX = Bu * controlPointsX * Bv;
+    float xVal = resX.x() + resX.y() + resX.z() + resX.w();
+    QVector4D resY = Bu * controlPointsY * Bv;
+    float yVal = resY.x() + resY.y() + resY.z() + resY.w();
+    QVector4D resZ = Bu * controlPointsZ * Bv;
+    float zVal = resZ.x() + resZ.y() + resZ.z() + resZ.w();
+    QVector4D resW = Bu * controlPointsW * Bv;
+    float wVal = resW.x() + resW.y() + resW.z() + resW.w();
+
+    return QVector4D(xVal,yVal,zVal,wVal);
 }
 
 QVector4D BezierPlane::ComputeDvv(float u, float v)
 {
     QList<int> indexXY = ConvertUVtoLocal(u, v);
-    return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvvPoint(u, v);
+    //return BezierSegments[indexXY[0]+(indexXY[1]*X)].getBezierDvvPoint(u, v);
+    QVector4D Bu = CubicBernsteinVector(u);
+    QVector4D Bv = CubicBernsteinSecondDerivative(v);
+
+    const BicubicSegment* segment = &BezierSegments[indexXY[0]+(indexXY[1]*X)];
+
+    QMatrix4x4 controlPointsX;
+    QMatrix4x4 controlPointsY;
+    QMatrix4x4 controlPointsZ;
+    QMatrix4x4 controlPointsW;
+
+    SetControlPoints(controlPointsY, controlPointsZ, controlPointsW, controlPointsX, segment);
+
+    QVector4D resX = Bu * controlPointsX * Bv;
+    float xVal = resX.x() + resX.y() + resX.z() + resX.w();
+    QVector4D resY = Bu * controlPointsY * Bv;
+    float yVal = resY.x() + resY.y() + resY.z() + resY.w();
+    QVector4D resZ = Bu * controlPointsZ * Bv;
+    float zVal = resZ.x() + resZ.y() + resZ.z() + resZ.w();
+    QVector4D resW = Bu * controlPointsW * Bv;
+    float wVal = resW.x() + resW.y() + resW.z() + resW.w();
+
+    return QVector4D(xVal,yVal,zVal,wVal);
 }
 
 QVector<QPoint> BezierPlane::getIndices() const
@@ -298,4 +478,37 @@ QList<Marker*> BezierPlane::getMarkers()
         m.append(&markers[i]);
     return m;*/
     return markers;
+}
+
+QVector4D BezierPlane::CubicBernsteinVector(float t){
+    float t2 = t*t;
+    float t3 = t*t*t;
+
+    float B0 = 1 - 3*t + 3*t2 - t3;
+    float B1 = 3*t - 6*t2 + 3*t3;
+    float B2 = 3*t2 - 3*t3;
+    float B3 = t3;
+
+    return QVector4D(B0, B1, B2, B3);
+}
+
+QVector4D BezierPlane::CubicBernsteinDerivative(float t){
+    float t2 = t*t;
+
+    float B0 = -3 + 6*t - 3*t2;
+    float B1 = 3 - 12*t + 9*t2;
+    float B2 = 6*t - 9*t2;
+    float B3 = 3*t2;
+
+    return QVector4D(B0, B1, B2, B3);
+}
+
+QVector4D BezierPlane::CubicBernsteinSecondDerivative(float t){
+
+    float B0 = 6 - 6*t;
+    float B1 = -12 + 18*t;
+    float B2 = 6 - 18*t;
+    float B3 = 6*t;
+
+    return QVector4D(B0, B1, B2, B3);
 }
