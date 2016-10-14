@@ -199,7 +199,7 @@ void BSplinePlane::InitializeSpline(QMatrix4x4 matrix)
         }
         }
     }
-    
+    bool isBreak = false;
     for (int i = 0; i<BezierSegMarkers.length(); i++) {
         if (!isTrimmed)
             BezierSegments.append(BicubicSegment(&BezierSegMarkers[i], U, V, matrix, false));
@@ -211,10 +211,13 @@ void BSplinePlane::InitializeSpline(QMatrix4x4 matrix)
             for (int u = 0; u < U+1; u++) {
                 for (int i = 0; i <= linesNo; i++) {
                     if (IsEnclosed(u/(float)U, i/(float)linesNo, trimData, isPatch1)) {
+                        //if (isBreak) count++;
                         points.append(ComputePos(u/(float)U, i/(float)linesNo));
                         indices.append(QPoint(count, count+1));
                         count++;
-                    }
+                        //isBreak = false;
+                    } //else
+                        //isBreak = true;
                 }
                 if (indices.count()>0)
                     indices.removeLast();
@@ -223,10 +226,13 @@ void BSplinePlane::InitializeSpline(QMatrix4x4 matrix)
             for (int v = 0; v < V+1; v++) {
                 for (int i = 0; i <= linesNo; i++) {
                     if (IsEnclosed(i/(float)linesNo, v/(float)V, trimData, isPatch1)) {
+                        //if (isBreak) count++;
                         points.append(ComputePos(i/(float)linesNo, v/(float)V));
                         indices.append(QPoint(count, count+1));
                         count++;
-                    }
+                        //isBreak = false;
+                    } //else
+                        //isBreak = true;
                 }
                 if (indices.count()>0)
                     indices.removeLast();

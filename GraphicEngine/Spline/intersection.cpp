@@ -1,5 +1,7 @@
 #include "intersection.h"
 
+#include <Patch/bezierplane.h>
+
 int Intersection::id = 0;
 
 Intersection::Intersection()
@@ -60,7 +62,7 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     //step accuracy
     double e = 0.00000001;
     double a = 0.0005; //step'
-    double epsilon = 0.04f;
+    double epsilon = 0.000001f;
     int count1 = 0;
     int count2 = 0;
 
@@ -86,9 +88,12 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     QVector4D point = x_optimal;
     QVector4D nextStep;
     do{
-        nextStep = GradientStep(e, a, point, patch1, patch2);
-        point = GradientDistanceMinimalization(e, a, nextStep, patch1, patch2);
-        //point = NewtonNextPoint(e, point, patch1, patch2);
+        if (dynamic_cast<BezierPlane*>(patch1)) {
+            nextStep = GradientStep(e, a, point, patch1, patch2);
+            point = GradientDistanceMinimalization(e, a, nextStep, patch1, patch2);
+        } else {
+            point = NewtonNextPoint(e, point, patch1, patch2);
+        }
         //point = GradientNextIntersection(e, a, point, patch1, patch2);
 
 
@@ -125,7 +130,7 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
                 count2++;
             }
             //check if made a full circle
-            if (turn == 1 && count2>0 && fabs(x_optimal.z()-point.z())<e && fabs(x_optimal.w()-point.w())<e && iter>10) //add direction/gradient check
+            if (turn == 1 && count2>0 && fabs(x_optimal.z()-point.z())<epsilon && fabs(x_optimal.w()-point.w())<epsilon && iter>10) //add direction/gradient check
                 turn = 0;
         }
 
@@ -328,7 +333,7 @@ Intersection::UVPointData Intersection::FindClosesPointOnSurface(QVector4D Point
     float Uval;
     float Vval;
 
-    int count = indicesCurve.length()/2; //+1 jak chcemy miec przerwe
+    //int count = indicesCurve.length()/2; //+1 jak chcemy miec przerwe
     //TODO: optimize
     float tmpDist;
     QVector4D tmpPos;
@@ -346,12 +351,12 @@ Intersection::UVPointData Intersection::FindClosesPointOnSurface(QVector4D Point
                 Vval = v;
                 pos = tmpPos;
            }
-           pointsCurve.append(tmpPos);
-           indicesCurve.append(QPoint(count, count+1));
-           count +=1;
+           //pointsCurve.append(tmpPos);
+           //indicesCurve.append(QPoint(count, count+1));
+           //count +=1;
         }
     }
-    pointsCurve.append(tmpPos);
+    //pointsCurve.append(tmpPos);
     return UVPointData(pos, Uval, Vval);
 }
 
