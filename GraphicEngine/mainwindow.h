@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "cadloader.h"
+#include "path3c.h"
 #include "widget.h"
 #include <QListWidget>
 #include <QMainWindow>
@@ -16,6 +17,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     CADLoader loader;
+    Path3C path;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -116,6 +118,8 @@ private slots:
     void on_pushButton_p2first_clicked();
 
     void on_pushButton_p2sec_clicked();
+
+    void on_pushButton_GeneratePath_clicked();
 
 private:
     Ui::MainWindow *ui;

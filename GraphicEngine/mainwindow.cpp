@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     w->tree = t;
     isPushBezier = false;
     loader = CADLoader(w);
+    path = Path3C(w);
 }
 
 MainWindow::~MainWindow()
@@ -1132,4 +1133,9 @@ void MainWindow::on_pushButton_p2sec_clicked()
     }
     w->UpdateSceneElements();
     w->update();
+}
+
+void MainWindow::on_pushButton_GeneratePath_clicked()
+{
+    path.GeneratePath();
 }

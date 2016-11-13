@@ -700,6 +700,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_GeneratePath">
+         <property name="text">
+          <string>Generate Path</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -726,7 +733,7 @@
      <x>0</x>
      <y>0</y>
      <width>1666</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLoll">

@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     cadloader.cpp \
     Patch/gapfilling.cpp \
     Patch/gregorypatch.cpp \
-    Spline/intersection.cpp
+    Spline/intersection.cpp \
+    path3c.cpp
 
 HEADERS  += mainwindow.h \
     widget.h \
@@ -57,6 +58,7 @@ HEADERS  += mainwindow.h \
     cadloader.h \
     Patch/gapfilling.h \
     Patch/gregorypatch.h \
-    Spline/intersection.h
+    Spline/intersection.h \
+    path3c.h
 
 FORMS    += mainwindow.ui
