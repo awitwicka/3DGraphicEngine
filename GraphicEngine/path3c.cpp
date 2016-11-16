@@ -2,6 +2,11 @@
 
 #include <QFile>
 
+Path3C::Path3C()
+{
+
+}
+
 Path3C::Path3C(Widget *context)
 {
     this->context = context;
@@ -20,7 +25,6 @@ void Path3C::GeneratePath()
     //
     //1500*2 x 1500*2
     QVector4D tmpPos;
-    float offset = 150/2.0f;
     for (int i = 0; i< context->SplinePatches.length(); i++) {
 
     for (float u = 0; u <= 1; u+=sampling) {
@@ -35,7 +39,8 @@ void Path3C::GeneratePath()
     }
 
     }
-    context->SplinePatches[0]->ComputePos(0,0);
+
+    SavePath();
 }
 
 void Path3C::SavePath()
@@ -46,13 +51,25 @@ void Path3C::SavePath()
     if ( file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text) )
     {
         QTextStream stream( &file );
-        stream << "" << endl;
+
+        int start, end, tmp;
+        int count = 3;
+        start = 150;
+        end = 0;
+        //TODO: move cutter to start position
+        for (int y = 0; y < 150; y++) {
+            //swap
+            tmp = start;
+            start = end;
+            end = tmp;
+
+            for (int x = start; x < end; x++) {
+                stream << "N" << count << "G01" << "X" << QString::number(x-offset, 'f', 3) << "Y" << QString::number(y-offset, 'f', 3) << "Z" << QString::number(heightMap[x][y], 'f', 3) << endl;
+                count++;
+            }
+        }
     } else {
         qWarning() << "Failed to open" << file.fileName() << "for write:" << file.errorString();
     }
 }
 
-Path3C::Path3C()
-{
-
-}

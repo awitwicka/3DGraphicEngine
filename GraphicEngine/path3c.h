@@ -7,15 +7,17 @@
 
 class Path3C
 {
+    float offset = 150/2.0f;
+
     Widget *context;
     void SavePath();
 public:
     //QVector3D materialDimentions = QVector3D(150, 150, 50);
 
     //scale of the model on output (ex. 1:20)
-    float scaleFactor = 20;
+    float scaleFactor = 10;
     //accuracy of sampling of parametrisation
-    float sampling = 0.1f;
+    float sampling = 0.01f;
 
     float materialHeight = 50;
     float heightMap[150][150]; //x y
