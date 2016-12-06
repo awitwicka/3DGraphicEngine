@@ -7,20 +7,29 @@
 
 class Path3C
 {
-    float offset = 150/2.0f;
+    //scale of the model on output (ex. 1:6)
+    float scaleFactor = 7.2f;
+    float offsetX = 80.0f;
+    float offsetY = 60.0f;
+    float centering = 150/2.0f;
+
+    //accuracy of sampling of parametrisation
+    float sampling1 = 0.01f;
+    float sampling2 = 0.001f;
+    float sampling3 = 0.0003f;
 
     Widget *context;
     void SavePath();
+    //void ScaleAlongNormals();
+public slots:
+    void doWork();
+    void stop();
 public:
     //QVector3D materialDimentions = QVector3D(150, 150, 50);
 
-    //scale of the model on output (ex. 1:20)
-    float scaleFactor = 10;
-    //accuracy of sampling of parametrisation
-    float sampling = 0.01f;
-
     float materialHeight = 50;
     float heightMap[150][150]; //x y
+    float groundLevelWithCutter = 20 + 8;
     float groundLevel = 20;
     
     Path3C();
@@ -28,6 +37,7 @@ public:
 
     void GeneratePath();
 
+    void PatchSampling(CADSplinePatch* patch, float additionalMat);
 };
 
 #endif // PATH3C_H
