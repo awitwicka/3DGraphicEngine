@@ -55,6 +55,8 @@ public:
 
     Intersection();
     Intersection(QMatrix4x4 matrix, Marker* start, CADSplinePatch *patch1, CADSplinePatch *patch2, float step);
+    //only when loading from file
+    Intersection(QMatrix4x4 matrix, CADSplinePatch *patch1, CADSplinePatch *patch2, QVector<QVector4D> parameters);
     ~Intersection();
 
     void InitializeSpline(QMatrix4x4 matrix);

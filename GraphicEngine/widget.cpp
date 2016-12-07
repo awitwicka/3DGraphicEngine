@@ -63,7 +63,7 @@ void Widget::paintEvent(QPaintEvent *)
                 case 1: //bezier
                     //draw bezier markers
                     for (int j = 0; j < c->bezierMarkers.length(); j++)
-                        c->bezierMarkers[j].Draw(painter, worldMatrix, isStereo); ;
+                        c->bezierMarkers[j].Draw(painter, worldMatrix, isStereo);
                     break;
                 default:
                     break;

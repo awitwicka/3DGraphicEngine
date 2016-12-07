@@ -1,6 +1,7 @@
 #include "cadloader.h"
 #include <Qfile>
 #include <QCoreApplication>
+#include <Spline/intersection.h>
 
 CADLoader::CADLoader()
 {
@@ -67,6 +68,27 @@ void CADLoader::LoadFile()
                     CADMarkerObject* b = new BSInterpolation(ref, context->worldMatrix);
                     context->Splines.append(b);
                 }
+            } else if (l[0] == "INTERS") {
+                QVector<QVector4D> UVparams;
+                CADSplinePatch *patch1;
+                CADSplinePatch *patch2;
+
+                QStringList params = stream.readLine().split(" ");
+                int n = params[0].toInt();
+                for (auto &s : context->SplinePatches) {
+                    if (s->name == params[1])
+                        patch1 = s;
+                    if (s->name == params[2])
+                        patch2 = s;
+                }
+                for (int k = 0; k < n; k++) {
+                    QStringList p = stream.readLine().split(" ");
+                    UVparams.push_back(QVector4D(p[0].toInt(), p[1].toInt(), p[2].toInt(), p[3].toInt()));
+                }
+                line = stream.readLine(); //END
+
+                CADMarkerObject* b = new Intersection(context->worldMatrix, patch1, patch2, UVparams);
+                context->Splines.append(b);
 
             /******SURFACES*******/
             } else if (l[0] == "BEZIERSURF" || l[0] == "BSPLINESURF") {
@@ -173,32 +195,6 @@ void CADLoader::SaveFile()
         n+=context->SplinePatches.length();
         stream << n << endl;
 
-        //SPLINES
-        for (int i = 0; i< context->Splines.length(); i++) {
-            QString type = context->Splines[i]->idname.at(0);
-            if(type.at(0) == 'b') { //bezier
-                stream << "BEZIERCURVE" << " " << context->Splines[i]->name << endl;
-                stream << context->Splines[i]->markers.length() << endl;
-                for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
-                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
-                }
-                stream << endl << "END" << endl;
-            } else if(type.at(0) == 'c') { //bspline
-                stream << "BSPLINECURVE" << " " << context->Splines[i]->name << endl;
-                stream << context->Splines[i]->markers.length() << endl;
-                for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
-                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
-                }
-                stream << endl << "END" << endl;
-            } else if (type.at(0) == 's') { //interpolation
-                stream << "INTERP" << " " << context->Splines[i]->name << endl;
-                stream << context->Splines[i]->markers.length() << endl;
-                for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
-                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
-                }
-                stream << endl << "END" << endl;
-            }
-        }
         //SURFACES
         for (int i = 0; i< context->SplinePatches.length(); i++) {
             CADSplinePatch* patch = context->SplinePatches[i];
@@ -224,6 +220,40 @@ void CADLoader::SaveFile()
             }
 
             stream << endl << "END" << endl;
+        }
+        //SPLINES
+        for (int i = 0; i< context->Splines.length(); i++) {
+            QString type = context->Splines[i]->idname.at(0);
+            if(type.at(0) == 'b') { //bezier
+                stream << "BEZIERCURVE" << " " << context->Splines[i]->name << endl;
+                stream << context->Splines[i]->markers.length() << endl;
+                for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
+                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
+                }
+                stream << endl << "END" << endl;
+            } else if(type.at(0) == 'c') { //bspline
+                stream << "BSPLINECURVE" << " " << context->Splines[i]->name << endl;
+                stream << context->Splines[i]->markers.length() << endl;
+                for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
+                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
+                }
+                stream << endl << "END" << endl;
+            } else if (type.at(0) == 's') { //interpolation
+                stream << "INTERP" << " " << context->Splines[i]->name << endl;
+                stream << context->Splines[i]->markers.length() << endl;
+                for(int k = 0; k<context->Splines[i]->markers.length(); k++) {
+                    stream << context->markers.indexOf(*context->Splines[i]->markers[k]) << " ";
+                }
+                stream << endl << "END" << endl;
+            } else if (type.at(0) == 'x') { //intersection
+                stream << "INTERS" << " " << context->Splines[i]->name << endl;
+                Intersection* inter = dynamic_cast<Intersection*>(context->Splines[i]);
+                stream << inter->UVparameters.length() << " " << inter->patch1->name << " " << inter->patch2->name << endl;
+                for(int k = 0; k<inter->UVparameters.length(); k++) {
+                    stream << inter->UVparameters[k].x() << " " << inter->UVparameters[k].y() << " " << inter->UVparameters[k].z() << " " << inter->UVparameters[k].w() << endl;
+                }
+                stream << "END" << endl;
+            }
         }
 
     } else {

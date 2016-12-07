@@ -167,6 +167,35 @@ void Intersection::CalculateIntersection(CADSplinePatch *patch2, Marker* start, 
     window2.show();
 }
 
+
+Intersection::Intersection(QMatrix4x4 matrix, CADSplinePatch *patch1, CADSplinePatch *patch2, QVector<QVector4D> UVparameters)
+{
+    name = QString("Intersection%1").arg(id);
+    idname = QString("x%1").arg(id);
+    id++;
+
+    this->patch1 = patch1;
+    this->patch2 = patch2;
+    this->UVparameters = UVparameters;
+
+    Color = Qt::red;
+    //draw intersection
+    int count = 0;
+    int n = UVparameters.length();
+    for (int i = 0; i<n; i++) {
+        points.append((patch1->ComputePos(UVparameters[i].x(), UVparameters[i].y())
+                       + patch2->ComputePos(UVparameters[i].z(), UVparameters[i].w()))/2);
+        indices.append(QPoint(count, count+1));
+        //series1->append(UVparameters[i].x(), UVparameters[i].y());
+        //series2->append(UVparameters[i].z(), UVparameters[i].w());
+        count++;
+    }
+    indices.removeLast();
+
+    //window1.show();
+    //window2.show();
+}
+
 QVector4D Intersection::GradientDistanceMinimalization(double e, double a, QVector4D x, CADSplinePatch *patch1, CADSplinePatch *patch2)
 {
     //function f(u1v1u2v2) = sqrt((g.x-h.x)^2 + (g.y-h.y)^2 + (g.z-h.z)^2)
