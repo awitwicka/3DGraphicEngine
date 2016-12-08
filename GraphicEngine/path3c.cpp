@@ -4,6 +4,8 @@
 #include <future>
 #include <iostream>
 
+#include <Spline/intersection.h>
+
 Path3C::Path3C()
 {
 
@@ -84,7 +86,11 @@ void Path3C::GenerateSecondPath()
         QVector3D Norm;
         QVector3D dv;
         QVector3D du;
+
+        Intersection* inters;
+        QVector<Intersection*> myIntersections;
         CADSplinePatch* patch;
+        BSplinePlane* b_patch;
         int count = 3;
         float additionalMat = 6;
         bool isFirst = true;
@@ -92,6 +98,13 @@ void Path3C::GenerateSecondPath()
         for (int i = 0; i< context->SplinePatches.length(); i++) {
 
             patch = context->SplinePatches[i];
+            b_patch = dynamic_cast<BSplinePlane*>(patch);
+            for (auto s : context->Splines) {
+                inters = dynamic_cast<Intersection*>(s);
+                if (inters->patch1 == patch || inters->patch2 == patch) //check if not compare by id
+                    myIntersections.push_back(inters);
+            }
+
             bool isEven = 0;
             isFirst = true;
 
@@ -121,6 +134,11 @@ void Path3C::GenerateSecondPath()
                             tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
                         }
                     }
+
+                    //hee function
+                    bool isEnclosed = false;
+                    for (auto inter : myIntersections)
+                    //isEnclosed = isEnclosed && b_patch->IsEnclosed(u, v, myIntersections[0]->UVparameters, true); //check somehow if true or false
 
                     if (tmpPos.x() > groundLevel) {
                         if (isFirst){
