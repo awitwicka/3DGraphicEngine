@@ -83,7 +83,7 @@ void CADLoader::LoadFile()
                 }
                 for (int k = 0; k < n; k++) {
                     QStringList p = stream.readLine().split(" ");
-                    UVparams.push_back(QVector4D(p[0].toInt(), p[1].toInt(), p[2].toInt(), p[3].toInt()));
+                    UVparams.push_back(QVector4D(p[0].toFloat(), p[1].toFloat(), p[2].toFloat(), p[3].toFloat()));
                 }
                 line = stream.readLine(); //END
 

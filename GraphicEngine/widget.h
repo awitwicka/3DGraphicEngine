@@ -15,6 +15,7 @@
 #include "Patch/bezierplane.h"
 #include "Patch/bsplineplane.h"
 #include "Patch/gapfilling.h"
+//#include "Spline/intersection.h"
 //#include "virtualmarker.h"
 
 class Widget : public QWidget

@@ -4,6 +4,7 @@
 #include "widget.h"
 
 #include <QVector3D>
+#include "Spline/intersection.h"
 
 class Path3C
 {
@@ -43,6 +44,7 @@ public:
     void GenerateSecondPath();
 private:
     void Scale(float additionalMat, QVector3D Norm, QVector4D &tmpPos);
+    QVector<QVector2D> GetClosestVparam(QVector<Intersection*> myIntersections, float v, QVector<bool> isPatch1);
 };
 
 #endif // PATH3C_H

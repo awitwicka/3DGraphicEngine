@@ -4,8 +4,6 @@
 #include <future>
 #include <iostream>
 
-#include <Spline/intersection.h>
-
 Path3C::Path3C()
 {
 
@@ -72,6 +70,44 @@ void Path3C::Scale(float additionalMat, QVector3D Norm, QVector4D &tmpPos)
     tmpPos.setY(tmpPos.y() + offsetY);
 }
 
+QVector<QVector2D> Path3C::GetClosestVparam(QVector<Intersection*> myIntersections, float v, QVector<bool> isPatch1)
+{
+    QVector<QVector2D> exclusions;
+    QVector4D tmpUV;
+    float tmpDiffUV;
+    for (int k = 0; k<myIntersections.length(); k++) {
+        if (isPatch1[k] == true) {
+            tmpDiffUV = abs(myIntersections[k]->UVparameters[0].y() - v);
+            tmpUV = myIntersections[k]->UVparameters[0];
+        } else if (isPatch1[k] == false) {
+            tmpDiffUV = myIntersections[k]->UVparameters[0].w() - v;
+            tmpUV = myIntersections[k]->UVparameters[0];
+        }
+        for (int j = 0; j<myIntersections[k]->UVparameters.length(); j++)
+        {
+            if (isPatch1[k] == true) {
+                if (abs((myIntersections[k]->UVparameters[j].y() - v) < tmpDiffUV) ) //v
+                {
+                    tmpDiffUV = myIntersections[k]->UVparameters[j].y() - v;
+                    tmpUV = myIntersections[k]->UVparameters[j];
+                }
+            } else if (isPatch1[k] == false) {
+                if (abs(myIntersections[k]->UVparameters[j].w() - v < tmpDiffUV) ) //v
+                {
+                    tmpDiffUV = myIntersections[k]->UVparameters[j].w() - v;
+                    tmpUV = myIntersections[k]->UVparameters[j];
+                }
+
+            }
+        }
+        if (isPatch1[k] == true)
+            exclusions.push_back(QVector2D(tmpUV.x(), tmpUV.y()));
+        else
+            exclusions.push_back(QVector2D(tmpUV.z(), tmpUV.w()));
+    }
+    return exclusions;
+}
+
 void Path3C::GenerateSecondPath()
 {
     QString path = "E:\\Path2.k12";
@@ -89,6 +125,11 @@ void Path3C::GenerateSecondPath()
 
         Intersection* inters;
         QVector<Intersection*> myIntersections;
+        QVector<bool> isPatch1;
+
+        QVector<QVector2D> exclusions;
+        bool isEnclosed = false;
+
         CADSplinePatch* patch;
         BSplinePlane* b_patch;
         int count = 3;
@@ -101,10 +142,16 @@ void Path3C::GenerateSecondPath()
             b_patch = dynamic_cast<BSplinePlane*>(patch);
             for (auto s : context->Splines) {
                 inters = dynamic_cast<Intersection*>(s);
-                if (inters->patch1 == patch || inters->patch2 == patch) //check if not compare by id
+                if (inters->patch1 == patch) //check if not compare by id
+                {
                     myIntersections.push_back(inters);
+                    isPatch1.push_back(true);
+                } else if (inters->patch2 == patch)
+                {
+                    myIntersections.push_back(inters);
+                    isPatch1.push_back(false);
+                }
             }
-
             bool isEven = 0;
             isFirst = true;
 
@@ -135,12 +182,11 @@ void Path3C::GenerateSecondPath()
                         }
                     }
 
-                    //hee function
-                    bool isEnclosed = false;
-                    for (auto inter : myIntersections)
+                    //finding an intersection point closest to our V -> TODO: check if shouldnt find 2 and make a mean instead
+                    exclusions = GetClosestVparam(myIntersections, v, isPatch1);
                     //isEnclosed = isEnclosed && b_patch->IsEnclosed(u, v, myIntersections[0]->UVparameters, true); //check somehow if true or false
 
-                    if (tmpPos.x() > groundLevel) {
+                    if (tmpPos.x() > groundLevel /*&& u > exclusions[0].x()*/) {
                         if (isFirst){
                             //move to new patch start position
                             stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
