@@ -122,6 +122,9 @@ void Path3C::GenerateSecondPath()
         QVector3D Norm;
         QVector3D dv;
         QVector3D du;
+        QVector<QVector4D> toCheck;
+        QVector4D closestPoint;
+        bool isTrim = false;
 
         Intersection* inters;
         QVector<Intersection*> myIntersections;
@@ -135,8 +138,17 @@ void Path3C::GenerateSecondPath()
         int count = 3;
         float additionalMat = 6;
         bool isFirst = true;
+        bool isFirstTrim = true;
+        bool isLastTrim = false;
+        bool isEven = 0;
+        float e = 0.5; //0.5 mm
 
-        for (int i = 0; i< context->SplinePatches.length(); i++) {
+        for (int i = 0; i< 1/*context->SplinePatches.length()*/; i++) {
+
+            //add point to chek for trimming
+            PatchSamplingRange(toCheck, context->SplinePatches[1], additionalMat, 0, 1, 0, 0.3);//0-0.15
+            PatchSamplingRange(toCheck, context->SplinePatches[1], additionalMat, 0, 1, 0.6, 1);//0.75-1
+            PatchSamplingRange(toCheck, context->SplinePatches[2], additionalMat, 0, 1, 0.7, 1);//0.9-1
 
             patch = context->SplinePatches[i];
             b_patch = dynamic_cast<BSplinePlane*>(patch);
@@ -152,11 +164,12 @@ void Path3C::GenerateSecondPath()
                     isPatch1.push_back(false);
                 }
             }
-            bool isEven = 0;
+
+            isEven = 0;
             isFirst = true;
 
-            for (float v = 0; v <= 1; v+=sampling1) {
-                for (float u = 0; u <= 1; u+=sampling1) {
+            for (float u = 0; u <= 1; u+=sampling1) {
+                for (float v = 0; v <= 1; v+=sampling1) {
 
                     if (isEven) {
                         tmpPos = patch->ComputePos(u, v);
@@ -170,11 +183,11 @@ void Path3C::GenerateSecondPath()
                             tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
                         }
                     } else {
-                        tmpPos = patch->ComputePos(1-u, v);
+                        tmpPos = patch->ComputePos(u, 1-v);
                         if (tmpPos.x() >= 0)
                         {
-                            du = QVector3D(patch->ComputeDu(1-u, v)); //u1' v1
-                            dv = QVector3D(patch->ComputeDv(1-u, v)); //u1 v1'
+                            du = QVector3D(patch->ComputeDu(u, 1-v)); //u1' v1
+                            dv = QVector3D(patch->ComputeDv(u, 1-v)); //u1 v1'
                             Norm = QVector3D::crossProduct(du, dv).normalized();
                             Scale(additionalMat, Norm, tmpPos);
                             //adjust to cutter
@@ -183,19 +196,37 @@ void Path3C::GenerateSecondPath()
                     }
 
                     //finding an intersection point closest to our V -> TODO: check if shouldnt find 2 and make a mean instead
-                    exclusions = GetClosestVparam(myIntersections, v, isPatch1);
+                    //exclusions = GetClosestVparam(myIntersections, v, isPatch1);
                     //isEnclosed = isEnclosed && b_patch->IsEnclosed(u, v, myIntersections[0]->UVparameters, true); //check somehow if true or false
 
+                    isFirstTrim = true;
                     if (tmpPos.x() > groundLevel /*&& u > exclusions[0].x()*/) {
-                        if (isFirst){
-                            //move to new patch start position
+                        //find closest XY
+                        isTrim = false;
+                        for (int j=0; j<toCheck.length(); j++){
+                            if (fabs(toCheck[j].y() - tmpPos.y()) < e && fabs(toCheck[j].z() - tmpPos.z()) < e) {
+                                closestPoint = toCheck[j];
+                                isTrim = true;
+                            }
+                        }
+                        if (!isTrim || closestPoint.x() < tmpPos.x()) {
+                            if (isFirst){
+                                //move to new patch start position
+                                stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+                                count++;
+                                isFirst = false;
+                            }
+                            stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(tmpPos.x(), 'f', 3) << endl;
+                            count++;
+                            Pos = tmpPos;
+                        } else {
+                            if (isFirstTrim) {
+                                qDebug( "not drawing" );
+                                isFirstTrim = false;
+                            }
                             stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
                             count++;
-                            isFirst = false;
                         }
-                        stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(tmpPos.x(), 'f', 3) << endl;
-                        count++;
-                        Pos = tmpPos;
                     }
 
                 }
@@ -242,6 +273,34 @@ void Path3C::PatchSampling(CADSplinePatch* patch, float additionalMat, float i, 
         }
     }
     qDebug( "Bye!" );
+}
+
+void Path3C::PatchSamplingRange(QVector<QVector4D> &result, CADSplinePatch *patch, float additionalMat, float startU, float endU, float startV, float endV)
+{
+    QVector4D tmpPos;
+    QVector3D Norm;
+    QVector3D dv;
+    QVector3D du;
+
+    for (float u = startU; u <= endU; u+=sampling3) {
+        for (float v = startV; v <= endV; v+=sampling3) {
+            tmpPos = patch->ComputePos(u, v);
+
+            //scale along normals (add additional material around the object)
+            du = QVector3D(patch->ComputeDu(u, v)); //u1' v1
+            dv = QVector3D(patch->ComputeDv(u, v)); //u1 v1'
+            Norm = QVector3D::crossProduct(du, dv).normalized();
+            //add additional material
+            tmpPos/=scaleFactor;
+            tmpPos += Norm * (additionalMat);
+
+            tmpPos.setZ(tmpPos.z() + offsetX);
+            tmpPos.setY(tmpPos.y() + offsetY);
+
+            tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+            if(tmpPos.x() >= groundLevel ) result.append(tmpPos);
+        }
+    }
 }
 
 void Path3C::SaveFirstPath()

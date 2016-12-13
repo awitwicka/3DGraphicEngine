@@ -17,12 +17,14 @@ class Path3C
     //accuracy of sampling of parametrisation
     float sampling1 = 0.01f;
     float sampling2 = 0.002f;
-    float sampling3 = 0.0003f;
+    float sampling3 = 0.005f;
 
     Widget *context;
 
     void PatchSampling(CADSplinePatch* patch, float additionalMat, float i, float n);
+    void PatchSamplingRange(QVector<QVector4D> &result, CADSplinePatch* patch, float additionalMat, float startU, float endU, float startV, float endV);
     void SaveFirstPath();
+    //void SavePartialSecPath(float additionalMat, QVector4D Pos, int count, QTextStream stream, float v, bool isFirst, float u, CADSplinePatch* patch, bool isEven);
 
 public slots:
     void doWork();
@@ -42,6 +44,7 @@ public:
     void GeneratePath();
     void GenerateFirstPath();
     void GenerateSecondPath();
+
 private:
     void Scale(float additionalMat, QVector3D Norm, QVector4D &tmpPos);
     QVector<QVector2D> GetClosestVparam(QVector<Intersection*> myIntersections, float v, QVector<bool> isPatch1);
