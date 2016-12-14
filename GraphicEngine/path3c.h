@@ -22,7 +22,7 @@ class Path3C
     Widget *context;
 
     void PatchSampling(CADSplinePatch* patch, float additionalMat, float i, float n);
-    void PatchSamplingRange(QVector<QVector4D> &result, CADSplinePatch* patch, float additionalMat, float startU, float endU, float startV, float endV);
+    void PatchSamplingRange(QVector<QVector4D> *result, CADSplinePatch* patch, float additionalMat, float startU, float endU, float startV, float endV);
     void SaveFirstPath();
     //void SavePartialSecPath(float additionalMat, QVector4D Pos, int count, QTextStream stream, float v, bool isFirst, float u, CADSplinePatch* patch, bool isEven);
 

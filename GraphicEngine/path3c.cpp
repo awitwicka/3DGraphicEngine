@@ -110,7 +110,7 @@ QVector<QVector2D> Path3C::GetClosestVparam(QVector<Intersection*> myIntersectio
 
 void Path3C::GenerateSecondPath()
 {
-    QString path = "E:\\Path2.k12";
+    QString path = "E:\\Path3.k08";
     QFile file( path );
 
     if ( file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text) )
@@ -130,27 +130,44 @@ void Path3C::GenerateSecondPath()
         QVector<Intersection*> myIntersections;
         QVector<bool> isPatch1;
 
-        QVector<QVector2D> exclusions;
-        bool isEnclosed = false;
-
         CADSplinePatch* patch;
         BSplinePlane* b_patch;
         int count = 3;
-        float additionalMat = 6;
+        float additionalMat = 4;
         bool isFirst = true;
-        bool isFirstTrim = true;
-        bool isLastTrim = false;
+        bool isFirstUnderGround = false;
         bool isEven = 0;
         float e = 0.5; //0.5 mm
 
-        for (int i = 0; i< 1/*context->SplinePatches.length()*/; i++) {
+        for (int i = 0; i< 2/*context->SplinePatches.length()*/; i++) {
 
+            toCheck.clear();
+            std::vector<std::future<void>> results;
+            auto start = std::chrono::steady_clock::now();
             //add point to chek for trimming
-            PatchSamplingRange(toCheck, context->SplinePatches[1], additionalMat, 0, 1, 0, 0.3);//0-0.15
-            PatchSamplingRange(toCheck, context->SplinePatches[1], additionalMat, 0, 1, 0.6, 1);//0.75-1
-            PatchSamplingRange(toCheck, context->SplinePatches[2], additionalMat, 0, 1, 0.7, 1);//0.9-1
+            if (i == 0) {
+                results.push_back(std::async(std::launch::async,
+                                             PatchSamplingRange, this, &toCheck, context->SplinePatches[1], additionalMat, 0, 1, 0, 0.3));
+                results.push_back(std::async(std::launch::async,
+                                             PatchSamplingRange, this, &toCheck, context->SplinePatches[1], additionalMat, 0, 1, 0.6, 1));
+                results.push_back(std::async(std::launch::async,
+                                             PatchSamplingRange, this, &toCheck, context->SplinePatches[2], additionalMat, 0, 1, 0.7, 1));
+            } else if (i == 1) {
+                results.push_back(std::async(std::launch::async,
+                                             PatchSamplingRange, this, &toCheck, context->SplinePatches[0], additionalMat, 0.1, 0.6, 0.35, 0.9));
+                results.push_back(std::async(std::launch::async,
+                                             PatchSamplingRange, this, &toCheck, context->SplinePatches[0], additionalMat, 0.1, 0.55, 0, 0.4));
+            }
+            for (auto &e : results) {
+                e.get();
+            }
+            auto end = std::chrono::steady_clock::now();
+            auto diff = end - start;
+            std::cout << "P3<" << i << ">: " << std::chrono::duration <double, std::milli> (diff).count()/1000 << " s" << std::endl;
 
             patch = context->SplinePatches[i];
+
+            //get intersections
             b_patch = dynamic_cast<BSplinePlane*>(patch);
             for (auto s : context->Splines) {
                 inters = dynamic_cast<Intersection*>(s);
@@ -165,7 +182,7 @@ void Path3C::GenerateSecondPath()
                 }
             }
 
-            isEven = 0;
+            isEven = true; //false
             isFirst = true;
 
             for (float u = 0; u <= 1; u+=sampling1) {
@@ -195,12 +212,8 @@ void Path3C::GenerateSecondPath()
                         }
                     }
 
-                    //finding an intersection point closest to our V -> TODO: check if shouldnt find 2 and make a mean instead
-                    //exclusions = GetClosestVparam(myIntersections, v, isPatch1);
-                    //isEnclosed = isEnclosed && b_patch->IsEnclosed(u, v, myIntersections[0]->UVparameters, true); //check somehow if true or false
-
-                    isFirstTrim = true;
-                    if (tmpPos.x() > groundLevel /*&& u > exclusions[0].x()*/) {
+                    //TODO: handle if some points are under ground level in the midle of a path OR correct in faile later
+                    if (tmpPos.x() > groundLevel) {
                         //find closest XY
                         isTrim = false;
                         for (int j=0; j<toCheck.length(); j++){
@@ -210,22 +223,27 @@ void Path3C::GenerateSecondPath()
                             }
                         }
                         if (!isTrim || closestPoint.x() < tmpPos.x()) {
-                            if (isFirst){
+                            if (isFirst || (isFirstUnderGround)){
                                 //move to new patch start position
                                 stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
                                 count++;
                                 isFirst = false;
+                                isFirstUnderGround = false;
                             }
                             stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(tmpPos.x(), 'f', 3) << endl;
                             count++;
                             Pos = tmpPos;
                         } else {
-                            if (isFirstTrim) {
-                                qDebug( "not drawing" );
-                                isFirstTrim = false;
-                            }
+
                             stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
                             count++;
+                        }
+                        //avoid generating start-end points with path that is completely hidden
+                    } else if (tmpPos.x() <= groundLevel && !isFirst) {
+                        if (!isFirstUnderGround) {
+                            stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+                            count++;
+                            isFirstUnderGround = true;
                         }
                     }
 
@@ -275,7 +293,7 @@ void Path3C::PatchSampling(CADSplinePatch* patch, float additionalMat, float i, 
     qDebug( "Bye!" );
 }
 
-void Path3C::PatchSamplingRange(QVector<QVector4D> &result, CADSplinePatch *patch, float additionalMat, float startU, float endU, float startV, float endV)
+void Path3C::PatchSamplingRange(QVector<QVector4D> *result, CADSplinePatch *patch, float additionalMat, float startU, float endU, float startV, float endV)
 {
     QVector4D tmpPos;
     QVector3D Norm;
@@ -298,7 +316,7 @@ void Path3C::PatchSamplingRange(QVector<QVector4D> &result, CADSplinePatch *patc
             tmpPos.setY(tmpPos.y() + offsetY);
 
             tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
-            if(tmpPos.x() >= groundLevel ) result.append(tmpPos);
+            if(tmpPos.x() >= groundLevel ) result->append(tmpPos);
         }
     }
 }
