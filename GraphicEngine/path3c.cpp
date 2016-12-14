@@ -51,7 +51,7 @@ void Path3C::GenerateFirstPath()
     }
     auto end = std::chrono::steady_clock::now();
     auto diff = end - start;
-    std::cout << std::chrono::duration <double, std::milli> (diff).count()/1000 << " s" << std::endl;
+    std::cout << "P1: " << std::chrono::duration <double, std::milli> (diff).count()/1000 << " s" << std::endl;
 
     //adjust to cutter
     for (int i = 0; i<150; i++) {
@@ -139,7 +139,7 @@ void Path3C::GenerateSecondPath()
         bool isEven = 0;
         float e = 0.5; //0.5 mm
 
-        for (int i = 0; i< 2/*context->SplinePatches.length()*/; i++) {
+        for (int i = 0; i< 3/*context->SplinePatches.length()*/; i++) {
 
             toCheck.clear();
             std::vector<std::future<void>> results;
@@ -157,7 +157,11 @@ void Path3C::GenerateSecondPath()
                                              PatchSamplingRange, this, &toCheck, context->SplinePatches[0], additionalMat, 0.1, 0.6, 0.35, 0.9));
                 results.push_back(std::async(std::launch::async,
                                              PatchSamplingRange, this, &toCheck, context->SplinePatches[0], additionalMat, 0.1, 0.55, 0, 0.4));
+            } else if (i == 2) {
+                results.push_back(std::async(std::launch::async,
+                                             PatchSamplingRange, this, &toCheck, context->SplinePatches[0], additionalMat, 0.6, 1, 0.55, 1));
             }
+
             for (auto &e : results) {
                 e.get();
             }
@@ -188,6 +192,7 @@ void Path3C::GenerateSecondPath()
             for (float u = 0; u <= 1; u+=sampling1) {
                 for (float v = 0; v <= 1; v+=sampling1) {
 
+                    if (i != 2) {
                     if (isEven) {
                         tmpPos = patch->ComputePos(u, v);
                         if (tmpPos.x() >= 0)
@@ -211,7 +216,32 @@ void Path3C::GenerateSecondPath()
                             tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
                         }
                     }
-
+                    } else {
+                        if (isEven) {
+                            tmpPos = patch->ComputePos(v, u);
+                            if (tmpPos.x() >= 0)
+                            {
+                                du = QVector3D(patch->ComputeDu(v, u)); //u1' v1
+                                dv = QVector3D(patch->ComputeDv(v, u)); //u1 v1'
+                                Norm = QVector3D::crossProduct(du, dv).normalized();
+                                Scale(additionalMat, Norm, tmpPos);
+                                //adjust to cutter
+                                tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+                            }
+                        } else {
+                            tmpPos = patch->ComputePos(1-v, u);
+                            if (tmpPos.x() >= 0)
+                            {
+                                du = QVector3D(patch->ComputeDu(1-v, u)); //u1' v1
+                                dv = QVector3D(patch->ComputeDv(1-v, u)); //u1 v1'
+                                Norm = QVector3D::crossProduct(du, dv).normalized();
+                                Scale(additionalMat, Norm, tmpPos);
+                                //adjust to cutter
+                                tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+                            }
+                        }
+                    }
+                    //TODO i=2 bigger sampling; check if with isFirstGround we doesnt omit drawing last points (or if its relevant)
                     //TODO: handle if some points are under ground level in the midle of a path OR correct in faile later
                     if (tmpPos.x() > groundLevel) {
                         //find closest XY
@@ -233,13 +263,12 @@ void Path3C::GenerateSecondPath()
                             stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(tmpPos.x(), 'f', 3) << endl;
                             count++;
                             Pos = tmpPos;
-                        } else {
-
+                        } else if (i == 0) {
                             stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
                             count++;
                         }
                         //avoid generating start-end points with path that is completely hidden
-                    } else if (tmpPos.x() <= groundLevel && !isFirst) {
+                    } else if (tmpPos.x() <= groundLevel && !isFirst && i != 2) {
                         if (!isFirstUnderGround) {
                             stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
                             count++;
