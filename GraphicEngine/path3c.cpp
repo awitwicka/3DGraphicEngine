@@ -117,9 +117,11 @@ void Path3C::GenerateSecondPath()
     {
         QTextStream stream( &file );
 
+
         QVector4D tmpPos;
         QVector4D Pos;
         QVector3D Norm;
+        QVector3D prevNorm;
         QVector3D dv;
         QVector3D du;
         QVector<QVector4D> toCheck;
@@ -139,7 +141,7 @@ void Path3C::GenerateSecondPath()
         bool isEven = 0;
         float e = 0.5; //0.5 mm
 
-        for (int i = 0; i< 3/*context->SplinePatches.length()*/; i++) {
+        for (int i = 2; i< 3/*context->SplinePatches.length()*/; i++) {
 
             toCheck.clear();
             std::vector<std::future<void>> results;
@@ -170,6 +172,10 @@ void Path3C::GenerateSecondPath()
             std::cout << "P3<" << i << ">: " << std::chrono::duration <double, std::milli> (diff).count()/1000 << " s" << std::endl;
 
             patch = context->SplinePatches[i];
+            //for p3 calc
+            du = QVector3D(patch->ComputeDu(0, 0)); //u1' v1
+            dv = QVector3D(patch->ComputeDv(0, 0)); //u1 v1'
+            Norm = QVector3D::crossProduct(du, dv).normalized();
 
             //get intersections
             b_patch = dynamic_cast<BSplinePlane*>(patch);
@@ -191,6 +197,8 @@ void Path3C::GenerateSecondPath()
 
             for (float u = 0; u <= 1; u+=sampling1) {
                 for (float v = 0; v <= 1; v+=sampling1) {
+                    //not nice way to avoid drawing 0 points in 1st patch
+                    //if (i != 1 || v<1)
 
                     if (i != 2) {
                     if (isEven) {
@@ -221,9 +229,26 @@ void Path3C::GenerateSecondPath()
                             tmpPos = patch->ComputePos(v, u);
                             if (tmpPos.x() >= 0)
                             {
+                                du = QVector3D(patch->ComputeDu(v, u-sampling1)); //u1' v1
+                                dv = QVector3D(patch->ComputeDv(v, u-sampling1)); //u1 v1'
+                                prevNorm = QVector3D::crossProduct(du, dv).normalized();
                                 du = QVector3D(patch->ComputeDu(v, u)); //u1' v1
                                 dv = QVector3D(patch->ComputeDv(v, u)); //u1 v1'
                                 Norm = QVector3D::crossProduct(du, dv).normalized();
+
+                                //find C0
+                                if (u>0.5 && u<0.75/*QVector3D::dotProduct(prevNorm, Norm) < 0.866*/) {
+                                    qDebug() << "u: " << v <<  "v: " << u;
+                                    du = QVector3D(patch->ComputeDu(v, 0.62)); //u1' v1
+                                    dv = QVector3D(patch->ComputeDv(v, 0.62)); //u1 v1'
+                                    QVector3D norm1 = QVector3D::crossProduct(du, dv).normalized();
+                                    du = QVector3D(patch->ComputeDu(v, 0.77)); //u1' v1
+                                    dv = QVector3D(patch->ComputeDv(v, 0.77)); //u1 v1'
+                                    QVector3D norm2 = QVector3D::crossProduct(du, dv).normalized();
+                                    Norm = (norm1 + norm2).normalized();
+                                    Norm = QVector3D(0,1,0);
+                                }
+
                                 Scale(additionalMat, Norm, tmpPos);
                                 //adjust to cutter
                                 tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
@@ -232,16 +257,38 @@ void Path3C::GenerateSecondPath()
                             tmpPos = patch->ComputePos(1-v, u);
                             if (tmpPos.x() >= 0)
                             {
+                                du = QVector3D(patch->ComputeDu(1-v, u-sampling1)); //u1' v1
+                                dv = QVector3D(patch->ComputeDv(1-v, u-sampling1)); //u1 v1'
+                                prevNorm = QVector3D::crossProduct(du, dv).normalized();
                                 du = QVector3D(patch->ComputeDu(1-v, u)); //u1' v1
                                 dv = QVector3D(patch->ComputeDv(1-v, u)); //u1 v1'
                                 Norm = QVector3D::crossProduct(du, dv).normalized();
+
+                                //find C0
+                                if (u>0.5 && u<0.75/*QVector3D::dotProduct(prevNorm, Norm) < 0.866*/) {
+                                    qDebug() << "u: " << v <<  "v: " << u;
+                                    du = QVector3D(patch->ComputeDu(1-v, 0.62)); //u1' v1
+                                    dv = QVector3D(patch->ComputeDv(1-v, 0.62)); //u1 v1'
+                                    QVector3D norm1 = QVector3D::crossProduct(du, dv).normalized();
+                                    du = QVector3D(patch->ComputeDu(1-v, 0.77)); //u1' v1
+                                    dv = QVector3D(patch->ComputeDv(1-v, 0.77)); //u1 v1'
+                                    QVector3D norm2 = QVector3D::crossProduct(du, dv).normalized();
+                                    Norm = (norm1 + norm2).normalized();
+                                    Norm = QVector3D(0,1,0);
+                                }
+
                                 Scale(additionalMat, Norm, tmpPos);
                                 //adjust to cutter
                                 tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
                             }
                         }
+
+                        //if (QVector3D::dotProduct(prevNorm, Norm) < 0.866) {//30 deg and bigger
+                        //    qDebug() << "u: " << v <<  "v: " << u;
+                        //}
+
                     }
-                    //TODO i=2 bigger sampling; check if with isFirstGround we doesnt omit drawing last points (or if its relevant)
+                    //TODO i=2 bigger sampling; check if with isFirstGround we dont omit drawing last points (or if its relevant)
                     //TODO: handle if some points are under ground level in the midle of a path OR correct in faile later
                     if (tmpPos.x() > groundLevel) {
                         //find closest XY
