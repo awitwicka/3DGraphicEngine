@@ -21,6 +21,7 @@ class Path3C
 
     Widget *context;
 
+    QVector2D FindIntersectionOfIntersections(QVector<QVector4D> inters1, QVector<QVector4D> inters2);
     void PatchSampling(CADSplinePatch* patch, float additionalMat, float i, float n);
     void PatchSamplingRange(QVector<QVector4D> *result, CADSplinePatch* patch, float additionalMat, float startU, float endU, float startV, float endV);
     void SaveFirstPath();
@@ -44,6 +45,7 @@ public:
     void GeneratePath();
     void GenerateFirstPath();
     void GenerateSecondPath();
+    void GenerateThirdPath();
 
 private:
     void Scale(float additionalMat, QVector3D Norm, QVector4D &tmpPos);

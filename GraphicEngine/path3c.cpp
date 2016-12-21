@@ -21,8 +21,9 @@ Path3C::Path3C(Widget *context)
 
 void Path3C::GeneratePath()
 {
-    //GenerateFirstPath();
-    GenerateSecondPath();
+    GenerateFirstPath();
+    GenerateThirdPath();
+    //GenerateSecondPath();
 }
 
 void Path3C::GenerateFirstPath()
@@ -39,7 +40,7 @@ void Path3C::GenerateFirstPath()
     std::vector<std::future<void>> results;
 
     auto start = std::chrono::steady_clock::now();
-    for (int i = 0; i< context->SplinePatches.length(); i++) {
+    for (int i = 0; i< /*context->SplinePatches.length()*/3; i++) {
         for (int j = 0; j<n; j++) {
             patch = context->SplinePatches[i];
             results.push_back(std::async(std::launch::async, PatchSampling, this, patch, additionalMat, j, n)); //void -> return val of a funct
@@ -141,7 +142,7 @@ void Path3C::GenerateSecondPath()
         bool isEven = 0;
         float e = 0.5; //0.5 mm
 
-        for (int i = 2; i< 3/*context->SplinePatches.length()*/; i++) {
+        for (int i = 0; i< 3/*context->SplinePatches.length()*/; i++) {
 
             toCheck.clear();
             std::vector<std::future<void>> results;
@@ -334,6 +335,355 @@ void Path3C::GenerateSecondPath()
     } else {
         qWarning() << "Failed to open" << file.fileName() << "for write:" << file.errorString();
     }
+}
+
+void Path3C::GenerateThirdPath()
+{
+    QString path = "E:\\Path2.f12";
+    QFile file( path );
+
+    if ( file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text) )
+    {
+        QTextStream stream( &file );
+
+        Intersection* inters;
+        QVector<Intersection*> myIntersections;
+        
+        float additionalMat = 6;
+        int precision = 5;
+        int count = 3;
+        bool isEven = true;
+        int x;
+        int y;
+
+        float firstNumerZPos = 0;
+        //UP
+        stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(0-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+        for (y = 0; y < 150; y+=precision)
+        {
+            x = 0;
+            firstNumerZPos = groundLevel;
+            while (firstNumerZPos == groundLevel && x<150)
+            {
+                if (heightMap[x][y] != groundLevel)
+                    firstNumerZPos = heightMap[x][y];
+                x++;
+            }
+            //when model in between
+            if (x<150) {
+                 if (isEven) {
+                     stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                     stream << "N" << count << "G01" << "X" << QString::number(x-1-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                 }
+                 else
+                 {
+                     stream << "N" << count << "G01" << "X" << QString::number(x-1-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                     stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                 }
+                 count++;
+            }
+            //when empty path
+            else
+            {
+                if (isEven)
+                {
+                    stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                    stream << "N" << count << "G01" << "X" << QString::number(149-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                }
+                else
+                {
+                    stream << "N" << count << "G01" << "X" << QString::number(149-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                    stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                }
+            }
+            isEven = (!isEven);
+        }
+        //cutter is at x = 0
+        //UP
+        //stream << "N" << count << "G01" << "X" << QString::number(x-1-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+        //UP
+        //stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(149-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+        isEven = false; //?
+        for (y = 149; y >= 0; y-=precision)
+        {
+            x = 149;
+            firstNumerZPos = groundLevel;
+            while (firstNumerZPos == groundLevel && x>=0)
+            {
+                if (heightMap[x][y] != groundLevel)
+                    firstNumerZPos = heightMap[x][y];
+                x--;
+            }
+            //when model in between
+            if (x<150) {
+                 if (isEven) {
+                     stream << "N" << count << "G01" << "X" << QString::number(149-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                     stream << "N" << count << "G01" << "X" << QString::number(x+1-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                 }
+                 else
+                 {
+                     stream << "N" << count << "G01" << "X" << QString::number(x+1-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                     stream << "N" << count << "G01" << "X" << QString::number(149-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                 }
+                 count++;
+            }
+            //when empty path
+            else
+            {
+                if (isEven)
+                {
+                    stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                    stream << "N" << count << "G01" << "X" << QString::number(149-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                }
+                else
+                {
+                    stream << "N" << count << "G01" << "X" << QString::number(149-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                    stream << "N" << count << "G01" << "X" << QString::number(0-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+                }
+            }
+            isEven = (!isEven);
+        }
+        //UP
+        stream << "N" << count << "G01" << "X" << QString::number(x-centering, 'f', 3) << "Y" << QString::number(y-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+
+        //******** OBWIEDNIA ************''
+        //finding intersection points
+        //get intersections
+        //p2 - correct patch z w
+        //p1 - common patch for comparison x y
+
+        QVector4D tmpPos;
+        QVector3D Norm;
+        QVector3D dv;
+        QVector3D du;
+
+        CADSplinePatch* patch;
+        QVector<QVector4D> result;
+        for (int s = 3; s < 10; s++) {
+            inters = dynamic_cast<Intersection*>(context->Splines[s]);
+            myIntersections.push_back(inters);
+        }
+        //*******UPPER PART
+        QVector<QVector4D> leftArm;
+        QVector<QVector4D> rightArm;
+        int c = myIntersections[6]->UVparameters.count();
+        for (int i = 0; i<myIntersections[6]->UVparameters.count(); i++)
+            if (i < c/2) rightArm.append(myIntersections[6]->UVparameters[i]);
+        for (int i = 0; i<myIntersections[6]->UVparameters.count(); i++)
+            if (i > c/2) leftArm.append(myIntersections[6]->UVparameters[i]);
+
+        QVector2D i3a = FindIntersectionOfIntersections(rightArm, myIntersections[5]->UVparameters);
+        QVector2D i3b = FindIntersectionOfIntersections(leftArm, myIntersections[5]->UVparameters);
+        //UP
+        patch = context->SplinePatches[1];
+        tmpPos = patch->ComputePos(rightArm[i3a.x()].z(), rightArm[i3a.x()].w());
+        du = QVector3D(patch->ComputeDu(rightArm[i3a.x()].z(), rightArm[i3a.x()].w()));
+        dv = QVector3D(patch->ComputeDv(rightArm[i3a.x()].z(), rightArm[i3a.x()].w()));
+        Norm = QVector3D::crossProduct(du, dv).normalized();
+        Scale(additionalMat, Norm, tmpPos);
+        stream << "N" << count << "G01" << "X" << QString::number(tmpPos.z()-centering, 'f', 3) << "Y" << QString::number(tmpPos.y()-6-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+
+
+        /*for (int s = 0; s < myIntersections[6]->UVparameters.count(); s++)
+        {
+            if (myIntersections[6]->UVparameters[s].x() > myIntersections[6]->UVparameters[i3a.x()].x()
+                    //&& myIntersections[6]->UVparameters[s].x() < myIntersections[6]->UVparameters[i3b.x()].x()) //>=?
+            {
+                tmpPos = patch->ComputePos(myIntersections[6]->UVparameters[s].z(), myIntersections[6]->UVparameters[s].w());
+                du = QVector3D(patch->ComputeDu(myIntersections[6]->UVparameters[s].z(), myIntersections[6]->UVparameters[s].w()));
+                dv = QVector3D(patch->ComputeDv(myIntersections[6]->UVparameters[s].z(), myIntersections[6]->UVparameters[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                result.append(tmpPos);
+            }
+        }*/
+        for (int s = 0; s < rightArm.count(); s++)
+        {
+            if (rightArm[s].x() > rightArm[i3a.x()].x()) //>=?
+            {
+                tmpPos = patch->ComputePos(rightArm[s].z(), rightArm[s].w());
+                du = QVector3D(patch->ComputeDu(rightArm[s].z(), rightArm[s].w()));
+                dv = QVector3D(patch->ComputeDv(rightArm[s].z(), rightArm[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                result.append(tmpPos);
+            }
+        }
+        for (int s = 0; s < leftArm.count(); s++)
+        {
+            if (leftArm[s].x() < leftArm[i3b.x()].x()) //>=?
+            {
+                tmpPos = patch->ComputePos(leftArm[s].z(), leftArm[s].w());
+                du = QVector3D(patch->ComputeDu(leftArm[s].z(), leftArm[s].w()));
+                dv = QVector3D(patch->ComputeDv(leftArm[s].z(), leftArm[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                result.append(tmpPos);
+            }
+        }
+        patch = context->SplinePatches[0];
+        for (int s = 0; s < myIntersections[5]->UVparameters.count(); s++)
+        {
+            if (myIntersections[5]->UVparameters[s].x() > myIntersections[5]->UVparameters[i3b.y()].x()) //>=?
+            {
+                tmpPos = patch->ComputePos(myIntersections[5]->UVparameters[s].z(), myIntersections[5]->UVparameters[s].w());
+                du = QVector3D(patch->ComputeDu(myIntersections[5]->UVparameters[s].z(), myIntersections[5]->UVparameters[s].w()));
+                dv = QVector3D(patch->ComputeDv(myIntersections[5]->UVparameters[s].z(), myIntersections[5]->UVparameters[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                result.append(tmpPos);
+            }
+        }
+
+
+        //intersections LOWER PART
+        QVector2D i1 = FindIntersectionOfIntersections(myIntersections[0]->UVparameters, myIntersections[4]->UVparameters);
+        QVector2D i2 = FindIntersectionOfIntersections(myIntersections[3]->UVparameters, myIntersections[4]->UVparameters);
+        patch = context->SplinePatches[0];
+        for (int s = 0; s < myIntersections[4]->UVparameters.count(); s++)
+        {
+            //v
+            if (myIntersections[4]->UVparameters[s].x() > myIntersections[4]->UVparameters[i1.y()].x()) //>=?
+            {
+                tmpPos = patch->ComputePos(myIntersections[4]->UVparameters[s].z(), myIntersections[4]->UVparameters[s].w());
+                du = QVector3D(patch->ComputeDu(myIntersections[4]->UVparameters[s].z(), myIntersections[4]->UVparameters[s].w()));
+                dv = QVector3D(patch->ComputeDv(myIntersections[4]->UVparameters[s].z(), myIntersections[4]->UVparameters[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                //tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+                result.append(tmpPos);
+            }
+        }
+        result.removeLast();
+        /*result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();
+        result.removeLast();*/
+        //*******
+        patch = context->SplinePatches[2];
+        /*for (int s = 0; s < myIntersections[0]->UVparameters.count(); s++)
+        {
+            //v
+            if (myIntersections[0]->UVparameters[s].y() > myIntersections[0]->UVparameters[i1.x()].y()) //>=?
+            {
+                tmpPos = patch->ComputePos(myIntersections[0]->UVparameters[s].z(), myIntersections[0]->UVparameters[s].w());
+                du = QVector3D(patch->ComputeDu(myIntersections[0]->UVparameters[s].z(), myIntersections[0]->UVparameters[s].w()));
+                dv = QVector3D(patch->ComputeDv(myIntersections[0]->UVparameters[s].z(), myIntersections[0]->UVparameters[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                //tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+                result.append(tmpPos);
+            }
+        }*/
+        for (int s = 0; s < myIntersections[1]->UVparameters.count(); s++) {
+            tmpPos = patch->ComputePos(myIntersections[1]->UVparameters[s].z(), myIntersections[1]->UVparameters[s].w());
+            du = QVector3D(patch->ComputeDu(myIntersections[1]->UVparameters[s].z(), myIntersections[1]->UVparameters[s].w()));
+            dv = QVector3D(patch->ComputeDv(myIntersections[1]->UVparameters[s].z(), myIntersections[1]->UVparameters[s].w()));
+            Norm = QVector3D::crossProduct(du, dv).normalized();
+            Scale(additionalMat, Norm, tmpPos);
+            //tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+            result.append(tmpPos);
+        }
+        for (int s = 0; s < myIntersections[2]->UVparameters.count(); s++)
+        {
+            tmpPos = patch->ComputePos(myIntersections[2]->UVparameters[s].z(), myIntersections[2]->UVparameters[s].w());
+            du = QVector3D(patch->ComputeDu(myIntersections[2]->UVparameters[s].z(), myIntersections[2]->UVparameters[s].w()));
+            dv = QVector3D(patch->ComputeDv(myIntersections[2]->UVparameters[s].z(), myIntersections[2]->UVparameters[s].w()));
+            Norm = QVector3D::crossProduct(du, dv).normalized();
+            Scale(additionalMat, Norm, tmpPos);
+            //tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+            result.append(tmpPos);
+        }
+        /*for (int s = 0; s < myIntersections[3]->UVparameters.count(); s++)
+        {
+            //v
+            if (myIntersections[3]->UVparameters[s].y() > myIntersections[3]->UVparameters[i2.x()].y()) //>=?
+            {
+                tmpPos = patch->ComputePos(myIntersections[3]->UVparameters[s].z(), myIntersections[3]->UVparameters[s].w());
+                du = QVector3D(patch->ComputeDu(myIntersections[3]->UVparameters[s].z(), myIntersections[3]->UVparameters[s].w()));
+                dv = QVector3D(patch->ComputeDv(myIntersections[3]->UVparameters[s].z(), myIntersections[3]->UVparameters[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                //tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+                result.append(tmpPos);
+            }
+        }*/
+        //*******
+        int calc = 0;
+        patch = context->SplinePatches[0];
+        for (int s = 0; s < myIntersections[4]->UVparameters.count(); s++)
+        {
+            //v
+            if (myIntersections[4]->UVparameters[s].x() < myIntersections[4]->UVparameters[i2.y()].x()) //>=?
+            {
+                c++;
+                tmpPos = patch->ComputePos(myIntersections[4]->UVparameters[s].z(), myIntersections[4]->UVparameters[s].w());
+                du = QVector3D(patch->ComputeDu(myIntersections[4]->UVparameters[s].z(), myIntersections[4]->UVparameters[s].w()));
+                dv = QVector3D(patch->ComputeDv(myIntersections[4]->UVparameters[s].z(), myIntersections[4]->UVparameters[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                //tmpPos.setX(tmpPos.x() + groundLevel - additionalMat);
+                result.append(tmpPos);
+            }
+            if (calc == 1)
+            {
+                result.removeLast();
+            }
+        }
+        //*****UPPER
+        for (int s = 0; s < myIntersections[5]->UVparameters.count(); s++)
+        {
+            if (myIntersections[5]->UVparameters[s].x() < myIntersections[5]->UVparameters[i3a.y()].x()) //>=?
+            {
+                tmpPos = patch->ComputePos(myIntersections[5]->UVparameters[s].z(), myIntersections[5]->UVparameters[s].w());
+                du = QVector3D(patch->ComputeDu(myIntersections[5]->UVparameters[s].z(), myIntersections[5]->UVparameters[s].w()));
+                dv = QVector3D(patch->ComputeDv(myIntersections[5]->UVparameters[s].z(), myIntersections[5]->UVparameters[s].w()));
+                Norm = QVector3D::crossProduct(du, dv).normalized();
+                Scale(additionalMat, Norm, tmpPos);
+                result.append(tmpPos);
+            }
+        }
+
+        //****WRITE****
+
+        for (int i = 0; i<result.count(); i++)
+            stream << "N" << count << "G01" << "X" << QString::number(result[i].z()-centering, 'f', 3) << "Y" << QString::number(result[i].y()-centering, 'f', 3) << "Z" << QString::number(groundLevel, 'f', 3) << endl;
+         stream << "N" << count << "G01" << "X" << QString::number(result.last().z()-centering, 'f', 3) << "Y" << QString::number(result.last().y()-centering, 'f', 3) << "Z" << QString::number(maxZPos, 'f', 3) << endl;
+
+    } else {
+        qWarning() << "Failed to open" << file.fileName() << "for write:" << file.errorString();
+    }
+}
+
+QVector2D Path3C::FindIntersectionOfIntersections(QVector<QVector4D> inters1, QVector<QVector4D> inters2)
+{
+    //compare based on square patch intersecting all patches (patch1)
+    float tmpDist = fabs(inters1[0].x() - inters2[0].x())
+            + fabs(inters1[0].y() - inters2[0].y());
+    QVector2D intersIndex = QVector2D(0, 0);
+    float newDist;
+
+    for (int i = 0; i < inters1.count(); i++)
+    {
+        for (int j = 0; j < inters2.count(); j++)
+        {
+            newDist = fabs(inters1[i].x() - inters2[j].x()) + fabs(inters1[i].y() - inters2[j].y());
+            if (newDist < tmpDist) {
+                tmpDist = newDist;
+                intersIndex.setX(i);
+                intersIndex.setY(j);
+            }
+        }
+    }
+    return intersIndex;
 }
 
 void Path3C::PatchSampling(CADSplinePatch* patch, float additionalMat, float i, float n)
