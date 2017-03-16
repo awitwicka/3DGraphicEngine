@@ -174,6 +174,30 @@ Intersection::Intersection(QMatrix4x4 matrix, CADSplinePatch *patch1, CADSplineP
     idname = QString("x%1").arg(id);
     id++;
 
+    /*series1 = new QLineSeries();
+    series2 = new QLineSeries();
+
+    chart1 = new QChart();
+    chart1->legend()->hide();
+    chart1->addSeries(series1);
+    chart1->createDefaultAxes();
+    chart1->setTitle("UV patch1");
+    chart2 = new QChart();
+    chart2->legend()->hide();
+    chart2->addSeries(series2);
+    chart2->createDefaultAxes();
+    chart2->setTitle("UV patch2");
+
+    chartView1 = new QChartView(chart1);
+    chartView1->setRenderHint(QPainter::Antialiasing);
+    chartView2 = new QChartView(chart2);
+    chartView2->setRenderHint(QPainter::Antialiasing);
+
+    window1.setCentralWidget(chartView1);
+    window1.resize(400, 400);
+    window2.setCentralWidget(chartView2);
+    window2.resize(400, 400);*/
+
     this->patch1 = patch1;
     this->patch2 = patch2;
     this->UVparameters = UVparameters;
@@ -190,6 +214,7 @@ Intersection::Intersection(QMatrix4x4 matrix, CADSplinePatch *patch1, CADSplineP
         //series2->append(UVparameters[i].z(), UVparameters[i].w());
         count++;
     }
+
     indices.removeLast();
 
     //window1.show();

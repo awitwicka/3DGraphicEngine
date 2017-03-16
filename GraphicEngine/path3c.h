@@ -11,20 +11,22 @@ class Path3C
     //scale of the model on output (ex. 1:6)
     float scaleFactor = 6.0f;//7.2f;
     float offsetX = 80.0f;
-    float offsetY = 60.0f;
+    float offsetY = 62.0f;
     float centering = 150/2.0f;
 
     //accuracy of sampling of parametrisation
     float sampling1 = 0.01f;
     float sampling2 = 0.002f;
-    float sampling3 = 0.005f;
+    float sampling3 = 0.003f;
 
     Widget *context;
-
+    QVector<QVector4D> GetPositions(QVector<QVector4D> inters, CADSplinePatch* patch, float additionalMat);
     QVector2D FindIntersectionOfIntersections(QVector<QVector4D> inters1, QVector<QVector4D> inters2);
     void PatchSampling(CADSplinePatch* patch, float additionalMat, float i, float n);
     void PatchSamplingRange(QVector<QVector4D> *result, CADSplinePatch* patch, float additionalMat, float startU, float endU, float startV, float endV);
     void SaveFirstPath();
+    bool isEnclosed(QVector<QVector4D> polygon, float x, float y);
+    double GetAngle(QPointF pivot, QPointF source, QPointF dest);
     //void SavePartialSecPath(float additionalMat, QVector4D Pos, int count, QTextStream stream, float v, bool isFirst, float u, CADSplinePatch* patch, bool isEven);
 
 public slots:
