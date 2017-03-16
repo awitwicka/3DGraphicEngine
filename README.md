@@ -18,3 +18,11 @@ Features:
 - Trimming (partially finished)
 - Scene Saving/Loading
 - Generating Milling Machine pathes for a 3D object - works only for a provided Mixer object!
+
+## Ray Casting
+Visualization of an implicite elipsoide 
+
+Features:
+- Implicite elipsoide drawing using Ray Casting method
+- Configurable elipsoide's radiuses and light intensity
+- Adaptive dimention of a pixel (during loading)
